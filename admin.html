@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>CAMXD Store — Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <section id="loginView" class="panel login-panel">
+      <div class="brand-admin">CAMXD <b>STORE</b></div>
+      <p class="eyebrow">ADMIN PANEL</p>
+      <h1>Login Admin</h1>
+      <p class="muted">Masuk untuk melihat dan mengelola pesanan CAMXD Store.</p>
+      <form id="loginForm">
+        <label>Email</label>
+        <input id="email" type="email" autocomplete="username" required placeholder="Email admin">
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password" required placeholder="Password admin">
+        <button class="btn primary" type="submit">Masuk ke Dashboard</button>
+      </form>
+      <p id="loginError" class="error"></p>
+      <a class="back-link" href="index.html">← Kembali ke toko</a>
+    </section>
+
+    <section id="dashboardView" hidden>
+      <header class="admin-head">
+        <div>
+          <p class="eyebrow">CAMXD STORE</p>
+          <h1>Dashboard Admin</h1>
+          <p id="adminEmail" class="muted"></p>
+        </div>
+        <div class="head-actions">
+          <button id="refreshBtn" class="btn">↻ Refresh</button>
+          <button id="logoutBtn" class="btn danger">Keluar</button>
+        </div>
+      </header>
+
+      <div class="stats">
+        <article class="stat"><span>Total Pesanan</span><strong id="statTotal">0</strong></article>
+        <article class="stat"><span>Menunggu Pembayaran</span><strong id="statWaiting">0</strong></article>
+        <article class="stat"><span>Menunggu Verifikasi</span><strong id="statVerify">0</strong></article>
+        <article class="stat"><span>Selesai</span><strong id="statDone">0</strong></article>
+        <article class="stat"><span>Omzet Selesai</span><strong id="statRevenue">Rp 0</strong></article>
+      </div>
+
+      <section class="panel orders-panel">
+        <div class="section-head">
+          <div>
+            <h2>Pesanan</h2>
+            <p class="muted">Periksa bukti pembayaran melalui WhatsApp, lalu ubah status pesanan.</p>
+          </div>
+          <select id="statusFilter">
+            <option value="all">Semua Status</option>
+            <option>Menunggu Pembayaran</option>
+            <option>Menunggu Verifikasi</option>
+            <option>Sudah Dibayar</option>
+            <option>Selesai</option>
+            <option>Dibatalkan</option>
+          </select>
+        </div>
+        <div id="ordersList" class="orders-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
