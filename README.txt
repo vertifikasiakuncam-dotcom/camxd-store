@@ -1,15 +1,14 @@
-CAMXD STORE - WEBSITE TOKO DIGITAL
-
-Cara menjalankan:
-1. Ekstrak file ZIP.
-2. Buka index.html untuk melihat website.
-3. Upload index.html, style.css, dan script.js ke hosting Anda.
+CAMXD STORE V2
+Upload index.html, style.css, script.js, README.txt ke repository GitHub Pages.
 
 PENTING:
-- Buka script.js.
-- Cari: const storeWA="628XXXXXXXXXX";
-- Ganti dengan nomor WhatsApp toko dalam format internasional tanpa tanda + atau spasi.
-- Produk dan harga dapat diubah pada bagian "const products".
+1. Buka script.js.
+2. Cari const STORE_WA="628XXXXXXXXXX";
+3. Ganti dengan nomor WhatsApp toko, format 62... tanpa +, spasi, atau tanda -.
+4. Commit perubahan.
+5. GitHub Pages akan memperbarui website.
 
-Versi ini adalah prototype toko + checkout WhatsApp.
-Pembayaran otomatis/payment gateway dan panel admin belum diaktifkan.
+Produk/harga bisa diubah pada array products di script.js.
+
+Versi V2 ini sudah memiliki katalog, filter kategori, checkout WhatsApp, dan tampilan mobile.
+Pembayaran otomatis belum terhubung karena membutuhkan akun/payment gateway dan kredensial API.
