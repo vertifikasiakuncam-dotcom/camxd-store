@@ -419,33 +419,51 @@ async function saveDelivery(id, sendAfter){
     return;
   }
 
-  const {error} =
+  // Simpan detail produk dan waktu pengiriman
+  const {error: detailError} =
     await sb
       .from("orders")
       .update({
         delivery_details: details,
-        delivered_at:
-          new Date().toISOString()
+        delivered_at: new Date().toISOString()
       })
       .eq("id", id);
 
-  if(error){
+  if(detailError){
 
     alert(
       "Gagal menyimpan detail: " +
-      error.message
+      detailError.message
     );
 
     return;
   }
 
-  order.delivery_details =
-    details;
-
-  order.delivered_at =
-    new Date().toISOString();
-
+  // Jika tombol "Simpan & Kirim WhatsApp" ditekan,
+  // otomatis ubah status menjadi Selesai
   if(sendAfter){
+
+    const {error: statusError} =
+      await sb
+        .from("orders")
+        .update({
+          status: "Selesai"
+        })
+        .eq("id", id);
+
+    if(statusError){
+
+      alert(
+        "Detail sudah tersimpan, tetapi status gagal diubah: " +
+        statusError.message
+      );
+
+      return;
+    }
+
+    order.delivery_details = details;
+    order.delivered_at = new Date().toISOString();
+    order.status = "Selesai";
 
     const url =
       buildWhatsAppUrl(
@@ -453,11 +471,27 @@ async function saveDelivery(id, sendAfter){
         details
       );
 
-    window.location.href =
-      url;
+    if(url === "#"){
+
+      alert(
+        "Detail sudah disimpan dan status menjadi Selesai, tetapi nomor WhatsApp pelanggan tidak valid."
+      );
+
+      await loadOrders();
+      return;
+    }
+
+    // Refresh data sebelum membuka WhatsApp
+    await loadOrders();
+
+    // Buka WhatsApp
+    window.location.href = url;
 
     return;
   }
+
+  order.delivery_details = details;
+  order.delivered_at = new Date().toISOString();
 
   alert(
     "Detail produk berhasil disimpan."
