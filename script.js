@@ -20,6 +20,28 @@ function filter(cat,el){document.querySelectorAll(".filters button").forEach(x=>
 function openModal(i){current=products[i];selected=0;document.getElementById("mTitle").textContent=current.name;document.getElementById("mDesc").textContent=current.desc;document.getElementById("durations").innerHTML=current.durations.map((d,j)=>`<div class="duration ${j===0?"selected":""}" onclick="selectDuration(${j},this)"><span>${d[0]}</span><b>${rupiah(d[1])}</b></div>`).join("");document.getElementById("modal").classList.add("show")}
 function selectDuration(i,el){selected=i;document.querySelectorAll(".duration").forEach(x=>x.classList.remove("selected"));el.classList.add("selected")}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
-function orderWhatsApp(){const name=document.getElementById("buyerName").value.trim(),wa=document.getElementById("buyerWa").value.trim();if(!name||!wa)return alert("Silakan isi nama dan nomor WhatsApp.");if(STORE_WA.includes("XXXXXXXX"))return alert("Nomor WhatsApp toko belum diatur. Buka script.js dan ganti STORE_WA.");const d=current.durations[selected];const msg=`Halo CAMXD Store,%0A%0ASaya ingin order:%0AProduk: ${current.name}%0ADurasi: ${d[0]}%0AHarga: ${rupiah(d[1])}%0ANama: ${name}%0ANomor WA: ${wa}`;window.open(`https://wa.me/${STORE_WA}?text=${msg}`,"_blank")}
+function orderWhatsApp(){
+  const name=document.getElementById("buyerName").value.trim();
+  const wa=document.getElementById("buyerWa").value.trim();
+  if(!name||!wa)return alert("Silakan isi nama dan nomor WhatsApp.");
+  if(STORE_WA.includes("XXXXXXXX"))return alert("Nomor WhatsApp toko belum diatur. Buka script.js dan ganti STORE_WA.");
+  const d=current.durations[selected];
+  const orderId="CX"+Date.now().toString().slice(-8);
+  const text=[
+    "Halo CAMXD Store 👋",
+    "",
+    "Saya ingin order:",
+    `ID Pesanan: ${orderId}`,
+    `Produk: ${current.name}`,
+    `Durasi/Paket: ${d[0]}`,
+    `Total: ${rupiah(d[1])}`,
+    `Nama: ${name}`,
+    `Nomor WA: ${wa}`,
+    "",
+    "Mohon kirim tagihan/link atau QRIS GoPay Merchant sesuai total pesanan ini.",
+    "Setelah saya bayar, saya akan kirim bukti pembayaran."
+  ].join("\n");
+  window.open(`https://wa.me/${STORE_WA}?text=${encodeURIComponent(text)}`,"_blank");
+}
 function contactGeneral(){if(STORE_WA.includes("XXXXXXXX"))return alert("Nomor WhatsApp toko belum diatur di script.js.");window.open(`https://wa.me/${STORE_WA}?text=Halo%20CAMXD%20Store,%20saya%20ingin%20bertanya%20tentang%20produk.`,"_blank")}
 renderFilters();render();

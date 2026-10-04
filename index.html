@@ -57,12 +57,13 @@
 <div class="modal" id="modal">
  <div class="modal-card">
   <button class="x" onclick="closeModal()">×</button>
-  <div class="tag">CHECKOUT</div><h2 id="mTitle"></h2><p id="mDesc" class="muted"></p>
+  <div class="tag">CHECKOUT • WHATSAPP + QRIS</div><h2 id="mTitle"></h2><p id="mDesc" class="muted"></p>
   <div id="durations"></div>
   <input id="buyerName" placeholder="Nama lengkap">
   <input id="buyerWa" placeholder="Nomor WhatsApp">
-  <button class="primary full" onclick="orderWhatsApp()">Lanjut ke WhatsApp →</button>
-  <small class="muted">Pembayaran dan pengiriman diproses setelah konfirmasi.</small>
+  <div class="payment-note"><b>💳 Pembayaran via GoPay/QRIS</b><span>Setelah klik tombol, WhatsApp CAMXD Store akan terbuka. Admin akan mengirim tagihan/QRIS sesuai total pesanan.</span></div>
+  <button class="primary full" onclick="orderWhatsApp()">Pesan & Lanjut ke WhatsApp →</button>
+  <small class="muted">Pembayaran dilakukan melalui QRIS GoPay Merchant setelah pesanan dikonfirmasi. Jangan kirim pembayaran ke QRIS lain.</small>
  </div>
 </div>
 <script src="script.js"></script>
