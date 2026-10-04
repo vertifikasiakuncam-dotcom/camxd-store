@@ -1,27 +1,71 @@
 const STORE_WA="6282133942994";
+
 const products=[
-{name:"KTV Premium",image:"ktv-premium.jpg",cat:"Premium",icon:"KTV",badge:"BEST SELLER",desc:"Akses KTV Premium",durations:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]]},
-{name:"YouTube Premium",image:"youtube-premium.jpg",cat:"Premium",icon:"▶",badge:"POPULER",desc:"YouTube Premium",durations:[["1 Bulan",15000]]},
-{name:"Netflix Sharing",image:"netflix-sharing.jpg",cat:"Premium",icon:"N",badge:"POPULER",desc:"Netflix sharing",durations:[["1 Bulan",33000]]},
-{name:"CapCut Pro",image:"capcut-pro.jpg",cat:"Premium",icon:"CC",badge:"HOT",desc:"CapCut Pro sharing",durations:[["1 Bulan",35000]]},
-{name:"Canva Premium",image:"canva-premium.jpg",cat:"Premium",icon:"Ca",badge:"POPULER",desc:"Canva Premium",durations:[["1 Bulan",25000]]},
-{name:"Spotify Premium",image:"spotify-premium.jpg",cat:"Premium",icon:"S",badge:"",desc:"Spotify Premium",durations:[["1 Bulan",25000]]},
-{name:"Top Up All Games",image:"top-up-all-games.jpg",cat:"Top Up",icon:"🎮",badge:"TOP UP",desc:"Top up berbagai game",durations:[["Mulai dari",10000]]},
-{name:"Pembayaran Digital",image:"pembayaran-digital.jpg",cat:"Jasa",icon:"Rp",badge:"JASA",desc:"Bantuan pembayaran digital",durations:[["Mulai dari",5000]]},
-{name:"Jasa Pembuatan Sertifikat",image:"jasa-sertifikat.jpg",cat:"Jasa",icon:"✓",badge:"BEST VALUE",desc:"Sertifikat digital",durations:[["1 Sertifikat",20000],["Laminating +",5000]]}
+ {id:"ktv",name:"KTV Premium",desc:"Akses KTV Premium",category:"premium",image:"ktv-premium.jpg",badge:"BEST SELLER",plans:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]]},
+ {id:"youtube",name:"YouTube Premium",desc:"YouTube Premium",category:"premium",image:"youtube-premium.jpg",badge:"POPULER",plans:[["1 Bulan",15000],["3 Bulan",40000],["6 Bulan",70000],["1 Tahun",120000]]},
+ {id:"netflix",name:"Netflix Sharing",desc:"Netflix sharing",category:"premium",image:"netflix-sharing.jpg",badge:"POPULER",plans:[["1 Bulan",33000],["3 Bulan",90000],["6 Bulan",165000],["1 Tahun",300000]]},
+ {id:"capcut",name:"CapCut Pro",desc:"CapCut Premium",category:"premium",image:"capcut-pro.jpg",badge:"POPULER",plans:[["1 Bulan",35000],["3 Bulan",90000],["6 Bulan",160000],["1 Tahun",300000]]},
+ {id:"canva",name:"Canva Premium",desc:"Canva Premium",category:"premium",image:"canva-premium.jpg",badge:"POPULER",plans:[["1 Bulan",30000],["3 Bulan",75000],["6 Bulan",140000],["1 Tahun",250000]]},
+ {id:"spotify",name:"Spotify Premium",desc:"Spotify Premium",category:"premium",image:"spotify-premium.jpg",badge:"POPULER",plans:[["1 Bulan",25000],["3 Bulan",65000],["6 Bulan",120000],["1 Tahun",220000]]},
+ {id:"topup",name:"Top Up All Games",desc:"Top up game & kebutuhan digital",category:"topup",image:"top-up-all-games.jpg",badge:"CEPAT",plans:[["Top Up",0]]},
+ {id:"payment",name:"Pembayaran Digital",desc:"Pulsa, tagihan & pembayaran",category:"topup",image:"pembayaran-digital.jpg",badge:"MUDAH",plans:[["Pembayaran",0]]},
+ {id:"certificate",name:"Jasa Pembuatan Sertifikat",desc:"Jasa pembuatan sertifikat",category:"jasa",image:"jasa-sertifikat.jpg",badge:"JASA",plans:[["1 Sertifikat",20000],["+ Laminating",25000]]}
 ];
-let current=null,selected=0,currentCat="Semua";
-const rupiah=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
-function renderFilters(){const cats=["Semua",...new Set(products.map(p=>p.cat))];document.getElementById("filters").innerHTML=cats.map((c,i)=>`<button class="${i===0?"active":""}" onclick="filter('${c}',this)">${c}</button>`).join("")}
-function applyCatalog(){const q=(document.getElementById("search")?.value||"").toLowerCase();const list=products.filter(p=>currentCat==="Semua"||p.cat===currentCat).filter(p=>(p.name+" "+p.desc).toLowerCase().includes(q));render(list)}
-function render(list=products){document.getElementById("count").textContent=`${list.length} produk`;document.getElementById("products").innerHTML=list.length?list.map(p=>`<article class="product"><div class="badge">${p.badge||p.cat}</div><div class="product-media"><img src="${p.image}" alt="${p.name}" loading="lazy"></div><div class="phead"><div class="picon">${p.icon}</div><div><h3>${p.name}</h3><div class="desc">${p.desc}</div></div></div><div class="package">Mulai dari <b>${rupiah(p.durations[0][1])}</b></div><div class="pfoot"><span class="price">${rupiah(p.durations[0][1])}</span><button class="buy" onclick="openModal(${products.indexOf(p)})">Pilih Paket →</button></div></article>`).join(""):`<div class="empty">Produk tidak ditemukan.<br><button class="secondary" onclick="resetCatalog()">Tampilkan semua</button></div>`}
-function filter(cat,el){currentCat=cat;document.querySelectorAll(".filters button").forEach(x=>x.classList.remove("active"));el.classList.add("active");applyCatalog()}
-function resetCatalog(){currentCat="Semua";document.getElementById("search").value="";document.querySelectorAll(".filters button").forEach((x,i)=>x.classList.toggle("active",i===0));render()}
-function updateTotal(){if(!current)return;const d=current.durations[selected];document.getElementById("mTotal").textContent=rupiah(d[1])}
-function openModal(i){current=products[i];selected=0;document.getElementById("mTitle").textContent=current.name;document.getElementById("mDesc").textContent=current.desc;document.getElementById("mImage").src=current.image;document.getElementById("mImage").alt=current.name;document.getElementById("durations").innerHTML=current.durations.map((d,j)=>`<div class="duration ${j===0?"selected":""}" onclick="selectDuration(${j},this)"><span>${d[0]}</span><b>${rupiah(d[1])}</b></div>`).join("");updateTotal();document.getElementById("modal").classList.add("show");document.getElementById("modal").setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
-function selectDuration(i,el){selected=i;document.querySelectorAll(".duration").forEach(x=>x.classList.remove("selected"));el.classList.add("selected");updateTotal()}
-function closeModal(){document.getElementById("modal").classList.remove("show");document.getElementById("modal").setAttribute("aria-hidden","true");document.body.style.overflow=""}
-function orderWhatsApp(){if(!current)return;const name=document.getElementById("buyerName").value.trim(),wa=document.getElementById("buyerWa").value.trim();if(!name||!wa){alert("Silakan isi nama dan nomor WhatsApp.");return}const d=current.durations[selected],orderId="CX"+Date.now().toString().slice(-8);const text=["Halo CAMXD Store 👋","","Saya sudah melakukan pembayaran untuk pesanan berikut:",`ID Pesanan: ${orderId}`,`Produk: ${current.name}`,`Durasi/Paket: ${d[0]}`,`Total dibayar: ${rupiah(d[1])}`,`Nama: ${name}`,`Nomor WA: ${wa}`,"","Saya lampirkan bukti pembayaran pada chat ini.","Mohon dicek dan diproses. Terima kasih 🙏"].join("\n");window.open(`https://wa.me/${STORE_WA}?text=${encodeURIComponent(text)}`,"_blank")}
-function contactGeneral(){window.open(`https://wa.me/${STORE_WA}?text=${encodeURIComponent("Halo CAMXD Store 👋 Saya ingin bertanya tentang produk.")}`,"_blank")}
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
-renderFilters();render();
+
+const rupiah=n=>"Rp "+Number(n).toLocaleString("id-ID");
+const $=s=>document.querySelector(s);
+let activeFilter="all", selectedProduct=null, selectedPlan=null;
+
+function render(){
+  const q=$("#search").value.trim().toLowerCase();
+  const list=products.filter(p=>(activeFilter==="all"||p.category===activeFilter)&&(!q||(`${p.name} ${p.desc}`).toLowerCase().includes(q)));
+  $("#productCount").textContent=`${list.length} produk`;
+  $("#empty").hidden=list.length>0;
+  $("#products").innerHTML=list.map(p=>`
+    <article class="product">
+      <span class="badge">${p.badge}</span>
+      <div class="product-image"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>
+      <div class="product-body">
+        <h3>${p.name}</h3><p>${p.desc}</p>
+        <div class="price-row">
+          <div><small>Mulai dari</small><div class="price">${rupiah(p.plans[0][1])}</div></div>
+          <button class="choose" data-id="${p.id}">Pilih Paket →</button>
+        </div>
+      </div>
+    </article>`).join("");
+  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openModal(b.dataset.id));
+}
+
+function openModal(id){
+  selectedProduct=products.find(p=>p.id===id);
+  selectedPlan=selectedProduct.plans[0];
+  $("#modalTitle").textContent=selectedProduct.name;
+  $("#modalDesc").textContent=selectedProduct.desc;
+  $("#modalImage").src=selectedProduct.image;
+  $("#modalImage").alt=selectedProduct.name;
+  $("#plans").innerHTML=selectedProduct.plans.map((p,i)=>`<button class="plan ${i===0?"selected":""}" data-i="${i}"><span>${p[0]}</span><strong>${p[1]?rupiah(p[1]):"Sesuai kebutuhan"}</strong></button>`).join("");
+  document.querySelectorAll(".plan").forEach(b=>b.onclick=()=>{selectedPlan=selectedProduct.plans[Number(b.dataset.i)];document.querySelectorAll(".plan").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");updateTotal();});
+  updateTotal();
+  $("#modalBackdrop").hidden=false;
+  document.body.style.overflow="hidden";
+}
+function updateTotal(){ $("#totalPrice").textContent=selectedPlan[1]?rupiah(selectedPlan[1]):"Sesuai kebutuhan"; }
+function closeModal(){ $("#modalBackdrop").hidden=true;document.body.style.overflow=""; }
+
+function sendOrder(){
+  const name=$("#customerName").value.trim(), wa=$("#customerWa").value.trim();
+  if(!name||!wa){alert("Silakan isi nama lengkap dan nomor WhatsApp terlebih dahulu.");return;}
+  const orderId="CX"+Date.now().toString().slice(-8);
+  const total=selectedPlan[1]?rupiah(selectedPlan[1]):"Sesuai kebutuhan";
+  const msg=`Halo CAMXD Store 👋%0A%0ASaya ingin order:%0AID Pesanan: ${orderId}%0AProduk: ${selectedProduct.name}%0ADurasi/Paket: ${selectedPlan[0]}%0ATotal: ${total}%0ANama: ${name}%0ANomor WA: ${wa}%0A%0ASaya sudah melakukan pembayaran melalui QRIS CAMXD Store.%0ASaya lampirkan bukti pembayaran pada chat ini.%0AMohon dicek dan diproses. Terima kasih 🙏`;
+  window.open(`https://wa.me/${STORE_WA}?text=${msg}`,"_blank");
+}
+
+document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();});
+$("#search").addEventListener("input",render);
+$("#sendOrder").onclick=sendOrder;
+$("#closeModal").onclick=closeModal;
+$("#modalBackdrop").addEventListener("click",e=>{if(e.target.id==="modalBackdrop")closeModal();});
+$("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
+document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
+render();

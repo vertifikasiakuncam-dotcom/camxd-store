@@ -1,82 +1,157 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CAMXD Store — Digital Premium Store</title>
-<meta name="description" content="CAMXD Store — produk digital premium, top up, jasa digital, QRIS dan pemesanan WhatsApp.">
-<meta name="theme-color" content="#080808">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="CAMXD Store - Produk digital, premium, top up dan jasa digital.">
+  <title>CAMXD Store — Digital Shop</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="topbar"><span>⚡ Proses cepat</span><span>🔒 Aman & terpercaya</span><span>💳 Bayar via QRIS</span><span>💬 Support WhatsApp</span></div>
-<header class="header">
-  <a class="brand" href="#beranda"><img class="brand-logo" src="camxd-logo.png" alt="CAMXD Store"><span>CAMXD <b>Store</b></span></a>
-  <nav id="nav"><a href="#beranda">Beranda</a><a href="#produk">Produk</a><a href="#cara">Cara Beli</a><a href="#kontak">Kontak</a></nav>
-  <div class="header-actions"><button class="head-wa" onclick="contactGeneral()">Chat WhatsApp</button><button class="hamb" aria-label="Menu" onclick="document.getElementById('nav').classList.toggle('open')">☰</button></div>
-</header>
+  <div class="bg-glow"></div>
 
-<main>
-<section class="hero" id="beranda">
-  <div class="hero-copy">
-    <div class="eyebrow"><span class="live-dot"></span> CAMXD STORE • DIGITAL SHOP</div>
-    <h1>Produk digital<br><em>premium & cepat.</em></h1>
-    <p>Streaming, aplikasi premium, top up game, jasa digital, dan kebutuhan digital lainnya dalam satu tempat.</p>
-    <div class="hero-actions"><a class="primary" href="#produk">Belanja Sekarang <span>→</span></a><a class="secondary" href="#cara">Cara beli</a></div>
-    <div class="trust"><span>✓ Harga transparan</span><span>✓ Order via WhatsApp</span><span>✓ Bayar QRIS</span></div>
+  <header class="topbar">
+    <a class="brand" href="#beranda">
+      <img src="camxd-logo.png" alt="CAMXD Store">
+      <span>CAMXD <b>Store</b></span>
+    </a>
+    <button class="menu-btn" id="menuBtn" aria-label="Buka menu">☰</button>
+    <nav id="navMenu">
+      <a href="#produk">Produk</a>
+      <a href="#cara-beli">Cara Beli</a>
+      <a href="#faq">FAQ</a>
+      <a href="#syarat">Syarat</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="beranda">
+      <div class="hero-card">
+        <span class="eyebrow">🔥 CAMXD STORE • DIGITAL SHOP</span>
+        <h1>Produk digital<br><em>murah & cepat.</em></h1>
+        <p>Streaming, aplikasi premium, top up, pembayaran digital, dan jasa dalam satu tempat.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#produk">Belanja Sekarang →</a>
+          <a class="btn ghost" href="#cara-beli">Cara Beli</a>
+        </div>
+        <div class="trust-row">
+          <span>✓ Proses cepat</span>
+          <span>✓ Harga transparan</span>
+          <span>✓ Bantuan WhatsApp</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="produk">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">KATALOG</span>
+          <h2>Pilih Produk</h2>
+          <p>Gunakan kategori atau cari produk yang kamu butuhkan.</p>
+        </div>
+        <span class="product-count" id="productCount">9 produk</span>
+      </div>
+
+      <div class="filters">
+        <button class="filter active" data-filter="all">Semua</button>
+        <button class="filter" data-filter="premium">Premium</button>
+        <button class="filter" data-filter="topup">Top Up</button>
+        <button class="filter" data-filter="jasa">Jasa</button>
+      </div>
+      <label class="search">
+        <span>⌕</span><input id="search" type="search" placeholder="Cari produk...">
+      </label>
+
+      <div class="benefits">
+        <span>⚡ Produk populer</span>
+        <span>🔒 Aman & terpercaya</span>
+        <span>💬 Order via WhatsApp</span>
+        <span>💳 Bayar QRIS</span>
+      </div>
+
+      <div class="products" id="products"></div>
+      <div class="empty" id="empty" hidden>Produk tidak ditemukan.</div>
+    </section>
+
+    <section class="section split" id="cara-beli">
+      <div>
+        <span class="eyebrow">SIMPLE CHECKOUT</span>
+        <h2>Cara Pembelian</h2>
+        <p class="lead">Pesan dari website, bayar melalui QRIS, lalu kirim bukti pembayaran ke admin.</p>
+      </div>
+      <div class="steps">
+        <article><b>01</b><h3>Pilih produk</h3><p>Pilih produk dan paket yang kamu inginkan.</p></article>
+        <article><b>02</b><h3>Isi data</h3><p>Masukkan nama dan nomor WhatsApp yang aktif.</p></article>
+        <article><b>03</b><h3>Bayar QRIS</h3><p>Bayar sesuai total pesanan melalui QRIS CAMXD Store.</p></article>
+        <article><b>04</b><h3>Kirim bukti</h3><p>WhatsApp akan terbuka. Lampirkan screenshot bukti pembayaran.</p></article>
+      </div>
+    </section>
+
+    <section class="section info-grid" id="faq">
+      <div class="info-card">
+        <span class="eyebrow">FAQ</span>
+        <h2>Pertanyaan Umum</h2>
+        <details open><summary>Berapa lama pesanan diproses?</summary><p>Pesanan diproses setelah pembayaran dan bukti transaksi diterima serta diverifikasi admin.</p></details>
+        <details><summary>Bagaimana cara mengirim bukti pembayaran?</summary><p>Setelah checkout, tekan tombol kirim bukti. WhatsApp akan terbuka dan kamu tinggal melampirkan screenshot pembayaran.</p></details>
+        <details><summary>Apakah harga sudah sesuai paket?</summary><p>Harga yang tampil pada paket adalah total harga pesanan sebelum dikirim ke WhatsApp.</p></details>
+      </div>
+      <div class="info-card" id="syarat">
+        <span class="eyebrow">INFO TOKO</span>
+        <h2>Syarat & Ketentuan</h2>
+        <ul class="terms">
+          <li>Pastikan nomor WhatsApp yang diisi aktif.</li>
+          <li>Bayar sesuai nominal total pesanan.</li>
+          <li>Jangan membayar ke QRIS selain yang tampil di checkout.</li>
+          <li>Simpan bukti pembayaran sampai pesanan selesai.</li>
+          <li>Kesalahan data dari pembeli dapat memperlambat proses.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div><strong>CAMXD <span>Store</span></strong><small>Digital Shop • Premium • Top Up • Jasa</small></div>
+    <a href="https://wa.me/6282133942994" target="_blank" rel="noopener">Chat WhatsApp →</a>
+  </footer>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close" id="closeModal">×</button>
+      <div class="modal-head">
+        <span class="eyebrow">CHECKOUT CAMXD</span>
+        <span class="secure">🔒 Aman</span>
+      </div>
+      <div class="product-summary">
+        <img id="modalImage" src="" alt="">
+        <div><h2 id="modalTitle"></h2><p id="modalDesc"></p></div>
+      </div>
+
+      <label class="field-label">PILIH PAKET</label>
+      <div class="plans" id="plans"></div>
+
+      <label class="field-label">DATA PEMESAN</label>
+      <input id="customerName" class="input" placeholder="Nama lengkap">
+      <input id="customerWa" class="input" placeholder="Nomor WhatsApp">
+
+      <div class="total"><span>Total pesanan</span><strong id="totalPrice">Rp 0</strong></div>
+
+      <div class="payment-box">
+        <strong>💳 Pembayaran via GoPay / QRIS</strong>
+        <p>Bayar sesuai total pesanan, lalu kirim bukti transfer ke admin melalui WhatsApp.</p>
+      </div>
+
+      <details class="qris-box">
+        <summary>▼ 📱 Lihat QRIS CAMXD Store</summary>
+        <img src="qris-gopay.jpg" alt="QRIS CAMXD Store">
+        <p><b>Perhatian:</b> Pastikan nominal pembayaran sama dengan total pesanan.</p>
+      </details>
+
+      <button class="btn primary wide" id="sendOrder">Saya Sudah Bayar — Kirim Bukti →</button>
+      <p class="modal-note">Setelah WhatsApp terbuka, lampirkan screenshot bukti pembayaran.</p>
+    </div>
   </div>
-  <div class="hero-art"><div class="hero-glow"></div><div class="hero-ring"></div><img class="hero-logo" src="camxd-logo.png" alt="CAMXD Digital Store"></div>
-</section>
 
-<section class="section catalog" id="produk">
-  <div class="section-title"><div><div class="tag">KATALOG CAMXD</div><h2>Pilih Produk</h2><p class="section-sub">Pilih paket, isi data, lalu lanjutkan order melalui WhatsApp.</p></div><div class="catalog-count" id="count"></div></div>
-  <div class="featured"><div><span class="hot">🔥 TERLARIS</span><h3>Produk Premium CAMXD</h3><p>Paket favorit pelanggan dengan proses cepat dan support langsung.</p></div><a class="featured-btn" href="#products">Lihat Produk →</a></div>
-  <div class="catalog-tools"><div class="filters" id="filters"></div><label class="search"><span>⌕</span><input id="search" type="search" placeholder="Cari produk..." autocomplete="off" oninput="applyCatalog()"></label></div>
-  <div class="mini-trust"><span>⚡ Produk populer</span><span>🔒 Aman & terpercaya</span><span>💬 Order via WhatsApp</span><span>💳 Bayar QRIS</span></div>
-  <div class="products" id="products"></div>
-</section>
-
-<section class="section promo">
-  <div><div class="tag">CUSTOMER SUPPORT</div><h2>Butuh bantuan memilih produk?</h2><p>Chat CAMXD Store untuk cek paket, ketersediaan, atau layanan digital lainnya.</p></div>
-  <button class="primary" onclick="contactGeneral()">Chat WhatsApp →</button>
-</section>
-
-<section class="section how" id="cara"><div class="tag">MUDAH & CEPAT</div><h2>Cara Beli</h2><div class="steps">
-  <div><i>01</i><h3>Pilih produk</h3><p>Pilih produk dan paket yang sesuai dengan kebutuhanmu.</p></div>
-  <div><i>02</i><h3>Isi data</h3><p>Masukkan nama dan nomor WhatsApp untuk konfirmasi pesanan.</p></div>
-  <div><i>03</i><h3>Bayar via QRIS</h3><p>Bayar sesuai total pesanan melalui QRIS, lalu kirim bukti pembayaran ke WhatsApp admin.</p></div>
-</div></section>
-
-<section class="section contact-section" id="kontak">
-  <div class="contact-heading"><div><div class="tag">HUBUNGI KAMI</div><h2>Kontak Kami</h2><p>Butuh bantuan atau sudah selesai membayar? Hubungi admin CAMXD Store.</p></div><button class="primary" onclick="contactGeneral()">Chat WhatsApp →</button></div>
-  <div class="contact-grid">
-    <a class="contact-card" href="https://wa.me/6282133942994" target="_blank" rel="noopener"><span>💬</span><div><b>WhatsApp</b><small>0821 3394 2994</small></div><strong>→</strong></a>
-    <div class="contact-card"><span>◎</span><div><b>Instagram</b><small>@CAMXD+</small></div><strong>→</strong></div>
-    <div class="contact-card"><span>🕐</span><div><b>Jam Layanan</b><small>Setiap hari • 08.00–22.00</small></div><strong>✓</strong></div>
-  </div>
-</section>
-</main>
-
-<footer><div class="footer-brand"><div class="brand"><img class="brand-logo" src="camxd-logo.png" alt="CAMXD Store"><span>CAMXD <b>Store</b></span></div><p>Produk digital premium • harga transparan • proses cepat.</p></div><div class="footer-note"><span>© 2026 CAMXD Store</span><span>Order resmi melalui WhatsApp CAMXD</span></div></footer>
-
-<div class="wa-float" onclick="contactGeneral()"><span class="wa-icon">☏</span><span>Chat CAMXD</span></div>
-
-<div class="modal" id="modal" aria-hidden="true"><div class="modal-card">
-  <button class="x" onclick="closeModal()" aria-label="Tutup">×</button>
-  <div class="checkout-head"><div class="tag">CHECKOUT CAMXD</div><span class="secure">🔒 Aman</span></div>
-  <div class="modal-product"><img id="mImage" src="" alt=""><div><h2 id="mTitle"></h2><p id="mDesc" class="muted"></p></div></div>
-  <div class="checkout-label">Pilih paket</div><div id="durations"></div>
-  <div class="checkout-label">Data pemesan</div>
-  <input id="buyerName" placeholder="Nama lengkap" autocomplete="name">
-  <input id="buyerWa" placeholder="Nomor WhatsApp" inputmode="tel" autocomplete="tel">
-  <div class="order-total"><span>Total pesanan</span><b id="mTotal">Rp 0</b></div>
-  <div class="payment-note"><b>💳 Pembayaran via GoPay / QRIS</b><span>Bayar sesuai total pesanan yang tertera, lalu kirim bukti transfer ke admin melalui WhatsApp.</span></div>
-  <details class="qris-box"><summary>📲 Lihat QRIS CAMXD Store</summary><img src="qris-gopay.jpg" alt="QRIS CAMXD Store" class="qris-img"><p class="qris-warning"><b>Perhatian:</b> Bayar sesuai total pesanan dan pastikan nama merchant sesuai. Setelah membayar, screenshot bukti pembayaran.</p></details>
-  <button class="primary full" onclick="orderWhatsApp()">Saya Sudah Bayar — Kirim Bukti →</button>
-  <small class="muted">Setelah WhatsApp terbuka, lampirkan screenshot bukti pembayaran lalu kirim ke admin.</small>
-</div></div>
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
