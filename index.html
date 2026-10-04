@@ -8,7 +8,7 @@
 </head>
 <body>
 <header class="header">
-  <a class="brand" href="#beranda"><span class="brand-logo">CX</span><span>CAMXD <b>Store</b></span></a>
+  <a class="brand" href="#beranda"><img class="brand-logo" src="camxd-logo.png" alt="CAMXD+"><span>CAMXD <b>Store</b></span></a>
   <nav id="nav">
     <a href="#beranda">Beranda</a><a href="#produk">Produk</a><a href="#cara">Cara Beli</a><a href="#kontak">Kontak</a>
   </nav>
@@ -23,9 +23,7 @@
     <div class="hero-actions"><a class="primary" href="#produk">Belanja Sekarang →</a><a class="secondary" href="#cara">Cara beli</a></div>
     <div class="trust"><span>✓ Proses cepat</span><span>✓ Harga transparan</span><span>✓ Bantuan WhatsApp</span></div>
   </div>
-  <div class="hero-art">
-    <div class="orb"></div><div class="hero-box"><small>FLASH OFFER</small><strong>CAMXD</strong><span>Digital Store</span><b>ORDER • PAY • DONE</b></div>
-  </div>
+  <div class="hero-art"><div class="hero-glow"></div><img class="hero-logo" src="camxd-logo.png" alt="CAMXD+ Digital Store"></div>
 </section>
 
 <section class="section" id="produk">
@@ -49,7 +47,7 @@
 </section>
 
 <footer id="kontak">
-  <div><div class="brand"><span class="brand-logo">CX</span><span>CAMXD <b>Store</b></span></div><p>Produk digital murah & proses cepat.</p></div>
+  <div><div class="brand"><img class="brand-logo" src="camxd-logo.png" alt="CAMXD+"> <span>CAMXD <b>Store</b></span></div><p>Produk digital murah & proses cepat.</p></div>
   <div><h3>Kontak</h3><p>Instagram: @CAMXD+</p><p>WhatsApp: nomor toko</p></div>
   <div><h3>Jam Layanan</h3><p>Setiap hari • 08.00–22.00</p></div>
 </footer>
@@ -61,7 +59,12 @@
   <div id="durations"></div>
   <input id="buyerName" placeholder="Nama lengkap">
   <input id="buyerWa" placeholder="Nomor WhatsApp">
-  <div class="payment-note"><b>💳 Pembayaran via GoPay/QRIS</b><span>Setelah klik tombol, WhatsApp CAMXD Store akan terbuka. Admin akan mengirim tagihan/QRIS sesuai total pesanan.</span></div>
+  <div class="payment-note"><b>💳 Pembayaran via GoPay/QRIS</b><span>Setelah klik tombol, WhatsApp CAMXD Store akan terbuka. Admin akan mengonfirmasi pesanan dan nominal pembayaran.</span></div>
+  <details class="qris-box">
+    <summary>📲 Lihat QRIS CAMXD Store</summary>
+    <img src="qris-gopay.jpg" alt="QRIS CAMXD Store" class="qris-img">
+    <p class="qris-warning"><b>Perhatian:</b> QRIS ini adalah QRIS statis. Sebelum membayar, pastikan nominalnya <b>sama dengan total pesanan</b> dan nama merchant sesuai.</p>
+  </details>
   <button class="primary full" onclick="orderWhatsApp()">Pesan & Lanjut ke WhatsApp →</button>
   <small class="muted">Pembayaran dilakukan melalui QRIS GoPay Merchant setelah pesanan dikonfirmasi. Jangan kirim pembayaran ke QRIS lain.</small>
  </div>
