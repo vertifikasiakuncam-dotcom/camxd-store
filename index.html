@@ -17,6 +17,7 @@
       <span>CAMXD <b>Store</b></span>
     </a>
     <button class="menu-btn" id="menuBtn" aria-label="Buka menu">☰</button>
+    <button class="cart-btn" id="cartBtn" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button>
     <nav id="navMenu">
       <a href="#produk">Produk</a>
       <a href="#cara-beli">Cara Beli</a>
@@ -115,42 +116,33 @@
     <a href="https://wa.me/6282133942994" target="_blank" rel="noopener">Chat WhatsApp →</a>
   </footer>
 
-  <div class="modal-backdrop" id="modalBackdrop" hidden>
-    <div class="modal" role="dialog" aria-modal="true">
-      <button class="close" id="closeModal">×</button>
-      <div class="modal-head">
-        <span class="eyebrow">CHECKOUT CAMXD</span>
-        <span class="secure">🔒 Aman</span>
-      </div>
-      <div class="product-summary">
-        <img id="modalImage" src="" alt="">
-        <div><h2 id="modalTitle"></h2><p id="modalDesc"></p></div>
-      </div>
-
-      <label class="field-label">PILIH PAKET</label>
-      <div class="plans" id="plans"></div>
-
-      <label class="field-label">DATA PEMESAN</label>
-      <input id="customerName" class="input" placeholder="Nama lengkap">
-      <input id="customerWa" class="input" placeholder="Nomor WhatsApp">
-
-      <div class="total"><span>Total pesanan</span><strong id="totalPrice">Rp 0</strong></div>
-
-      <div class="payment-box">
-        <strong>💳 Pembayaran via GoPay / QRIS</strong>
-        <p>Bayar sesuai total pesanan, lalu kirim bukti transfer ke admin melalui WhatsApp.</p>
-      </div>
-
-      <details class="qris-box">
-        <summary>▼ 📱 Lihat QRIS CAMXD Store</summary>
-        <img src="qris-gopay.jpg" alt="QRIS CAMXD Store">
-        <p><b>Perhatian:</b> Pastikan nominal pembayaran sama dengan total pesanan.</p>
-      </details>
-
-      <button class="btn primary wide" id="sendOrder">Saya Sudah Bayar — Kirim Bukti →</button>
-      <p class="modal-note">Setelah WhatsApp terbuka, lampirkan screenshot bukti pembayaran.</p>
-    </div>
+  <div class="detail-backdrop" id="detailModal" hidden>
+  <div class="detail-modal" role="dialog" aria-modal="true">
+    <button class="close" id="closeDetail">×</button>
+    <div class="detail-hero"><img id="detailImage" src="" alt=""><span class="badge" id="detailBadge"></span></div>
+    <span class="eyebrow">DETAIL PRODUK</span>
+    <h2 id="detailTitle"></h2>
+    <p id="detailDesc" class="detail-desc"></p>
+    <label class="field-label">PILIH PAKET</label>
+    <div class="plans" id="detailPlans"></div>
+    <button class="btn primary wide" id="addToCart">Tambah ke Keranjang 🛒</button>
+    <p class="modal-note">Kamu masih bisa menambah produk lain sebelum checkout.</p>
   </div>
+</div>
+
+<div class="cart-backdrop" id="cartBackdrop" hidden></div>
+<aside class="cart-drawer" id="cartDrawer" aria-label="Keranjang belanja">
+  <div class="cart-head"><div><span class="eyebrow">KERANJANG</span><h2>Pesanan Kamu</h2></div><button class="close-cart" id="closeCart">×</button></div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="cart-checkout">
+    <div class="cart-total"><span>Total</span><strong id="cartTotal">Rp 0</strong></div>
+    <input id="cartName" class="input" placeholder="Nama lengkap">
+    <input id="cartWa" class="input" placeholder="Nomor WhatsApp">
+    <div class="payment-box"><strong>💳 Bayar via GoPay / QRIS</strong><p>Setelah checkout, bayar sesuai total lalu kirim bukti pembayaran ke admin WhatsApp.</p></div>
+    <button class="btn primary wide" id="checkoutCart">Checkout & Kirim ke WhatsApp →</button>
+  </div>
+</aside>
+
 
   <script src="script.js"></script>
 </body>
