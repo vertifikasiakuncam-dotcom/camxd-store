@@ -1,14 +1,14 @@
 const STORE_WA="6282133942994";
 const products=[
-{name:"KTV Premium",img:"product-images/ktv-premium.jpg",cat:"Premium",icon:"KTV",badge:"BEST SELLER",desc:"Akses KTV Premium",durations:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]]},
-{name:"YouTube Premium",img:"product-images/youtube-premium.jpg",cat:"Premium",icon:"▶",badge:"POPULER",desc:"YouTube Premium",durations:[["1 Bulan",15000]]},
-{name:"Netflix Sharing",img:"product-images/netflix-sharing.jpg",cat:"Premium",icon:"N",badge:"POPULER",desc:"Netflix sharing",durations:[["1 Bulan",33000]]},
-{name:"CapCut Pro",img:"product-images/capcut-pro.jpg",cat:"Premium",icon:"CC",badge:"HOT",desc:"CapCut Pro sharing",durations:[["1 Bulan",35000]]},
-{name:"Canva Premium",img:"product-images/canva-premium.jpg",cat:"Premium",icon:"Ca",badge:"POPULER",desc:"Canva Premium",durations:[["1 Bulan",25000]]},
-{name:"Spotify Premium",img:"product-images/spotify-premium.jpg",cat:"Premium",icon:"S",badge:"",desc:"Spotify Premium",durations:[["1 Bulan",25000]]},
-{name:"Top Up All Games",img:"product-images/top-up-all-games.jpg",cat:"Top Up",icon:"🎮",badge:"TOP UP",desc:"Top up berbagai game",durations:[["Mulai dari",10000]]},
-{name:"Pembayaran Digital",img:"product-images/pembayaran-digital.jpg",cat:"Jasa",icon:"Rp",badge:"JASA",desc:"Bantuan pembayaran digital",durations:[["Mulai dari",5000]]},
-{name:"Jasa Pembuatan Sertifikat",img:"product-images/jasa-sertifikat.jpg",cat:"Jasa",icon:"✓",badge:"BEST VALUE",desc:"Sertifikat digital",durations:[["1 Sertifikat",20000],["Laminating +",5000]]}
+{name:"KTV Premium",img:"ktv-premium.jpg",cat:"Premium",icon:"KTV",badge:"BEST SELLER",desc:"Akses KTV Premium",durations:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]]},
+{name:"YouTube Premium",img:"youtube-premium.jpg",cat:"Premium",icon:"▶",badge:"POPULER",desc:"YouTube Premium",durations:[["1 Bulan",15000]]},
+{name:"Netflix Sharing",img:"netflix-sharing.jpg",cat:"Premium",icon:"N",badge:"POPULER",desc:"Netflix sharing",durations:[["1 Bulan",33000]]},
+{name:"CapCut Pro",img:"capcut-pro.jpg",cat:"Premium",icon:"CC",badge:"HOT",desc:"CapCut Pro sharing",durations:[["1 Bulan",35000]]},
+{name:"Canva Premium",img:"canva-premium.jpg",cat:"Premium",icon:"Ca",badge:"POPULER",desc:"Canva Premium",durations:[["1 Bulan",25000]]},
+{name:"Spotify Premium",img:"spotify-premium.jpg",cat:"Premium",icon:"S",badge:"",desc:"Spotify Premium",durations:[["1 Bulan",25000]]},
+{name:"Top Up All Games",img:"top-up-all-games.jpg",cat:"Top Up",icon:"🎮",badge:"TOP UP",desc:"Top up berbagai game",durations:[["Mulai dari",10000]]},
+{name:"Pembayaran Digital",img:"pembayaran-digital.jpg",cat:"Jasa",icon:"Rp",badge:"JASA",desc:"Bantuan pembayaran digital",durations:[["Mulai dari",5000]]},
+{name:"Jasa Pembuatan Sertifikat",img:"jasa-sertifikat.jpg",cat:"Jasa",icon:"✓",badge:"BEST VALUE",desc:"Sertifikat digital",durations:[["1 Sertifikat",20000],["Laminating +",5000]]}
 ];
 let current=null,selected=0,currentCat="Semua";
 const rupiah=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
