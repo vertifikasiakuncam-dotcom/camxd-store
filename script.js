@@ -62,15 +62,38 @@ function updateCart(){
 function openCart(){$("#cartDrawer").classList.add("open");$("#cartBackdrop").hidden=false;}
 function closeCart(){$("#cartDrawer").classList.remove("open");$("#cartBackdrop").hidden=true;}
 
+let pendingOrder=null;
+
 function checkoutCart(){
  if(!cart.length)return;
  const name=$("#cartName").value.trim(), wa=$("#cartWa").value.trim();
  if(!name||!wa){alert("Silakan isi nama lengkap dan nomor WhatsApp terlebih dahulu.");return;}
  const orderId="CX"+Date.now().toString().slice(-8);
- const lines=cart.map((x,i)=>`${i+1}. ${x.name} — ${x.plan} x${x.qty} = ${x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan"}`).join("%0A");
+ const lines=cart.map((x,i)=>`${i+1}. ${x.name} — ${x.plan} x${x.qty} = ${x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan"}`).join("\n");
  const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(cartTotal());
- const msg=`Halo CAMXD Store 👋%0A%0ASaya ingin order:%0AID Pesanan: ${orderId}%0A%0A${lines}%0A%0ATotal: ${total}%0ANama: ${name}%0ANomor WA: ${wa}%0A%0ASaya akan melakukan pembayaran melalui QRIS CAMXD Store.%0ASetelah membayar, saya akan kirim bukti pembayaran pada chat ini.%0AMohon dicek dan diproses. Terima kasih 🙏`;
- window.open(`https://wa.me/${STORE_WA}?text=${msg}`,"_blank");
+ pendingOrder={orderId,name,wa,lines,total};
+ $("#paymentOrderId").textContent=orderId;
+ $("#paymentTotal").textContent=total;
+ $("#paymentModal").hidden=false;
+ document.body.style.overflow="hidden";
+}
+
+function closePayment(){
+ $("#paymentModal").hidden=true;
+ document.body.style.overflow="";
+}
+
+function sendProof(){
+ if(!pendingOrder)return;
+ const o=pendingOrder;
+ const msg=`Halo CAMXD Store 👋\n\nSaya ingin order:\nID Pesanan: ${o.orderId}\n\n${o.lines}\n\nTotal: ${o.total}\nNama: ${o.name}\nNomor WA: ${o.wa}\n\nSaya sudah melakukan pembayaran melalui QRIS CAMXD Store.\nSaya lampirkan bukti pembayaran pada chat ini.\nMohon dicek dan diproses. Terima kasih 🙏`;
+ window.open(`https://wa.me/${STORE_WA}?text=${encodeURIComponent(msg)}`,"_blank");
+}
+
+async function copyOrderId(){
+ const id=$("#paymentOrderId").textContent;
+ try{await navigator.clipboard.writeText(id); $("#copyOrderId").textContent="Tersalin ✓";}catch(e){alert("ID Pesanan: "+id);}
+ setTimeout(()=>$("#copyOrderId").textContent="Salin",1600);
 }
 
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();});
@@ -78,6 +101,8 @@ $("#search").addEventListener("input",render);
 $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click",e=>{if(e.target.id==="detailModal")closeDetail();});
 $("#addToCart").onclick=addToCart;
 $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart; $("#checkoutCart").onclick=checkoutCart;
+$("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#copyOrderId").onclick=copyOrderId;
+$("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
 updateCart(); render();

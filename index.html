@@ -130,6 +130,30 @@
   </div>
 </div>
 
+<div class="payment-backdrop" id="paymentModal" hidden>
+  <div class="payment-modal" role="dialog" aria-modal="true">
+    <button class="close" id="closePayment">×</button>
+    <div class="modal-head">
+      <div><span class="eyebrow">PEMBAYARAN CAMXD STORE</span><h2>Bayar via QRIS</h2></div>
+      <span class="secure">🔒 Aman</span>
+    </div>
+    <div class="order-id-row"><span>ID Pesanan</span><strong id="paymentOrderId">-</strong><button id="copyOrderId" type="button">Salin</button></div>
+    <div class="payment-total"><span>Total pembayaran</span><strong id="paymentTotal">-</strong></div>
+    <div class="payment-qr">
+      <p class="payment-title">📱 Scan QRIS CAMXD Store</p>
+      <img src="qris-gopay.jpg" alt="QRIS CAMXD Store">
+      <p class="payment-hint">Bayar sesuai nominal total pesanan. Setelah berhasil, screenshot bukti pembayaran.</p>
+    </div>
+    <div class="payment-steps">
+      <div><b>1</b><span>Scan QRIS dan bayar sesuai total.</span></div>
+      <div><b>2</b><span>Screenshot bukti pembayaran.</span></div>
+      <div><b>3</b><span>Kirim bukti ke admin melalui WhatsApp.</span></div>
+    </div>
+    <button class="btn primary wide" id="sendProof">Saya Sudah Bayar — Kirim Bukti →</button>
+    <p class="modal-note">WhatsApp akan terbuka dengan ringkasan pesanan. Lampirkan screenshot bukti pembayaran lalu kirim.</p>
+  </div>
+</div>
+
 <div class="cart-backdrop" id="cartBackdrop" hidden></div>
 <aside class="cart-drawer" id="cartDrawer" aria-label="Keranjang belanja">
   <div class="cart-head"><div><span class="eyebrow">KERANJANG</span><h2>Pesanan Kamu</h2></div><button class="close-cart" id="closeCart">×</button></div>
