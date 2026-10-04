@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CAMXD Store — Produk Digital</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">CX</div><span>CAMXD Store</span></div>
+  <nav>
+    <a href="#beranda">Beranda</a>
+    <a href="#produk">Produk</a>
+    <a href="#cara">Cara Beli</a>
+    <a href="#kontak">Kontak</a>
+  </nav>
+  <button class="menu" onclick="toggleNav()">☰</button>
+</header>
+
+<main id="beranda">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">CAMXD STORE</div>
+      <h1>Produk digital<br><span>murah & proses cepat.</span></h1>
+      <p>Temukan berbagai layanan digital dengan pilihan durasi yang fleksibel.</p>
+      <a class="btn" href="#produk">Lihat Produk →</a>
+    </div>
+    <div class="hero-card">
+      <div class="spark">✦</div>
+      <b>ORDER CEPAT</b>
+      <strong>24/7</strong>
+      <small>Hubungi kami setelah memilih produk.</small>
+    </div>
+  </section>
+
+  <section class="section" id="produk">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">KATALOG</div>
+        <h2>Pilih Produk</h2>
+      </div>
+      <div class="filter" id="filters"></div>
+    </div>
+    <div class="grid" id="products"></div>
+  </section>
+
+  <section class="how section" id="cara">
+    <div class="eyebrow">MUDAH</div>
+    <h2>Cara Beli</h2>
+    <div class="steps">
+      <div><b>01</b><h3>Pilih produk</h3><p>Pilih layanan dan durasi yang Anda inginkan.</p></div>
+      <div><b>02</b><h3>Isi data</h3><p>Masukkan nama dan nomor WhatsApp untuk pesanan.</p></div>
+      <div><b>03</b><h3>Konfirmasi</h3><p>Pesanan akan diarahkan ke WhatsApp untuk diproses.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer id="kontak">
+  <div><b>CAMXD Store</b><p>Produk digital dengan proses cepat.</p></div>
+  <div><b>Kontak</b><p>Instagram: @CAMXD+</p><p>WhatsApp: ganti dengan nomor Anda</p></div>
+</footer>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeModal()">×</button>
+    <div class="eyebrow">CHECKOUT</div>
+    <h2 id="modalTitle">Produk</h2>
+    <div id="durations"></div>
+    <input id="buyerName" placeholder="Nama Anda">
+    <input id="buyerWa" placeholder="Nomor WhatsApp">
+    <button class="btn full" onclick="orderWhatsApp()">Pesan via WhatsApp</button>
+    <p class="note">Nomor WhatsApp dapat diganti di <b>script.js</b>.</p>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
