@@ -1,4 +1,5 @@
 const STORE_WA="6282133942994";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const products=[
  {id:"ktv",name:"KTV Premium",desc:"Akses KTV Premium",category:"premium",image:"ktv-premium.jpg",badge:"BEST SELLER",plans:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]],detail:"Akses KTV Premium dengan pilihan durasi fleksibel. Setelah pembayaran diverifikasi, pesanan diproses oleh admin."},
@@ -64,13 +65,34 @@ function closeCart(){$("#cartDrawer").classList.remove("open");$("#cartBackdrop"
 
 let pendingOrder=null;
 
-function checkoutCart(){
+async function checkoutCart(){
  if(!cart.length)return;
  const name=$("#cartName").value.trim(), wa=$("#cartWa").value.trim();
  if(!name||!wa){alert("Silakan isi nama lengkap dan nomor WhatsApp terlebih dahulu.");return;}
  const orderId="CX"+Date.now().toString().slice(-8);
  const lines=cart.map((x,i)=>`${i+1}. ${x.name} — ${x.plan} x${x.qty} = ${x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan"}`).join("\n");
  const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(cartTotal());
+ const orderItems = cart.map(x => ({
+  product_id: x.productId,
+  name: x.name,
+  plan: x.plan,
+  price: Number(x.price || 0),
+  qty: Number(x.qty || 1)
+ }));
+ const { error } = await sb.from("orders").insert({
+  order_id: orderId,
+  customer_name: name,
+  customer_wa: wa,
+  items: orderItems,
+  total: cartTotal(),
+  total_label: total,
+  status: "Menunggu Pembayaran"
+ });
+ if(error){
+  console.error(error);
+  alert("Pesanan belum tersimpan ke sistem. Silakan coba lagi.\n\n" + error.message);
+  return;
+ }
  pendingOrder={orderId,name,wa,lines,total};
  $("#paymentOrderId").textContent=orderId;
  $("#paymentTotal").textContent=total;
