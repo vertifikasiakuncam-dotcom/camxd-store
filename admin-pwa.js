@@ -1,66 +1,56 @@
-(function(){
-  let installBusy=false;
+let deferredAdminInstallPrompt=null;
 
-  function getPrompt(){
-    return window.__camxdAdminInstallPrompt || null;
+function adminIsInstalled(){
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.matchMedia("(display-mode: fullscreen)").matches ||
+         window.navigator.standalone === true;
+}
+
+function showAdminInstallButton(show){
+  const btn=document.getElementById("installAdminBtn");
+  if(btn) btn.hidden=!show;
+}
+
+window.addEventListener("beforeinstallprompt",event=>{
+  event.preventDefault();
+  deferredAdminInstallPrompt=event;
+  showAdminInstallButton(true);
+});
+
+window.addEventListener("appinstalled",()=>{
+  deferredAdminInstallPrompt=null;
+  showAdminInstallButton(false);
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const install=document.getElementById("installAdminBtn");
+
+  if(adminIsInstalled()){
+    showAdminInstallButton(false);
   }
 
-  function showButton(show){
-    const btn=document.getElementById("installAdminBtn");
-    if(btn) btn.hidden=!show;
-  }
-
-  window.addEventListener("beforeinstallprompt",function(event){
-    event.preventDefault();
-    window.__camxdAdminInstallPrompt=event;
-    showButton(true);
-  });
-
-  window.addEventListener("appinstalled",function(){
-    window.__camxdAdminInstallPrompt=null;
-    showButton(false);
-  });
-
-  document.addEventListener("DOMContentLoaded",function(){
-    const btn=document.getElementById("installAdminBtn");
-
-    btn?.addEventListener("click",async function(){
-      if(installBusy) return;
-
-      const promptEvent=getPrompt();
-
-      if(!promptEvent){
-        alert("Chrome belum menyediakan dialog instalasi untuk halaman ini. Coba refresh halaman Admin sekali, tunggu beberapa detik, lalu tekan Install Admin lagi.");
-        return;
-      }
-
-      installBusy=true;
-
-      try{
-        promptEvent.prompt();
-        const choice=await promptEvent.userChoice;
-
-        if(choice && choice.outcome==="accepted"){
-          showButton(false);
-          window.__camxdAdminInstallPrompt=null;
-        }
-      }catch(error){
-        console.warn("CAMXD Admin install:",error);
-        alert("Dialog instalasi gagal dibuka. Refresh halaman Admin sekali, lalu coba lagi.");
-      }finally{
-        installBusy=false;
-      }
-    });
-
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("./admin-sw.js",{scope:"./"})
-        .then(function(registration){
-          console.log("CAMXD Admin SW aktif:",registration.scope);
-          registration.update();
-        })
-        .catch(function(error){
-          console.warn("CAMXD Admin SW:",error);
-        });
+  install?.addEventListener("click",async()=>{
+    if(!deferredAdminInstallPrompt){
+      return;
     }
+
+    deferredAdminInstallPrompt.prompt();
+
+    try{
+      await deferredAdminInstallPrompt.userChoice;
+    }catch(err){
+      console.warn("CAMXD Admin install:",err);
+    }
+
+    deferredAdminInstallPrompt=null;
+    showAdminInstallButton(false);
   });
-})();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>{
+      navigator.serviceWorker.register("./admin-sw.js",{scope:"./"})
+        .then(reg=>reg.update())
+        .catch(err=>console.warn("Admin PWA:",err));
+    });
+  }
+});
