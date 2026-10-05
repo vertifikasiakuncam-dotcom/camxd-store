@@ -741,6 +741,7 @@ function startOrderPolling(){
 }
 
 showDashboard();
+startOrderPolling();
 
 
 /* ==============================
