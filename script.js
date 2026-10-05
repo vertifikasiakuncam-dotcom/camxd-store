@@ -183,6 +183,66 @@ function sendProof(){
 }
 
 
+function normalizeWa(value){
+ return String(value||"").replace(/\\D/g,"");
+}
+
+function statusClass(status){
+ const s=String(status||"").toLowerCase();
+ if(s.includes("selesai")) return "done";
+ if(s.includes("batal")) return "cancel";
+ if(s.includes("verifikasi")||s.includes("proses")) return "process";
+ return "waiting";
+}
+
+function renderOrderCheck(order){
+ const result=$("#orderCheckResult");
+ const items=Array.isArray(order.items)?order.items:[];
+ const itemHtml=items.length?items.map(x=>`<div class="order-result-item"><span>${x.name||"Produk"} — ${x.plan||""} ×${x.qty||1}</span><strong>${Number(x.price||0)?rupiah(Number(x.price||0)*Number(x.qty||1)):"Konfirmasi admin"}</strong></div>`).join(""):"<div class='order-result-item'><span>Detail produk</span><strong>-</strong></div>";
+ result.innerHTML=`
+  <div class="order-result-head">
+   <div><span class="eyebrow">PESANAN DITEMUKAN</span><h3>${order.order_id}</h3></div>
+   <span class="order-status ${statusClass(order.status)}">${order.status||"Menunggu Pembayaran"}</span>
+  </div>
+  <div class="order-result-meta"><span>Nama</span><strong>${order.customer_name||"-"}</strong></div>
+  <div class="order-result-meta"><span>Dibuat</span><strong>${new Date(order.created_at).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}</strong></div>
+  <div class="order-result-items">${itemHtml}</div>
+  <div class="order-result-total"><span>Total</span><strong>${order.total_label||rupiah(order.total||0)}</strong></div>
+  ${order.delivery_details?`<div class="delivery-box"><b>📦 Detail Pesanan</b><p>${String(order.delivery_details).replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\\n/g,"<br>")}</p></div>`:"<p class='order-result-note'>Detail pengiriman akan muncul setelah pesanan selesai diproses admin.</p>"}
+ `;
+ result.hidden=false;
+}
+
+async function checkOrder(event){
+ event.preventDefault();
+ const id=$("#checkOrderId").value.trim().toUpperCase();
+ const wa=normalizeWa($("#checkOrderWa").value);
+ const result=$("#orderCheckResult");
+ const btn=$("#checkOrderBtn");
+ if(!id||!wa)return;
+ btn.disabled=true; btn.textContent="Mengecek...";
+ result.hidden=false;
+ result.innerHTML="<p class='order-loading'>⏳ Sedang mengecek pesanan...</p>";
+ try{
+  const {data,error}=await sb.from("orders")
+   .select("order_id,customer_name,customer_wa,items,total,total_label,status,created_at,delivery_details")
+   .eq("order_id",id)
+   .eq("customer_wa",wa)
+   .maybeSingle();
+  if(error) throw error;
+  if(!data){
+   result.innerHTML="<div class='order-not-found'><strong>Pesanan tidak ditemukan.</strong><p>Pastikan ID pesanan dan nomor WhatsApp sama seperti saat checkout.</p></div>";
+   return;
+  }
+  renderOrderCheck(data);
+ }catch(error){
+  console.error(error);
+  result.innerHTML="<div class='order-not-found'><strong>Gagal mengecek pesanan.</strong><p>Silakan coba lagi beberapa saat.</p></div>";
+ }finally{
+  btn.disabled=false; btn.textContent="🔎 Cek Pesanan";
+ }
+}
+
 async function copyOrderId(){
  const id=$("#paymentOrderId").textContent;
  try{await navigator.clipboard.writeText(id); $("#copyOrderId").textContent="Tersalin ✓";}catch(e){alert("ID Pesanan: "+id);}
@@ -195,6 +255,7 @@ $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click
 $("#addToCart").onclick=addToCart;
 $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart; $("#checkoutCart").onclick=checkoutCart;
 $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#copyOrderId").onclick=copyOrderId;
+$("#orderCheckForm").addEventListener("submit",checkOrder);
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
