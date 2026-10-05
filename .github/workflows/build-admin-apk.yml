@@ -1,0 +1,100 @@
+name: Build CAMXD Admin APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Android SDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - name: Create Android project
+        shell: bash
+        run: |
+          set -e
+          rm -rf admin-android
+          mkdir -p admin-android/app/src/main/java/com/camxd/admin admin-android/app/src/main/res/values admin-android/app/src/main/res/drawable
+          cat > admin-android/settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name="CAMXDAdmin"
+          include(":app")
+          EOF
+          cat > admin-android/build.gradle <<'EOF'
+          plugins { id 'com.android.application' version '8.7.3' apply false }
+          EOF
+          cat > admin-android/app/build.gradle <<'EOF'
+          plugins { id 'com.android.application' }
+          android { namespace 'com.camxd.admin'; compileSdk 35
+            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 1; versionName '1.0.0' }
+          }
+          EOF
+          cat > admin-android/app/src/main/res/values/styles.xml <<'EOF'
+          <resources><style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"><item name="android:colorAccent">#ffd000</item><item name="android:statusBarColor">#080808</item><item name="android:navigationBarColor">#050505</item><item name="android:windowLightStatusBar">false</item></style></resources>
+          EOF
+          cat > admin-android/app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <application android:theme="@style/AppTheme" android:label="CAMXD Admin" android:allowBackup="false">
+              <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait">
+                <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+              </activity>
+            </application>
+          </manifest>
+          EOF
+          cat > admin-android/app/src/main/java/com/camxd/admin/MainActivity.java <<'EOF'
+          package com.camxd.admin;
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.*;
+          public class MainActivity extends Activity {
+            WebView webView;
+            @Override public void onCreate(Bundle b){super.onCreate(b); webView=new WebView(this); setContentView(webView);
+              WebSettings s=webView.getSettings(); s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setDatabaseEnabled(true);
+              s.setSupportZoom(false); webView.setWebChromeClient(new WebChromeClient()); webView.setWebViewClient(new WebViewClient(){
+                @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r){v.loadUrl(r.getUrl().toString()); return true;}
+              });
+              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html");
+            }
+            @Override public void onBackPressed(){if(webView.canGoBack()) webView.goBack(); else super.onBackPressed();}
+            @Override protected void onDestroy(){webView.destroy(); super.onDestroy();}
+          }
+          EOF
+      - name: Build and sign
+        working-directory: admin-android
+        shell: bash
+        run: |
+          set -e
+          if ! command -v gradle >/dev/null 2>&1; then
+            curl -fsSL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/g.zip
+            unzip -q /tmp/g.zip -d /tmp
+            export GRADLE=/tmp/gradle-8.10.2/bin/gradle
+          else
+            export GRADLE=gradle
+          fi
+          $GRADLE --no-daemon :app:assembleRelease
+          mkdir -p ../signed
+          PASS=$(openssl rand -hex 16)
+          keytool -genkeypair -v -keystore ../signed/key.jks -alias camxd -storepass "$PASS" -keypass "$PASS" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=CAMXD Admin, O=CAMXD Store, C=ID"
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk ../signed/aligned.apk
+          "$BT/apksigner" sign --ks ../signed/key.jks --ks-key-alias camxd --ks-pass pass:"$PASS" --key-pass pass:"$PASS" --out ../signed/CAMXD-Admin.apk ../signed/aligned.apk
+          "$BT/apksigner" verify --verbose ../signed/CAMXD-Admin.apk
+          rm -f ../signed/key.jks ../signed/aligned.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CAMXD-Admin-APK
+          path: signed/CAMXD-Admin.apk
+          retention-days: 30
