@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
   <title>CAMXD Store — Admin</title>
-  <link rel="stylesheet" href="admin.css?v=20261005-3">
+  <link rel="stylesheet" href="admin.css?v=20261005-4">
 </head>
 <body>
   <main class="admin-shell">
@@ -75,32 +75,41 @@
 
       <div class="stats">
 
-        <article class="stat">
-          <span>Total Pesanan</span>
-          <strong id="statTotal">0</strong>
-        </article>
-
-        <article class="stat">
-          <span>Menunggu Pembayaran</span>
-          <strong id="statWaiting">0</strong>
-        </article>
-
-        <article class="stat">
-          <span>Menunggu Verifikasi</span>
-          <strong id="statVerify">0</strong>
-        </article>
-
-        <article class="stat">
-          <span>Selesai</span>
-          <strong id="statDone">0</strong>
-        </article>
-
-        <article class="stat">
-          <span>Omzet Selesai</span>
-          <strong id="statRevenue">Rp 0</strong>
-        </article>
+        <article class="stat"><span>Total Pesanan</span><strong id="statTotal">0</strong></article>
+        <article class="stat"><span>Menunggu Pembayaran</span><strong id="statWaiting">0</strong></article>
+        <article class="stat"><span>Menunggu Verifikasi</span><strong id="statVerify">0</strong></article>
+        <article class="stat"><span>Sedang Diproses</span><strong id="statProcess">0</strong></article>
+        <article class="stat"><span>Selesai</span><strong id="statDone">0</strong></article>
+        <article class="stat"><span>Omzet Selesai</span><strong id="statRevenue">Rp 0</strong></article>
+        <article class="stat"><span>Rata-rata Order</span><strong id="statAverage">Rp 0</strong></article>
 
       </div>
+
+      <section class="panel admin-overview">
+        <div class="overview-head">
+          <div>
+            <p class="eyebrow">RINGKASAN PENJUALAN</p>
+            <h2>Performa CAMXD Store</h2>
+            <p class="muted">Ringkasan berdasarkan pesanan yang tersimpan di database.</p>
+          </div>
+          <div class="overview-filters">
+            <input id="orderSearch" type="search" placeholder="🔎 Cari ID, nama, WhatsApp...">
+            <input id="dateFrom" type="date" title="Dari tanggal">
+            <input id="dateTo" type="date" title="Sampai tanggal">
+            <button id="clearFiltersBtn" class="btn">Reset</button>
+          </div>
+        </div>
+        <div class="overview-grid">
+          <div class="mini-chart-card">
+            <div class="mini-card-title"><span>Omzet 7 Hari</span><strong id="sevenDayRevenue">Rp 0</strong></div>
+            <div id="revenueBars" class="revenue-bars"></div>
+          </div>
+          <div class="mini-chart-card">
+            <div class="mini-card-title"><span>Produk Terlaris</span><strong id="topProductName">-</strong></div>
+            <div id="topProducts" class="top-products"></div>
+          </div>
+        </div>
+      </section>
 
       <section id="productsPanel" class="panel products-panel" hidden>
         <div class="section-head">
@@ -218,6 +227,7 @@
             <option>Menunggu Pembayaran</option>
             <option>Menunggu Verifikasi</option>
             <option>Sudah Dibayar</option>
+            <option>Sedang Diproses</option>
             <option>Selesai</option>
             <option>Dibatalkan</option>
           </select>
