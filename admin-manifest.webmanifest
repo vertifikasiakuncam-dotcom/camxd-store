@@ -2,10 +2,11 @@
   "name": "CAMXD Admin",
   "short_name": "CAMXD Admin",
   "description": "Dashboard Admin CAMXD Store",
+  "id": "./admin.html",
   "start_url": "./admin.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "background_color": "#050505",
   "theme_color": "#ffd000",
   "icons": [
