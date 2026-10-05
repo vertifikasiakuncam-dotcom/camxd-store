@@ -1,4 +1,4 @@
-name: Build CAMXD Store Android APK
+name: Build CAMXD Store Signed APK
 
 on:
   workflow_dispatch:
@@ -44,31 +44,68 @@ jobs:
           }
           EOF
 
+          yes '' | bubblewrap init \
+            --manifest="https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest" \
+            --directory=android
+
+      - name: Build Android package
+        working-directory: android
+        run: bubblewrap build --skipSigning --skipPwaValidation
+
+      - name: Sign APK for testing
+        shell: bash
+        run: |
+          set -e
+
+          UNSIGNED_APK=""
+          for candidate in \
+            "android/app-release-unsigned-aligned.apk" \
+            "android/app/build/outputs/apk/release/app-release-unsigned.apk"; do
+            if [ -f "$candidate" ]; then
+              UNSIGNED_APK="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$UNSIGNED_APK" ]; then
+            echo "Unsigned APK not found"
+            find android -type f -name "*.apk" -print
+            exit 1
+          fi
+
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          KEYSTORE="$RUNNER_TEMP/camxd-test.keystore"
+          ALIGNED_APK="$RUNNER_TEMP/CAMXD-Store-aligned.apk"
+          SIGNED_APK="$RUNNER_TEMP/CAMXD-Store-signed.apk"
+          STOREPASS=$(openssl rand -hex 24)
+
           keytool -genkeypair -v \
-            -keystore android/android-keystore \
-            -alias android \
-            -storepass camxd-build-only \
-            -keypass camxd-build-only \
+            -keystore "$KEYSTORE" \
+            -alias camxd-test \
+            -storepass "$STOREPASS" \
+            -keypass "$STOREPASS" \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
             -dname "CN=CAMXD Store, OU=CAMXD, O=CAMXD Store, C=ID"
 
-          yes '' | bubblewrap init \
-            --manifest="https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest" \
-            --directory=android
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
 
-      - name: Build unsigned APK and AAB
-        working-directory: android
-        run: bubblewrap build --skipSigning --skipPwaValidation
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$KEYSTORE" \
+            --ks-pass "pass:$STOREPASS" \
+            --out "$SIGNED_APK" \
+            "$ALIGNED_APK"
 
-      - name: Upload Android packages
+          "$BUILD_TOOLS/apksigner" verify --verbose "$SIGNED_APK"
+
+          mkdir -p dist
+          cp "$SIGNED_APK" "dist/CAMXD-Store-signed.apk"
+
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: CAMXD-Store-Android
-          path: |
-            android/app-release-unsigned-aligned.apk
-            android/app/build/outputs/apk/release/app-release-unsigned.apk
-            android/app/build/outputs/bundle/release/app-release.aab
+          name: CAMXD-Store-Signed-APK
+          path: dist/CAMXD-Store-signed.apk
           if-no-files-found: error
           retention-days: 14
