@@ -29,6 +29,9 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
+      - name: Configure Bubblewrap paths
+        run: bubblewrap updateConfig --jdkPath="$JAVA_HOME_17_X64" --androidSdkPath="$ANDROID_HOME"
+
       - name: Generate Android project
         shell: bash
         run: |
