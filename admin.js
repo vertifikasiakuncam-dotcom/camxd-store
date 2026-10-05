@@ -12,6 +12,30 @@ const STATUSES = [
 
 let allOrders = [];
 
+let seenOrderIds = new Set();
+let firstOrderLoad = true;
+
+function updateNewOrderAlert(){
+  const pending = allOrders.filter(o =>
+    o.status === "Menunggu Pembayaran" ||
+    o.status === "Menunggu Verifikasi"
+  );
+  const alert = $("#newOrderAlert");
+  const count = $("#newOrderCount");
+  if(!alert || !count) return;
+  const unseen = pending.filter(o => !seenOrderIds.has(String(o.id)));
+  count.textContent = unseen.length;
+  alert.hidden = unseen.length === 0;
+  alert.onclick = () => {
+    $("#statusFilter").value = "all";
+    renderOrders();
+    alert.hidden = true;
+    unseen.forEach(o => seenOrderIds.add(String(o.id)));
+    window.scrollTo({top: document.querySelector(".panel")?.offsetTop || 0, behavior:"smooth"});
+  };
+}
+
+
 const rupiah = (n) => "Rp " + Number(n || 0).toLocaleString("id-ID");
 
 const escapeHtml = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({
@@ -61,6 +85,13 @@ async function loadOrders(){
 
   allOrders = data || [];
 
+  if(firstOrderLoad){
+    allOrders.forEach(o => seenOrderIds.add(String(o.id)));
+    firstOrderLoad = false;
+  }else{
+    updateNewOrderAlert();
+  }
+
   updateStats();
   renderOrders();
 }
@@ -92,6 +123,7 @@ function updateStats(){
   $("#statAverage").textContent = rupiah(average);
 
   renderOverview();
+  updateNewOrderAlert();
 }
 
 function getFilteredOrders(){
@@ -698,6 +730,15 @@ sb.auth.onAuthStateChange(
     // by showDashboard after login/logout.
   }
 );
+
+let orderPollingTimer = null;
+
+function startOrderPolling(){
+  clearInterval(orderPollingTimer);
+  orderPollingTimer = setInterval(async()=>{
+    if(!document.hidden) await loadOrders();
+  }, 30000);
+}
 
 showDashboard();
 
