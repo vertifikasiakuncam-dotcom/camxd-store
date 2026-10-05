@@ -1125,13 +1125,43 @@ resetProductForm();
 function exportOrdersCsv(){
   const orders=getFilteredOrders();
   if(!orders.length){ alert("Tidak ada pesanan untuk diekspor."); return; }
-  const rows=[["ID Pesanan","Tanggal","Nama","WhatsApp","Status","Produk","Total","Detail Pengiriman"]];
+
+  const rows=[[
+    "ID Pesanan","Tanggal","Nama","WhatsApp","Status","Produk","Total","Detail Pengiriman"
+  ]];
+
   orders.forEach(o=>{
     const items=Array.isArray(o.items)?o.items:[];
-    const products=items.map(x => (x.name||"Produk")+" - "+(x.plan||"")+" x"+Number(x.qty||1)).join(" | ");
-    rows.push([o.order_id||"",formatDate(o.created_at),o.customer_name||"",o.customer_wa||"",o.status||"",products,o.total_label||rupiah(o.total),o.delivery_details||""]);
+    const products=items.map(x =>
+      (x.name||"Produk")+" - "+(x.plan||"")+" x"+Number(x.qty||1)
+    ).join(" | ");
+
+    const d=new Date(o.created_at);
+    const date=Number.isNaN(d.getTime()) ? (o.created_at||"") :
+      d.toLocaleString("id-ID",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false});
+
+    rows.push([
+      String(o.order_id||""),
+      date,
+      String(o.customer_name||""),
+      String(o.customer_wa||""),
+      String(o.status||""),
+      products,
+      o.total_label || rupiah(o.total),
+      String(o.delivery_details||"")
+    ]);
   });
-  const csv="\ufeff"+rows.map(row=>row.map(v=>"\""+String(v??"").replace(/\"/g, "\"\"")+"\"").join(",")).join("\r\n");
+
+  const safeText=v=>{
+    const value=String(v??"");
+    return /^[-+@=]/.test(value) ? "'"+value : value;
+  };
+
+  const csv="\ufeff"+rows.map(row=>row.map(v=>{
+    const value=safeText(v);
+    return "\""+value.replace(/\"/g,"\"\"")+"\"";
+  }).join(",")).join("\r\n");
+
   const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
   const url=URL.createObjectURL(blob);
   const link=document.createElement("a");
