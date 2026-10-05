@@ -2,6 +2,9 @@ name: Build CAMXD Admin APK
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/build-admin-apk.yml"
 
 permissions:
   contents: read
@@ -59,14 +62,39 @@ jobs:
           import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.*;
+          import android.content.*;
+          import android.net.Uri;
           public class MainActivity extends Activity {
             WebView webView;
+          ValueCallback<Uri[]> fileCallback;
+          static final int FILE_REQUEST=1001;
             @Override public void onCreate(Bundle b){super.onCreate(b); webView=new WebView(this); setContentView(webView);
               WebSettings s=webView.getSettings(); s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setDatabaseEnabled(true);
-              s.setSupportZoom(false); webView.setWebChromeClient(new WebChromeClient()); webView.setWebViewClient(new WebViewClient(){
+              s.setSupportZoom(false); webView.setWebChromeClient(new WebChromeClient(){
+                @Override public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> callback, FileChooserParams params){
+                  fileCallback=callback;
+                  try{
+                    Intent i=params.createIntent();
+                    startActivityForResult(i, FILE_REQUEST);
+                    return true;
+                  }catch(Exception e){
+                    fileCallback=null;
+                    return false;
+                  }
+                }
+              }); webView.setWebViewClient(new WebViewClient(){
                 @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r){v.loadUrl(r.getUrl().toString()); return true;}
               });
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html");
+            }
+            @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
+              if(requestCode==FILE_REQUEST && fileCallback!=null){
+                Uri[] result=(resultCode==RESULT_OK && data!=null && data.getData()!=null)
+                  ? new Uri[]{data.getData()} : null;
+                fileCallback.onReceiveValue(result);
+                fileCallback=null;
+              }
+              super.onActivityResult(requestCode,resultCode,data);
             }
             @Override public void onBackPressed(){if(webView.canGoBack()) webView.goBack(); else super.onBackPressed();}
             @Override protected void onDestroy(){webView.destroy(); super.onDestroy();}
