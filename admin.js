@@ -194,45 +194,45 @@ function renderOverview(){
 
 function buildWhatsAppUrl(order, details){
 
-  const wa = String(
-    order.customer_wa || ""
-  ).replace(/\D/g, "");
-
+  const wa = String(order.customer_wa || "").replace(/\D/g, "");
   if(!wa) return "#";
 
-  const number =
-    wa.startsWith("62")
-      ? wa
-      : ("62" + wa.replace(/^0/,""));
-
-  const items =
-    Array.isArray(order.items)
-      ? order.items
-      : [];
-
-  const itemText =
-    items.map((x,i) =>
-      `${i+1}. ${x.name} — ${x.plan} x${Number(x.qty||1)}`
-    ).join("\n");
+  const number = wa.startsWith("62") ? wa : ("62" + wa.replace(/^0/,""));
+  const items = Array.isArray(order.items) ? order.items : [];
+  const itemText = items.map((x,i) =>
+    "   " + (i+1) + ". " + (x.name || "Produk") + " — " + (x.plan || "Paket") + " ×" + Number(x.qty || 1)
+  ).join("\n");
 
   const message = [
-    `Halo ${order.customer_name || ""},`,
-    ``,
-    `Pesanan CAMXD Store Anda sudah diproses.`,
-    `ID Pesanan: ${order.order_id}`,
-    ``,
-    `Produk:`,
-    itemText,
-    ``,
-    `Total: ${order.total_label || rupiah(order.total)}`,
-    ``,
-    `Detail produk/akun:`,
+    "Halo " + (order.customer_name || "Kak") + " 👋",
+    "",
+    "━━━━━━━━━━━━━━━━━━",
+    "🛍️ *CAMXD STORE*",
+    "📦 *PESANAN SELESAI*",
+    "━━━━━━━━━━━━━━━━━━",
+    "",
+    "🆔 ID Pesanan : *" + order.order_id + "*",
+    "📌 Status     : *Selesai* ✅",
+    "",
+    "🛒 *DETAIL PESANAN*",
+    itemText || "   1. Pesanan CAMXD Store",
+    "",
+    "💰 *TOTAL PEMBAYARAN*",
+    "   " + (order.total_label || rupiah(order.total)),
+    "",
+    "🔐 *DETAIL PRODUK / AKUN*",
     details || "(detail belum diisi)",
-    ``,
-    `Terima kasih telah berbelanja di CAMXD Store.`
+    "",
+    "━━━━━━━━━━━━━━━━━━",
+    "📌 Mohon simpan informasi akun/kode ini dengan baik.",
+    "",
+    "Terima kasih telah berbelanja di *CAMXD Store* 🙏",
+    "Jika ada kendala, silakan hubungi admin kami.",
+    "",
+    "— *CAMXD STORE* —"
   ].join("\n");
 
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  return "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
 }
 
 function renderOrders(){
