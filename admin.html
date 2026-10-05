@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
+  <link rel="manifest" href="admin-manifest.webmanifest">
   <title>CAMXD Store — Admin</title>
   <link rel="stylesheet" href="admin.css?v=20261005-6">
 </head>
@@ -62,6 +63,7 @@
           <div id="newOrderAlert" class="new-order-alert" hidden>
             🔔 <span id="newOrderCount">0</span> pesanan baru
           </div>
+          <button id="installAdminBtn" class="btn" hidden>📲 Install Admin</button>
           <button id="refreshBtn" class="btn">
             ↻ Refresh
           </button>
@@ -248,6 +250,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="admin.js?v=20261006-6"></script>
+  <script src="admin-pwa.js?v=20261006-1"></script>
 
 </body>
 </html>
