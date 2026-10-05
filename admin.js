@@ -648,3 +648,280 @@ sb.auth.onAuthStateChange(
 );
 
 showDashboard();
+
+
+/* ==============================
+   PRODUCT MANAGEMENT
+============================== */
+
+let allProducts = [];
+let editingProductId = null;
+
+function resetProductForm(){
+  editingProductId = null;
+  $("#productDbId").value = "";
+  $("#productKey").value = "";
+  $("#productName").value = "";
+  $("#productCategory").value = "premium";
+  $("#productBadge").value = "";
+  $("#productDescription").value = "";
+  $("#productImage").value = "";
+  $("#productDetail").value = "";
+  $("#productSort").value = "10";
+  $("#productActive").checked = true;
+  $("#editorHeading").textContent = "Tambah Produk";
+  $("#productFormError").textContent = "";
+  $("#plansEditorList").innerHTML = "";
+  addPlanRow("", "", true);
+}
+
+function addPlanRow(name="", price="", active=true){
+  const wrap = document.createElement("div");
+  wrap.className = "plan-edit-row";
+  wrap.innerHTML = `
+    <input class="plan-name" placeholder="Nama paket" value="${escapeHtml(name)}">
+    <input class="plan-price" type="number" min="0" placeholder="Harga" value="${price}">
+    <label class="plan-active"><input type="checkbox" class="plan-active-check" ${active ? "checked" : ""}> Aktif</label>
+    <button type="button" class="btn danger remove-plan">Hapus</button>
+  `;
+  wrap.querySelector(".remove-plan").onclick = () => wrap.remove();
+  $("#plansEditorList").appendChild(wrap);
+}
+
+async function loadProductsAdmin(){
+  const {data, error} = await sb
+    .from("products")
+    .select("*")
+    .order("sort_order",{ascending:true})
+    .order("name",{ascending:true});
+
+  if(error){
+    $("#productsList").innerHTML = `<div class="empty">Gagal mengambil produk: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  allProducts = data || [];
+
+  const {data:plans, error:planError} = await sb
+    .from("product_plans")
+    .select("*")
+    .order("sort_order",{ascending:true});
+
+  if(planError){
+    $("#productsList").innerHTML = `<div class="empty">Gagal mengambil paket: ${escapeHtml(planError.message)}</div>`;
+    return;
+  }
+
+  allProducts.forEach(p => {
+    p.plans = (plans || []).filter(x => Number(x.product_id) === Number(p.id));
+  });
+
+  renderProductsAdmin();
+}
+
+function renderProductsAdmin(){
+  if(!allProducts.length){
+    $("#productsList").innerHTML = '<div class="empty">Belum ada produk.</div>';
+    return;
+  }
+
+  $("#productsList").innerHTML = allProducts.map(p => {
+    const activePlans = (p.plans || []).filter(x=>x.is_active);
+    const firstPrice = activePlans.length ? Number(activePlans[0].price||0) : 0;
+    return `
+      <article class="admin-product-card ${p.is_active ? "" : "inactive"}">
+        <div class="admin-product-image">
+          <img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">
+        </div>
+        <div class="admin-product-main">
+          <div class="admin-product-top">
+            <div>
+              <span class="admin-product-badge">${escapeHtml(p.badge || "PRODUK")}</span>
+              <h3>${escapeHtml(p.name)}</h3>
+              <p>${escapeHtml(p.description)}</p>
+            </div>
+            <span class="product-state ${p.is_active ? "on" : "off"}">${p.is_active ? "AKTIF" : "NONAKTIF"}</span>
+          </div>
+          <div class="admin-product-meta">
+            <span>Kunci: <b>${escapeHtml(p.product_key)}</b></span>
+            <span>${activePlans.length} paket aktif</span>
+            <span>Mulai: <b>${firstPrice ? rupiah(firstPrice) : "Sesuai kebutuhan"}</b></span>
+          </div>
+          <div class="admin-product-actions">
+            <button class="btn edit-product" data-id="${p.id}">✏️ Edit</button>
+            <button class="btn toggle-product" data-id="${p.id}" data-active="${p.is_active}">${p.is_active ? "⏸ Nonaktifkan" : "▶ Aktifkan"}</button>
+            <button class="btn danger delete-product" data-id="${p.id}">🗑 Hapus</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  document.querySelectorAll(".edit-product").forEach(b => b.onclick=()=>editProduct(Number(b.dataset.id)));
+  document.querySelectorAll(".toggle-product").forEach(b => b.onclick=()=>toggleProduct(Number(b.dataset.id), b.dataset.active !== "true"));
+  document.querySelectorAll(".delete-product").forEach(b => b.onclick=()=>deleteProduct(Number(b.dataset.id)));
+}
+
+function editProduct(id){
+  const p = allProducts.find(x=>Number(x.id)===Number(id));
+  if(!p) return;
+
+  editingProductId = Number(id);
+  $("#productDbId").value = p.id;
+  $("#productKey").value = p.product_key || "";
+  $("#productName").value = p.name || "";
+  $("#productCategory").value = p.category || "premium";
+  $("#productBadge").value = p.badge || "";
+  $("#productDescription").value = p.description || "";
+  $("#productImage").value = p.image_url || "";
+  $("#productDetail").value = p.detail || "";
+  $("#productSort").value = p.sort_order ?? 0;
+  $("#productActive").checked = !!p.is_active;
+  $("#editorHeading").textContent = "Edit Produk";
+  $("#productFormError").textContent = "";
+  $("#plansEditorList").innerHTML = "";
+
+  (p.plans || []).forEach(x=>addPlanRow(x.plan_name, x.price, x.is_active));
+  if(!(p.plans || []).length) addPlanRow("", "", true);
+
+  $("#productEditor").hidden = false;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function saveProduct(){
+  const err = $("#productFormError");
+  err.textContent = "";
+
+  const productKey = $("#productKey").value.trim().toLowerCase();
+  const name = $("#productName").value.trim();
+  const category = $("#productCategory").value;
+  const badge = $("#productBadge").value.trim();
+  const description = $("#productDescription").value.trim();
+  const image_url = $("#productImage").value.trim();
+  const detail = $("#productDetail").value.trim();
+  const sort_order = Number($("#productSort").value || 0);
+  const is_active = $("#productActive").checked;
+
+  if(!productKey || !name){
+    err.textContent = "Kunci Produk dan Nama Produk wajib diisi.";
+    return;
+  }
+
+  const planRows = [...document.querySelectorAll(".plan-edit-row")].map((row,i)=>({
+    plan_name: row.querySelector(".plan-name").value.trim(),
+    price: Number(row.querySelector(".plan-price").value || 0),
+    is_active: row.querySelector(".plan-active-check").checked,
+    sort_order: i+1
+  })).filter(x=>x.plan_name);
+
+  if(!planRows.length){
+    err.textContent = "Tambahkan minimal 1 paket.";
+    return;
+  }
+
+  $("#saveProductBtn").disabled = true;
+
+  try{
+    let productId = editingProductId;
+
+    const payload = {
+      product_key: productKey,
+      name,
+      description,
+      category,
+      image_url,
+      badge,
+      detail,
+      is_active,
+      sort_order
+    };
+
+    if(productId){
+      const {error} = await sb.from("products").update(payload).eq("id",productId);
+      if(error) throw error;
+    }else{
+      const {data,error} = await sb.from("products").insert(payload).select("id").single();
+      if(error) throw error;
+      productId = data.id;
+    }
+
+    const {error:deletePlansError} = await sb.from("product_plans").delete().eq("product_id",productId);
+    if(deletePlansError) throw deletePlansError;
+
+    const {error:insertPlansError} = await sb.from("product_plans").insert(
+      planRows.map(x=>({...x,product_id:productId}))
+    );
+    if(insertPlansError) throw insertPlansError;
+
+    alert("Produk berhasil disimpan.");
+    $("#productEditor").hidden = true;
+    resetProductForm();
+    await loadProductsAdmin();
+  }catch(e){
+    console.error(e);
+    err.textContent = "Gagal menyimpan: " + e.message;
+  }finally{
+    $("#saveProductBtn").disabled = false;
+  }
+}
+
+async function toggleProduct(id, active){
+  const p = allProducts.find(x=>Number(x.id)===Number(id));
+  if(!p) return;
+
+  const action = active ? "mengaktifkan" : "menonaktifkan";
+  if(!confirm(`Yakin ingin ${action} "${p.name}"?`)) return;
+
+  const {error} = await sb.from("products").update({is_active:active}).eq("id",id);
+  if(error){
+    alert("Gagal: " + error.message);
+    return;
+  }
+  await loadProductsAdmin();
+}
+
+async function deleteProduct(id){
+  const p = allProducts.find(x=>Number(x.id)===Number(id));
+  if(!p) return;
+
+  if(!confirm(`Hapus produk "${p.name}"? Semua paket harga produk ini juga akan dihapus. Pesanan lama tetap aman karena datanya tersimpan di orders.`)) return;
+
+  const {error} = await sb.from("products").delete().eq("id",id);
+  if(error){
+    alert("Gagal menghapus: " + error.message);
+    return;
+  }
+  alert("Produk berhasil dihapus.");
+  await loadProductsAdmin();
+}
+
+function showProductsPanel(){
+  $("#productsPanel").hidden = false;
+  $(".orders-panel").hidden = true;
+  $("#productsBtn").textContent = "🛍️ Produk Aktif";
+  loadProductsAdmin();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showOrdersPanel(){
+  $("#productsPanel").hidden = true;
+  $(".orders-panel").hidden = false;
+  $("#productsBtn").textContent = "🛍️ Kelola Produk";
+  loadOrders();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+$("#productsBtn").addEventListener("click",showProductsPanel);
+$("#backOrdersBtn").addEventListener("click",showOrdersPanel);
+$("#newProductBtn").addEventListener("click",()=>{
+  resetProductForm();
+  $("#productEditor").hidden = false;
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+$("#cancelProductBtn").addEventListener("click",()=>{
+  $("#productEditor").hidden = true;
+  resetProductForm();
+});
+$("#addPlanBtn").addEventListener("click",()=>addPlanRow("", "", true));
+$("#saveProductBtn").addEventListener("click",saveProduct);
+resetProductForm();
