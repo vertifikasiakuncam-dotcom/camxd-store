@@ -1122,6 +1122,28 @@ $("#productImage").addEventListener("input",()=>{
 resetProductForm();
 
 
+function exportOrdersCsv(){
+  const orders=getFilteredOrders();
+  if(!orders.length){ alert("Tidak ada pesanan untuk diekspor."); return; }
+  const rows=[["ID Pesanan","Tanggal","Nama","WhatsApp","Status","Produk","Total","Detail Pengiriman"]];
+  orders.forEach(o=>{
+    const items=Array.isArray(o.items)?o.items:[];
+    const products=items.map(x => (x.name||"Produk")+" - "+(x.plan||"")+" x"+Number(x.qty||1)).join(" | ");
+    rows.push([o.order_id||"",formatDate(o.created_at),o.customer_name||"",o.customer_wa||"",o.status||"",products,o.total_label||rupiah(o.total),o.delivery_details||""]);
+  });
+  const csv="\ufeff"+rows.map(row=>row.map(v=>"\""+String(v??"").replace(/\"/g, "\"\"")+"\"").join(",")).join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  link.href=url;
+  link.download="CAMXD-Store-Laporan-"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+$("#exportCsvBtn")?.addEventListener("click",exportOrdersCsv);
 $("#orderSearch")?.addEventListener("input",renderOrders);
 $("#dateFrom")?.addEventListener("change",renderOrders);
 $("#dateTo")?.addEventListener("change",renderOrders);
