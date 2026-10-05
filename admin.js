@@ -418,6 +418,12 @@ Masa aktif: 30 hari"
               WhatsApp
             </a>
 
+            <button
+              class="btn danger delete-order"
+              data-id="${o.id}">
+              🗑️ Hapus
+            </button>
+
             <select
               class="status-select"
               data-id="${o.id}">
@@ -457,6 +463,12 @@ Masa aktif: 30 hari"
     });
 
   document
+    .querySelectorAll(".delete-order")
+    .forEach(el => {
+      el.addEventListener("click", () => deleteOrder(Number(el.dataset.id)));
+    });
+
+  document
     .querySelectorAll(".save-detail")
     .forEach(el => {
 
@@ -485,6 +497,35 @@ Masa aktif: 30 hari"
       );
 
     });
+}
+
+async function deleteOrder(id){
+  const order=allOrders.find(o=>Number(o.id)===Number(id));
+  if(!order) return;
+
+  if(order.status!=="Dibatalkan"){
+    alert("Untuk keamanan, hanya pesanan dengan status Dibatalkan yang bisa dihapus. Ubah status pesanan menjadi Dibatalkan terlebih dahulu.");
+    return;
+  }
+
+  const ok=confirm(
+    "HAPUS PESANAN SECARA PERMANEN?\\n\\n"+
+    "ID: "+(order.order_id||"-")+"\\n"+
+    "Pelanggan: "+(order.customer_name||"-")+"\\n\\n"+
+    "Data pesanan akan hilang dari database dan tidak bisa dikembalikan."
+  );
+  if(!ok) return;
+
+  const {error}=await sb.from("orders").delete().eq("id",id);
+  if(error){
+    alert("Gagal menghapus pesanan: "+error.message);
+    return;
+  }
+
+  allOrders=allOrders.filter(o=>Number(o.id)!==Number(id));
+  alert("Pesanan "+(order.order_id||"")+" berhasil dihapus.");
+  updateStats();
+  renderOrders();
 }
 
 function getDeliveryValue(id){
