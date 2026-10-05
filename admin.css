@@ -109,3 +109,25 @@ input:focus,select:focus{border-color:var(--yellow)}
  .overview-filters .btn{grid-column:1/-1}
  .overview-grid{grid-template-columns:1fr}
 }
+
+
+.new-order-alert{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 12px;
+  border:1px solid rgba(255,208,0,.45);
+  border-radius:12px;
+  background:rgba(255,208,0,.10);
+  color:var(--yellow);
+  font-weight:800;
+  cursor:pointer;
+  animation:orderPulse 1.6s ease-in-out infinite;
+}
+@keyframes orderPulse{
+  0%,100%{box-shadow:0 0 0 rgba(255,208,0,0)}
+  50%{box-shadow:0 0 22px rgba(255,208,0,.22)}
+}
+@media(max-width:800px){
+  .new-order-alert{grid-column:1/-1;justify-content:center}
+}
