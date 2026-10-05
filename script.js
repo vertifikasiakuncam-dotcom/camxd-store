@@ -1,7 +1,9 @@
 const STORE_WA="6282133942994";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-const products=[
+let products=[];
+
+const FALLBACK_PRODUCTS=[
  {id:"ktv",name:"KTV Premium",desc:"Akses KTV Premium",category:"premium",image:"ktv-premium.jpg",badge:"BEST SELLER",plans:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]],detail:"Akses KTV Premium dengan pilihan durasi fleksibel. Setelah pembayaran diverifikasi, pesanan diproses oleh admin."},
  {id:"youtube",name:"YouTube Premium",desc:"YouTube Premium",category:"premium",image:"youtube-premium.jpg",badge:"POPULER",plans:[["1 Bulan",15000],["3 Bulan",40000],["6 Bulan",70000],["1 Tahun",120000]],detail:"Nikmati YouTube Premium sesuai paket yang kamu pilih. Detail akun/paket dikonfirmasi melalui WhatsApp."},
  {id:"netflix",name:"Netflix Sharing",desc:"Netflix sharing",category:"premium",image:"netflix-sharing.jpg",badge:"POPULER",plans:[["1 Bulan",33000],["3 Bulan",90000],["6 Bulan",165000],["1 Tahun",300000]],detail:"Paket Netflix sharing dengan durasi pilihan. Silakan cek ketentuan akun dengan admin sebelum proses."},
@@ -12,6 +14,59 @@ const products=[
  {id:"payment",name:"Pembayaran Digital",desc:"Pulsa, tagihan & pembayaran",category:"topup",image:"pembayaran-digital.jpg",badge:"MUDAH",plans:[["Pembayaran",0]],detail:"Bantuan pembayaran digital, pulsa, tagihan, dan kebutuhan lainnya. Nominal disesuaikan dengan pesanan."},
  {id:"certificate",name:"Jasa Pembuatan Sertifikat",desc:"Jasa pembuatan sertifikat",category:"jasa",image:"jasa-sertifikat.jpg",badge:"JASA",plans:[["1 Sertifikat",20000],["1 Sertifikat + Laminating",25000]],detail:"Jasa pembuatan sertifikat. Laminating tersedia sebagai pilihan tambahan sesuai paket."}
 ];
+
+async function loadProducts(){
+  const {data: productRows, error: productError}=await sb
+    .from("products")
+    .select("id,product_key,name,description,category,image_url,badge,detail,sort_order")
+    .eq("is_active",true)
+    .order("sort_order",{ascending:true});
+
+  if(productError){
+    console.error("Gagal mengambil produk dari Supabase:",productError);
+    products=FALLBACK_PRODUCTS;
+    render();
+    return;
+  }
+
+  const {data: planRows, error: planError}=await sb
+    .from("product_plans")
+    .select("product_id,plan_name,price,sort_order")
+    .eq("is_active",true)
+    .order("sort_order",{ascending:true});
+
+  if(planError){
+    console.error("Gagal mengambil paket produk dari Supabase:",planError);
+    products=FALLBACK_PRODUCTS;
+    render();
+    return;
+  }
+
+  const plansByProduct={};
+  (planRows||[]).forEach(row=>{
+    if(!plansByProduct[row.product_id]) plansByProduct[row.product_id]=[];
+    plansByProduct[row.product_id].push([
+      row.plan_name,
+      Number(row.price||0)
+    ]);
+  });
+
+  products=(productRows||[]).map(p=>({
+    id:p.product_key,
+    dbId:p.id,
+    name:p.name,
+    desc:p.description,
+    category:p.category,
+    image:p.image_url,
+    badge:p.badge,
+    plans:plansByProduct[p.id]||[],
+    detail:p.detail
+  })).filter(p=>p.plans.length);
+
+  render();
+}
+
+
 
 const rupiah=n=>"Rp "+Number(n).toLocaleString("id-ID");
 const $=s=>document.querySelector(s);
@@ -127,4 +182,4 @@ $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
-updateCart(); render();
+updateCart(); loadProducts();
