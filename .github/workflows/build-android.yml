@@ -3,6 +3,9 @@ name: Build CAMXD Store Android APK
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
@@ -12,10 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "20"
 
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
@@ -23,7 +32,12 @@ jobs:
       - name: Generate Android project
         shell: bash
         run: |
+          set -e
+          rm -rf android
           mkdir -p android
+
+          KEYSTORE_PASSWORD="$(openssl rand -hex 24)"
+
           printf '%s\n' \
             'https://vertifikasiakuncam-dotcom.github.io/camxd-store/' \
             'https://vertifikasiakuncam-dotcom.github.io/camxd-store/' \
@@ -41,15 +55,15 @@ jobs:
             'CAMXD Store' \
             'ID' \
             'camxd-store' \
-            'camxd-store-password-2026' \
-            'camxd-store-password-2026' \
+            "$KEYSTORE_PASSWORD" \
+            "$KEYSTORE_PASSWORD" \
           | bubblewrap init --manifest="https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest" --directory=android
 
       - name: Build unsigned APK and AAB
         working-directory: android
         run: bubblewrap build --skipSigning --skipPwaValidation
 
-      - name: Upload APK
+      - name: Upload Android packages
         uses: actions/upload-artifact@v4
         with:
           name: CAMXD-Store-Android
@@ -58,3 +72,4 @@ jobs:
             android/app/build/outputs/apk/release/app-release-unsigned.apk
             android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
+          retention-days: 14
