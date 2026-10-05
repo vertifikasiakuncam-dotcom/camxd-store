@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff36a"/><stop offset=".28" stop-color="#ffd000"/><stop offset=".65" stop-color="#d89200"/><stop offset="1" stop-color="#fff05a"/></linearGradient>
+ <linearGradient id="black" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#171717"/><stop offset="1" stop-color="#020202"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect x="8" y="8" width="496" height="496" rx="92" fill="url(#black)" stroke="url(#gold)" stroke-width="14"/>
+<path d="M55 190 L105 112 L145 151 L183 92 L329 92 L367 151 L407 112 L457 190 L432 236 L80 236 Z" fill="#0b0b0b" stroke="url(#gold)" stroke-width="8"/>
+<path d="M174 105 L205 58 L256 88 L307 58 L338 105 L319 137 L193 137 Z" fill="url(#gold)" stroke="#fff6a0" stroke-width="5"/>
+<path d="M198 121 L256 82 L314 121" fill="none" stroke="#171717" stroke-width="8"/>
+<rect x="92" y="157" width="328" height="245" rx="34" fill="#080808" stroke="url(#gold)" stroke-width="10"/>
+<path d="M119 203 H393" stroke="#ffd000" stroke-width="5"/>
+<circle cx="135" cy="181" r="7" fill="#ffd000"/><circle cx="158" cy="181" r="7" fill="#ffd000"/><circle cx="181" cy="181" r="7" fill="#ffd000"/>
+<rect x="123" y="252" width="25" height="88" rx="6" fill="url(#gold)"/>
+<rect x="158" y="225" width="25" height="115" rx="6" fill="url(#gold)"/>
+<rect x="193" y="204" width="25" height="136" rx="6" fill="url(#gold)"/>
+<circle cx="288" cy="258" r="35" fill="url(#gold)" stroke="#fff7ad" stroke-width="4"/>
+<path d="M238 335 Q288 278 338 335" fill="url(#gold)" stroke="#fff7ad" stroke-width="4"/>
+<circle cx="354" cy="320" r="31" fill="#111" stroke="url(#gold)" stroke-width="10"/>
+<circle cx="354" cy="320" r="11" fill="url(#gold)"/>
+<g stroke="url(#gold)" stroke-width="9" stroke-linecap="round">
+<path d="M354 278v14M354 348v14M312 320h14M382 320h14M325 291l10 10M373 339l10 10M383 291l-10 10M335 339l-10 10"/>
+</g>
+<path d="M70 416 H442" stroke="url(#gold)" stroke-width="8"/>
+<text x="256" y="468" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="900" letter-spacing="8" fill="url(#gold)" stroke="#111" stroke-width="2">CAMXD</text>
+</svg>
