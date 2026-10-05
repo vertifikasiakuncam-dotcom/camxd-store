@@ -162,26 +162,44 @@ function closePayment(){
 
 function sendProof(){
  if(!pendingOrder)return;
- const o=pendingOrder;
- const msg=[
-  "Halo CAMXD Store 👋",
-  "",
-  "Saya ingin melakukan pembayaran untuk pesanan:",
-  "ID Pesanan: "+o.orderId,
-  "",
-  o.lines,
-  "",
-  "Total: "+o.total,
-  "Nama: "+o.name,
-  "Nomor WA: "+o.wa,
-  "",
-  "Saya sudah melakukan pembayaran melalui QRIS CAMXD Store.",
-  "Saya lampirkan bukti pembayaran pada chat ini.",
-  "Mohon dicek dan diproses. Terima kasih 🙏"
- ].join("\\n");
- window.open(`https://wa.me/${STORE_WA}?text=${encodeURIComponent(msg)}`,"_blank");
-}
 
+ const o=pendingOrder;
+ const lines=String(o.lines||"").split("\\n").filter(Boolean);
+
+ const msg=[
+  "🛍️ *CAMXD STORE*",
+  "━━━━━━━━━━━━━━━━━━━━",
+  "🧾 *KONFIRMASI PEMBAYARAN*",
+  "",
+  "🆔 *ID Pesanan*",
+  o.orderId,
+  "",
+  "📦 *Detail Pesanan*",
+  ...lines,
+  "",
+  "💰 *Total Pembayaran*",
+  o.total,
+  "",
+  "👤 *Data Pemesan*",
+  "Nama: "+o.name,
+  "WhatsApp: "+o.wa,
+  "",
+  "💳 *Metode Pembayaran*",
+  "QRIS CAMXD Store",
+  "",
+  "✅ Saya sudah melakukan pembayaran.",
+  "📎 Bukti pembayaran saya lampirkan di chat ini.",
+  "",
+  "Mohon dicek dan diproses.",
+  "Terima kasih 🙏",
+  "━━━━━━━━━━━━━━━━━━━━"
+ ].join("\n");
+
+ window.open(
+  \`https://wa.me/\${STORE_WA}?text=\${encodeURIComponent(msg)}\`,
+  "_blank"
+ );
+}
 
 function normalizeWa(value){
  return String(value||"").replace(/\\D/g,"");
