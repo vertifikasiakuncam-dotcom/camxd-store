@@ -36,3 +36,32 @@ footer{max-width:1180px;margin:30px auto 0;padding:30px 20px 45px;border-top:1px
 .payment-modal{max-width:620px;margin:0 auto;background:#080808;border:1px solid var(--yellow);border-radius:28px;padding:28px;position:relative;box-shadow:0 30px 110px #000}
 .payment-modal h2{font-size:34px;margin:7px 0 0}.order-id-row{display:flex;align-items:center;gap:10px;border:1px solid #333;border-radius:15px;padding:12px 14px;margin-top:20px;background:#101010}.order-id-row span{color:#999;font-size:14px}.order-id-row strong{font-size:17px;letter-spacing:1px;color:#fff;margin-right:auto}.order-id-row button{border:1px solid #555;background:#171717;color:#fff;border-radius:9px;padding:8px 12px;font-weight:800;cursor:pointer}.payment-total{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #333;border-bottom:1px solid #333;padding:18px 3px;margin-top:12px;font-size:18px}.payment-total strong{color:var(--yellow);font-size:28px}.payment-qr{margin-top:16px;border:1px solid #3c3c3c;border-radius:20px;padding:15px;background:#0d0d0d;text-align:center}.payment-title{font-size:19px;font-weight:900;margin:2px 0 13px}.payment-qr img{display:block;width:100%;max-width:390px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:14px;margin:0 auto}.payment-hint{color:#aaa;margin:13px 5px 2px;font-size:14px}.payment-steps{display:grid;gap:8px;margin-top:14px}.payment-steps div{display:flex;align-items:center;gap:10px;color:#ccc;font-size:14px}.payment-steps b{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;background:var(--yellow);color:#111;border-radius:50%;flex:none}.payment-modal .wide{margin-top:16px}
 @media(max-width:760px){.payment-backdrop{padding:10px 7px}.payment-modal{padding:21px 14px;border-radius:23px}.payment-modal h2{font-size:28px}.order-id-row{margin-top:16px;padding:10px 11px}.order-id-row strong{font-size:15px}.payment-total{font-size:16px}.payment-total strong{font-size:24px}.payment-qr{padding:12px}.payment-title{font-size:17px}.payment-hint{font-size:13px}.payment-steps div{font-size:13px}.payment-steps b{width:25px;height:25px}}
+
+/* APP POLISH — CAMXD Store */
+body{overscroll-behavior-y:none}
+html{scroll-padding-top:90px}
+.btn{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.btn:hover,.choose:hover{transform:translateY(-2px);filter:brightness(1.04);box-shadow:0 10px 30px rgba(255,208,0,.16)}
+.product,.info-card,.steps article,.hero-card{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.product:active,.btn:active,.choose:active{transform:scale(.98)}
+.app-install{background:rgba(255,208,0,.08);color:var(--yellow);margin-top:0}
+.mobile-bottom-nav{display:none}
+@media(max-width:760px){
+  body{padding-bottom:72px}
+  .topbar{box-shadow:0 8px 30px rgba(0,0,0,.25)}
+  .hero-card{box-shadow:0 20px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,208,0,.08)}
+  .product{box-shadow:0 14px 38px rgba(0,0,0,.42)}
+  .mobile-bottom-nav{
+    display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:10px;right:10px;bottom:10px;z-index:200;
+    padding:7px 5px calc(7px + env(safe-area-inset-bottom));border:1px solid rgba(255,208,0,.25);
+    border-radius:22px;background:rgba(8,8,8,.92);backdrop-filter:blur(18px);box-shadow:0 12px 45px rgba(0,0,0,.65)
+  }
+  .mobile-bottom-nav a,.mobile-bottom-nav button{
+    min-height:50px;border:0;background:none;color:#aaa;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;font-size:20px;font-weight:900;text-decoration:none
+  }
+  .mobile-bottom-nav span{font-size:9px;letter-spacing:.3px;color:#aaa}
+  .mobile-bottom-nav a:first-child{color:var(--yellow)}
+  .mobile-bottom-nav button{font:inherit;cursor:pointer}
+  .mobile-bottom-nav button span{font-family:Inter,Arial,sans-serif}
+  .mobile-bottom-nav button{font-size:19px}
+}
