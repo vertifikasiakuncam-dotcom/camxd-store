@@ -666,6 +666,9 @@ function resetProductForm(){
   $("#productBadge").value = "";
   $("#productDescription").value = "";
   $("#productImage").value = "";
+  $("#productImageFile").value = "";
+  selectedProductFile = null;
+  $("#productImagePreview").innerHTML = "<span>Belum ada preview</span>";
   $("#productDetail").value = "";
   $("#productSort").value = "10";
   $("#productActive").checked = true;
@@ -774,6 +777,9 @@ function editProduct(id){
   $("#productBadge").value = p.badge || "";
   $("#productDescription").value = p.description || "";
   $("#productImage").value = p.image_url || "";
+  selectedProductFile = null;
+  $("#productImageFile").value = "";
+  renderProductImagePreview(p.image_url || "");
   $("#productDetail").value = p.detail || "";
   $("#productSort").value = p.sort_order ?? 0;
   $("#productActive").checked = !!p.is_active;
@@ -788,6 +794,52 @@ function editProduct(id){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
+function renderProductImagePreview(url){
+  const box = $("#productImagePreview");
+  if(!url){
+    box.innerHTML = "<span>Belum ada preview</span>";
+    return;
+  }
+  box.innerHTML = `<img src="${escapeHtml(url)}" alt="Preview gambar produk">`;
+}
+
+async function uploadProductImage(file, productKey){
+  if(!file) return null;
+
+  const allowed = ["image/jpeg","image/png","image/webp","image/gif"];
+  if(!allowed.includes(file.type)){
+    throw new Error("Format gambar harus JPG, PNG, WEBP, atau GIF.");
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    throw new Error("Ukuran gambar maksimal 5 MB.");
+  }
+
+  const safeKey = productKey.replace(/[^a-z0-9_-]/g,"-");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${safeKey}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+
+  const {error} = await sb.storage
+    .from("product-images")
+    .upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+      contentType: file.type
+    });
+
+  if(error) throw error;
+
+  const {data} = sb.storage
+    .from("product-images")
+    .getPublicUrl(path);
+
+  if(!data?.publicUrl){
+    throw new Error("URL gambar tidak berhasil dibuat.");
+  }
+
+  return data.publicUrl;
+}
+
 async function saveProduct(){
   const err = $("#productFormError");
   err.textContent = "";
@@ -797,7 +849,7 @@ async function saveProduct(){
   const category = $("#productCategory").value;
   const badge = $("#productBadge").value.trim();
   const description = $("#productDescription").value.trim();
-  const image_url = $("#productImage").value.trim();
+  let image_url = $("#productImage").value.trim();
   const detail = $("#productDetail").value.trim();
   const sort_order = Number($("#productSort").value || 0);
   const is_active = $("#productActive").checked;
@@ -823,6 +875,11 @@ async function saveProduct(){
 
   try{
     let productId = editingProductId;
+
+    if(selectedProductFile){
+      err.textContent = "Mengupload gambar...";
+      image_url = await uploadProductImage(selectedProductFile, productKey);
+    }
 
     const payload = {
       product_key: productKey,
@@ -924,4 +981,31 @@ $("#cancelProductBtn").addEventListener("click",()=>{
 });
 $("#addPlanBtn").addEventListener("click",()=>addPlanRow("", "", true));
 $("#saveProductBtn").addEventListener("click",saveProduct);
+
+$("#productImageFile").addEventListener("change",(e)=>{
+  const file = e.target.files?.[0] || null;
+  selectedProductFile = file;
+
+  if(!file){
+    renderProductImagePreview($("#productImage").value.trim());
+    return;
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    alert("Ukuran gambar maksimal 5 MB.");
+    e.target.value = "";
+    selectedProductFile = null;
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  $("#productImagePreview").innerHTML = `<img src="${url}" alt="Preview gambar baru">`;
+});
+
+$("#productImage").addEventListener("input",()=>{
+  if(!selectedProductFile){
+    renderProductImagePreview($("#productImage").value.trim());
+  }
+});
+
 resetProductForm();
