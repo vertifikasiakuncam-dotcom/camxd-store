@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
-  <meta name="description" content="CAMXD Store - Produk digital, premium, top up dan jasa digital.">\n  <meta name="theme-color" content="#ffd000">\n  <link rel="manifest" href="manifest.webmanifest">\n  <link rel="icon" href="camxd-logo.png" type="image/png">
+  <meta name="description" content="CAMXD Store - Produk digital, premium, top up dan jasa digital.">
+  <meta name="theme-color" content="#ffd000">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="camxd-logo.png" type="image/png">
   <title>CAMXD Store — Digital Shop</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -35,6 +38,7 @@
         <div class="hero-actions">
           <a class="btn primary" href="#produk">Belanja Sekarang →</a>
           <a class="btn ghost" href="#cara-beli">Cara Beli</a>
+          <button class="btn app-install" id="installApp" type="button" hidden>📲 Pasang Aplikasi</button>
         </div>
         <div class="trust-row">
           <span>✓ Proses cepat</span>
@@ -111,6 +115,14 @@
     </section>
   </main>
 
+  <div class="mobile-bottom-nav" aria-label="Navigasi cepat">
+    <a href="#beranda">⌂<span>Beranda</span></a>
+    <a href="#produk">▦<span>Produk</span></a>
+    <button id="mobileCart" type="button">🛒<span>Keranjang</span></button>
+    <a href="#cara-beli">ⓘ<span>Cara Beli</span></a>
+    <a href="#faq">?</a>
+  </div>
+
   <footer>
     <div><strong>CAMXD <span>Store</span></strong><small>Digital Shop • Premium • Top Up • Jasa</small></div>
     <a href="https://wa.me/6282133942994" target="_blank" rel="noopener">Chat WhatsApp →</a>
@@ -171,5 +183,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
-  <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>\n</body>
+  <script src="pwa.js"></script>
+</body>
 </html>
