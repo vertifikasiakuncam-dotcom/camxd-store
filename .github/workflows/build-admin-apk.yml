@@ -116,6 +116,11 @@ jobs:
       - name: Build and sign
         working-directory: admin-android
         shell: bash
+        env:
+          CAMXD_KEYSTORE_BASE64: ${{ secrets.CAMXD_KEYSTORE_BASE64 }}
+          CAMXD_KEYSTORE_PASSWORD: ${{ secrets.CAMXD_KEYSTORE_PASSWORD }}
+          CAMXD_KEY_PASSWORD: ${{ secrets.CAMXD_KEY_PASSWORD }}
+          CAMXD_KEY_ALIAS: ${{ secrets.CAMXD_KEY_ALIAS }}
         run: |
           set -e
           if ! command -v gradle >/dev/null 2>&1; then
@@ -134,11 +139,6 @@ jobs:
           "$BT/apksigner" verify --verbose ../signed/CAMXD-Admin.apk
           rm -f ../signed/key.jks ../signed/aligned.apk
       - uses: actions/upload-artifact@v4
-        env:
-          CAMXD_KEYSTORE_BASE64: ${{ secrets.CAMXD_KEYSTORE_BASE64 }}
-          CAMXD_KEYSTORE_PASSWORD: ${{ secrets.CAMXD_KEYSTORE_PASSWORD }}
-          CAMXD_KEY_PASSWORD: ${{ secrets.CAMXD_KEY_PASSWORD }}
-          CAMXD_KEY_ALIAS: ${{ secrets.CAMXD_KEY_ALIAS }}
         with:
           name: CAMXD-Admin-APK
           path: signed/CAMXD-Admin.apk
