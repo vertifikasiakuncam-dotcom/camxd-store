@@ -1189,7 +1189,9 @@ function exportOrdersXlsx(){
   const xmlEsc=v=>String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   const colName=n=>{let s="";while(n){let r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;};
   const sheetRows=rows.map((row,ri)=>"<row r=\""+(ri+1)+"\">"+row.map((v,ci)=>"<c r=\""+colName(ci+1)+(ri+1)+"\" t=\"inlineStr\"><is><t xml:space=\"preserve\">"+xmlEsc(v)+"</t></is></c>").join("")+"</row>").join("");
-  const sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+sheetRows+"</sheetData></worksheet>";
+  const widths=[18,20,22,18,22,38,18,48];
+  const cols=widths.map((w,i)=>"<col min=\""+(i+1)+"\" max=\""+(i+1)+"\" width=\""+w+"\" customWidth=\"1\"/>").join("");
+  const sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>'+cols+"</cols><sheetData>"+sheetRows+"</sheetData><autoFilter ref=\"A1:H"+rows.length+"\"/></worksheet>";
 
   const files={
     "[Content_Types].xml":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
