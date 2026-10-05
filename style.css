@@ -65,3 +65,39 @@ html{scroll-padding-top:90px}
   .mobile-bottom-nav button span{font-family:Inter,Arial,sans-serif}
   .mobile-bottom-nav button{font-size:19px}
 }
+
+
+/* ORDER TRACKING — Customer */
+.order-check-section{padding-top:20px}
+.order-check-card{max-width:900px;margin:auto;background:rgba(10,10,10,.88);border:1px solid rgba(255,208,0,.38);border-radius:28px;padding:30px;box-shadow:0 18px 60px rgba(0,0,0,.35)}
+.order-check-form{margin-top:22px;max-width:620px}
+.order-check-result{margin-top:22px;border:1px solid #3a3a3a;border-radius:20px;padding:20px;background:#0d0d0d}
+.order-result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding-bottom:15px;border-bottom:1px solid #292929}
+.order-result-head h3{font-size:27px;margin:5px 0 0}
+.order-status{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:900;border:1px solid #555}
+.order-status.waiting{color:var(--yellow);border-color:rgba(255,208,0,.55);background:rgba(255,208,0,.08)}
+.order-status.process{color:#74b9ff;border-color:rgba(116,185,255,.45);background:rgba(116,185,255,.08)}
+.order-status.done{color:#69e6a6;border-color:rgba(105,230,166,.45);background:rgba(105,230,166,.08)}
+.order-status.cancel{color:#ff7675;border-color:rgba(255,118,117,.45);background:rgba(255,118,117,.08)}
+.order-result-meta,.order-result-item,.order-result-total{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid #292929}
+.order-result-meta span,.order-result-note{color:#999}
+.order-result-items{margin-top:4px}
+.order-result-item span{color:#ccc}
+.order-result-item strong{color:#fff}
+.order-result-total{border-bottom:0;padding-top:16px;font-size:18px}
+.order-result-total strong{color:var(--yellow);font-size:24px}
+.delivery-box{margin-top:12px;padding:15px;border:1px solid rgba(255,208,0,.3);border-radius:15px;background:rgba(255,208,0,.06)}
+.delivery-box b{color:var(--yellow)}
+.delivery-box p{margin:8px 0 0;color:#ddd;white-space:normal}
+.order-not-found{padding:12px 2px}
+.order-not-found strong{font-size:18px}
+.order-not-found p,.order-loading{color:#aaa}
+@media(max-width:760px){
+ .order-check-card{padding:21px 15px;border-radius:23px}
+ .order-result-head{display:block}
+ .order-status{margin-top:12px}
+ .order-result-head h3{font-size:23px}
+ .order-result-meta,.order-result-item{font-size:14px}
+ .order-result-total{font-size:16px}
+ .order-result-total strong{font-size:22px}
+}
