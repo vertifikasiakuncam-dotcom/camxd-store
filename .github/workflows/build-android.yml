@@ -29,38 +29,34 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
-      - name: Configure Bubblewrap paths
-        run: bubblewrap updateConfig --jdkPath="$JAVA_HOME_17_X64" --androidSdkPath="$ANDROID_HOME"
-
       - name: Generate Android project
         shell: bash
         run: |
           set -e
           rm -rf android
           mkdir -p android
+          mkdir -p "$HOME/.bubblewrap"
 
-          KEYSTORE_PASSWORD="$(openssl rand -hex 24)"
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {
+            "jdkPath": "$JAVA_HOME_17_X64",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          EOF
 
-          printf '%s\n' \
-            'https://vertifikasiakuncam-dotcom.github.io/camxd-store/' \
-            'https://vertifikasiakuncam-dotcom.github.io/camxd-store/' \
-            'CAMXD Store' \
-            'CAMXD' \
-            'com.camxd.store' \
-            '1' \
-            '1.0.0' \
-            'standalone' \
-            'portrait' \
-            'CAMXD Store' \
-            'CAMXD Store' \
-            'Indonesia' \
-            'CAMXD Store' \
-            'CAMXD Store' \
-            'ID' \
-            'camxd-store' \
-            "$KEYSTORE_PASSWORD" \
-            "$KEYSTORE_PASSWORD" \
-          | bubblewrap init --manifest="https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest" --directory=android
+          keytool -genkeypair -v \
+            -keystore android/android-keystore \
+            -alias android \
+            -storepass camxd-build-only \
+            -keypass camxd-build-only \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=CAMXD Store, OU=CAMXD, O=CAMXD Store, C=ID"
+
+          yes '' | bubblewrap init \
+            --manifest="https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest" \
+            --directory=android
 
       - name: Build unsigned APK and AAB
         working-directory: android
