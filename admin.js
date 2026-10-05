@@ -82,15 +82,61 @@ function updateStats(){
       o => o.status === "Menunggu Verifikasi"
     ).length;
 
-  $("#statDone").textContent = done.length;
+  const process = allOrders.filter(o => o.status === "Sedang Diproses");
+  const revenue = done.reduce((s,o) => s + Number(o.total || 0),0);
 
-  $("#statRevenue").textContent =
-    rupiah(
-      done.reduce(
-        (s,o) => s + Number(o.total || 0),
-        0
-      )
-    );
+  $("#statProcess").textContent = process.length;
+  $("#statDone").textContent = done.length;
+  $("#statRevenue").textContent = rupiah(revenue);
+  $("#statAverage").textContent = rupiah(done.length ? revenue / done.length : 0);
+
+  renderOverview();
+}
+
+function getFilteredOrders(){
+  const q=($("#orderSearch")?.value||"").trim().toLowerCase();
+  const from=$("#dateFrom")?.value||"";
+  const to=$("#dateTo")?.value||"";
+  return allOrders.filter(o=>{
+    const text=[o.order_id,o.customer_name,o.customer_wa].join(" ").toLowerCase();
+    const day=String(o.created_at||"").slice(0,10);
+    return (!q||text.includes(q)) && (!from||day>=from) && (!to||day<=to);
+  });
+}
+
+function renderOverview(){
+  const filtered=getFilteredOrders();
+  const done=filtered.filter(o=>o.status==="Selesai");
+  const revenue=done.reduce((s,o)=>s+Number(o.total||0),0);
+  const seven=document.querySelector("#sevenDayRevenue");
+  if(seven) seven.textContent=rupiah(revenue);
+
+  const byProduct={};
+  done.forEach(o=>{
+    (Array.isArray(o.items)?o.items:[]).forEach(x=>{
+      const name=x.name||"Produk";
+      byProduct[name]=(byProduct[name]||0)+Number(x.qty||1);
+    });
+  });
+  const top=Object.entries(byProduct).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topName=document.querySelector("#topProductName");
+  if(topName) topName.textContent=top[0]?.[0]||"-";
+  const topBox=document.querySelector("#topProducts");
+  if(topBox) topBox.innerHTML=top.length?top.map(([name,count],i)=>`<div class="top-product-row"><span><b>${i+1}</b> ${escapeHtml(name)}</span><strong>${count} terjual</strong></div>`).join(""):"<span class='muted'>Belum ada penjualan selesai.</span>";
+
+  const bars=document.querySelector("#revenueBars");
+  if(bars){
+    const now=new Date();
+    const days=[];
+    for(let i=6;i>=0;i--){
+      const d=new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
+      const key=d.toISOString().slice(0,10);
+      const val=done.filter(o=>String(o.created_at||"").slice(0,10)===key).reduce((s,o)=>s+Number(o.total||0),0);
+      days.push({key,val,label:d.toLocaleDateString("id-ID",{weekday:"short"})});
+    }
+    const max=Math.max(1,...days.map(x=>x.val));
+    bars.innerHTML=days.map(x=>`<div class="bar-wrap" title="${x.label}: ${rupiah(x.val)}"><div class="bar" style="height:${Math.max(5,(x.val/max)*100)}%"></div><span>${x.label}</span></div>`).join("");
+  }
 }
 
 function buildWhatsAppUrl(order, details){
@@ -138,15 +184,16 @@ function buildWhatsAppUrl(order, details){
 
 function renderOrders(){
 
-  const filter =
-    $("#statusFilter").value;
-
-  const orders =
-    filter === "all"
-      ? allOrders
-      : allOrders.filter(
-          o => o.status === filter
-        );
+  const filter=$("#statusFilter").value;
+  const base=filter==="all"?allOrders:allOrders.filter(o=>o.status===filter);
+  const query=($("#orderSearch")?.value||"").trim().toLowerCase();
+  const from=$("#dateFrom")?.value||"";
+  const to=$("#dateTo")?.value||"";
+  const orders=base.filter(o=>{
+    const text=[o.order_id,o.customer_name,o.customer_wa].join(" ").toLowerCase();
+    const day=String(o.created_at||"").slice(0,10);
+    return (!query||text.includes(query)) && (!from||day>=from) && (!to||day<=to);
+  });
 
   if(!orders.length){
 
@@ -1010,3 +1057,15 @@ $("#productImage").addEventListener("input",()=>{
 });
 
 resetProductForm();
+
+
+$("#orderSearch")?.addEventListener("input",renderOrders);
+$("#dateFrom")?.addEventListener("change",renderOrders);
+$("#dateTo")?.addEventListener("change",renderOrders);
+$("#clearFiltersBtn")?.addEventListener("click",()=>{
+  $("#orderSearch").value="";
+  $("#dateFrom").value="";
+  $("#dateTo").value="";
+  renderOrders();
+  renderOverview();
+});
