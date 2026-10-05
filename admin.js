@@ -5,6 +5,7 @@ const STATUSES = [
   "Menunggu Pembayaran",
   "Menunggu Verifikasi",
   "Sudah Dibayar",
+  "Sedang Diproses",
   "Selesai",
   "Dibatalkan"
 ];
