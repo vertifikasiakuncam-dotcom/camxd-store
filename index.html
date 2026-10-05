@@ -23,6 +23,7 @@
     <button class="cart-btn" id="cartBtn" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button>
     <nav id="navMenu">
       <a href="#produk">Produk</a>
+      <a href="#cek-pesanan">Cek Pesanan</a>
       <a href="#cara-beli">Cara Beli</a>
       <a href="#faq">FAQ</a>
       <a href="#syarat">Syarat</a>
@@ -79,6 +80,24 @@
       <div class="empty" id="empty" hidden>Produk tidak ditemukan.</div>
     </section>
 
+    <section class="section order-check-section" id="cek-pesanan">
+      <div class="order-check-card">
+        <div>
+          <span class="eyebrow">ORDER TRACKING</span>
+          <h2>Cek Status Pesanan</h2>
+          <p class="lead">Masukkan ID pesanan dan nomor WhatsApp yang digunakan saat checkout.</p>
+        </div>
+        <form id="orderCheckForm" class="order-check-form">
+          <label class="field-label" for="checkOrderId">ID PESANAN</label>
+          <input id="checkOrderId" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Contoh: CX12345678" required>
+          <label class="field-label" for="checkOrderWa">NOMOR WHATSAPP</label>
+          <input id="checkOrderWa" class="input" type="tel" autocomplete="tel" placeholder="Contoh: 0821333942994" required>
+          <button class="btn primary wide" id="checkOrderBtn" type="submit">🔎 Cek Pesanan</button>
+        </form>
+        <div id="orderCheckResult" class="order-check-result" hidden></div>
+      </div>
+    </section>
+
     <section class="section split" id="cara-beli">
       <div>
         <span class="eyebrow">SIMPLE CHECKOUT</span>
@@ -119,7 +138,7 @@
     <a href="#beranda">⌂<span>Beranda</span></a>
     <a href="#produk">▦<span>Produk</span></a>
     <button id="mobileCart" type="button">🛒<span>Keranjang</span></button>
-    <a href="#cara-beli">ⓘ<span>Cara Beli</span></a>
+    <a href="#cek-pesanan">🔎<span>Cek Pesanan</span></a>
     <a href="#faq">?</a>
   </div>
 
