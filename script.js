@@ -214,33 +214,57 @@ function renderOrderCheck(order){
 }
 
 async function checkOrder(event){
- event.preventDefault();
- const id=$("#checkOrderId").value.trim().toUpperCase();
- const wa=normalizeWa($("#checkOrderWa").value);
- const result=$("#orderCheckResult");
- const btn=$("#checkOrderBtn");
- if(!id||!wa)return;
- btn.disabled=true; btn.textContent="Mengecek...";
- result.hidden=false;
- result.innerHTML="<p class='order-loading'>⏳ Sedang mengecek pesanan...</p>";
- try{
-  const {data,error}=await sb.from("orders")
-   .select("order_id,customer_name,customer_wa,items,total,total_label,status,created_at,delivery_details")
-   .eq("order_id",id)
-   .eq("customer_wa",wa)
-   .maybeSingle();
-  if(error) throw error;
-  if(!data){
-   result.innerHTML="<div class='order-not-found'><strong>Pesanan tidak ditemukan.</strong><p>Pastikan ID pesanan dan nomor WhatsApp sama seperti saat checkout.</p></div>";
-   return;
+  event.preventDefault();
+
+  const id=$("#checkOrderId").value.trim().toUpperCase();
+  const wa=$("#checkOrderWa").value.trim();
+
+  const result=$("#orderCheckResult");
+  const btn=$("#checkOrderBtn");
+
+  if(!id || !wa) return;
+
+  btn.disabled=true;
+  btn.textContent="Mengecek...";
+
+  result.hidden=false;
+  result.innerHTML="<p class='order-loading'>⏳ Sedang mengecek pesanan...</p>";
+
+  try{
+    const {data,error}=await sb.rpc("check_order",{
+      p_order_id:id,
+      p_customer_wa:wa
+    });
+
+    if(error) throw error;
+
+    if(!data){
+      result.innerHTML=
+        "<div class='order-not-found'>" +
+        "<strong>Pesanan tidak ditemukan.</strong>" +
+        "<p>Pastikan ID pesanan dan nomor WhatsApp sama seperti saat checkout.</p>" +
+        "</div>";
+      return;
+    }
+
+    renderOrderCheck(data);
+
+  }catch(error){
+
+    console.error(error);
+
+    result.innerHTML=
+      "<div class='order-not-found'>" +
+      "<strong>Gagal mengecek pesanan.</strong>" +
+      "<p>Silakan coba lagi beberapa saat.</p>" +
+      "</div>";
+
+  }finally{
+
+    btn.disabled=false;
+    btn.textContent="🔎 Cek Pesanan";
+
   }
-  renderOrderCheck(data);
- }catch(error){
-  console.error(error);
-  result.innerHTML="<div class='order-not-found'><strong>Gagal mengecek pesanan.</strong><p>Silakan coba lagi beberapa saat.</p></div>";
- }finally{
-  btn.disabled=false; btn.textContent="🔎 Cek Pesanan";
- }
 }
 
 async function copyOrderId(){
