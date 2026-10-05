@@ -13,25 +13,34 @@ const STATUSES = [
 let allOrders = [];
 
 let seenOrderIds = new Set();
+let unreadOrderIds = new Set();
 let firstOrderLoad = true;
 
 function updateNewOrderAlert(){
   const pending = allOrders.filter(o =>
-    o.status === "Menunggu Pembayaran" ||
-    o.status === "Menunggu Verifikasi"
+    (o.status === "Menunggu Pembayaran" ||
+     o.status === "Menunggu Verifikasi") &&
+    unreadOrderIds.has(String(o.id))
   );
   const alert = $("#newOrderAlert");
   const count = $("#newOrderCount");
   if(!alert || !count) return;
-  const unseen = pending.filter(o => !seenOrderIds.has(String(o.id)));
-  count.textContent = unseen.length;
-  alert.hidden = unseen.length === 0;
+
+  count.textContent = pending.length;
+  alert.hidden = pending.length === 0;
+
   alert.onclick = () => {
     $("#statusFilter").value = "all";
     renderOrders();
+    pending.forEach(o => unreadOrderIds.delete(String(o.id)));
     alert.hidden = true;
-    unseen.forEach(o => seenOrderIds.add(String(o.id)));
-    window.scrollTo({top: document.querySelector(".panel")?.offsetTop || 0, behavior:"smooth"});
+    const first = pending[0];
+    if(first){
+      const el = document.querySelector('[data-order-id="' + CSS.escape(String(first.order_id)) + '"]');
+      el?.scrollIntoView({behavior:"smooth",block:"center"});
+    }else{
+      window.scrollTo({top: document.querySelector(".panel")?.offsetTop || 0, behavior:"smooth"});
+    }
   };
 }
 
@@ -83,17 +92,25 @@ async function loadOrders(){
     return;
   }
 
-  allOrders = data || [];
+  const previousIds = new Set(allOrders.map(o => String(o.id)));
+  const nextOrders = data || [];
 
   if(firstOrderLoad){
-    allOrders.forEach(o => seenOrderIds.add(String(o.id)));
+    nextOrders.forEach(o => seenOrderIds.add(String(o.id)));
     firstOrderLoad = false;
   }else{
-    updateNewOrderAlert();
+    nextOrders.forEach(o => {
+      if(!previousIds.has(String(o.id))){
+        unreadOrderIds.add(String(o.id));
+      }
+    });
   }
+
+  allOrders = nextOrders;
 
   updateStats();
   renderOrders();
+  updateNewOrderAlert();
 }
 
 function updateStats(){
@@ -264,7 +281,7 @@ function renderOrders(){
           : "#";
 
       return `
-      <article class="order-card">
+      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">
 
         <div class="order-top">
 
