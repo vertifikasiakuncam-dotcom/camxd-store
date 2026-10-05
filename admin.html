@@ -154,7 +154,15 @@
             <div class="full">
               <label>Gambar / Logo</label>
               <input id="productImage" placeholder="contoh: youtube-premium.jpg">
-              <small class="form-help">Untuk sekarang isi nama file gambar yang sudah ada di repository.</small>
+              <div class="image-upload-box">
+                <div id="productImagePreview" class="product-image-preview">
+                  <span>Belum ada preview</span>
+                </div>
+                <div class="image-upload-controls">
+                  <input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                  <small class="form-help">Pilih gambar dari HP. Maksimal 5 MB. Gambar akan disimpan di Supabase Storage.</small>
+                </div>
+              </div>
             </div>
             <div class="full">
               <label>Detail Produk</label>
@@ -226,7 +234,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261005-2"></script>
+  <script src="admin.js?v=20261005-3"></script>
 
 </body>
 </html>
