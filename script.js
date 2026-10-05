@@ -196,7 +196,7 @@ function sendProof(){
  ].join("\n");
 
  window.open(
-  \`https://wa.me/\${STORE_WA}?text=\${encodeURIComponent(msg)}\`,
+  `https://wa.me/${STORE_WA}?text=${encodeURIComponent(msg)}`,
   "_blank"
  );
 }
