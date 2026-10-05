@@ -63,6 +63,10 @@
             ↻ Refresh
           </button>
 
+          <button id="productsBtn" class="btn">
+            🛍️ Kelola Produk
+          </button>
+
           <button id="logoutBtn" class="btn danger">
             Keluar
           </button>
@@ -97,6 +101,96 @@
         </article>
 
       </div>
+
+      <section id="productsPanel" class="panel products-panel" hidden>
+        <div class="section-head">
+          <div>
+            <h2>Kelola Produk</h2>
+            <p class="muted">Tambah, edit, aktif/nonaktifkan produk dan ubah semua paket harga langsung dari HP.</p>
+          </div>
+          <div class="product-head-actions">
+            <button id="backOrdersBtn" class="btn">← Pesanan</button>
+            <button id="newProductBtn" class="btn primary small-btn">＋ Produk Baru</button>
+          </div>
+        </div>
+
+        <div id="productEditor" class="product-editor" hidden>
+          <div class="editor-title">
+            <div>
+              <p class="eyebrow">FORM PRODUK</p>
+              <h3 id="editorHeading">Tambah Produk</h3>
+            </div>
+            <button id="cancelProductBtn" class="btn">Batal</button>
+          </div>
+
+          <input type="hidden" id="productDbId">
+
+          <div class="form-grid">
+            <div>
+              <label>Kunci Produk</label>
+              <input id="productKey" placeholder="contoh: youtube2">
+              <small class="form-help">Gunakan huruf kecil tanpa spasi. Jangan diubah untuk produk lama.</small>
+            </div>
+            <div>
+              <label>Nama Produk</label>
+              <input id="productName" placeholder="Nama produk">
+            </div>
+            <div>
+              <label>Kategori</label>
+              <select id="productCategory">
+                <option value="premium">Premium</option>
+                <option value="topup">Top Up</option>
+                <option value="jasa">Jasa</option>
+              </select>
+            </div>
+            <div>
+              <label>Badge</label>
+              <input id="productBadge" placeholder="POPULER / BEST SELLER / JASA">
+            </div>
+            <div class="full">
+              <label>Deskripsi singkat</label>
+              <input id="productDescription" placeholder="Deskripsi yang tampil di kartu produk">
+            </div>
+            <div class="full">
+              <label>Gambar / Logo</label>
+              <input id="productImage" placeholder="contoh: youtube-premium.jpg">
+              <small class="form-help">Untuk sekarang isi nama file gambar yang sudah ada di repository.</small>
+            </div>
+            <div class="full">
+              <label>Detail Produk</label>
+              <textarea id="productDetail" rows="4" placeholder="Penjelasan lengkap produk..."></textarea>
+            </div>
+            <div>
+              <label>Urutan</label>
+              <input id="productSort" type="number" value="10">
+            </div>
+            <div class="toggle-row">
+              <label class="check-label">
+                <input id="productActive" type="checkbox" checked>
+                <span>Produk aktif di toko</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="plans-editor">
+            <div class="plans-title">
+              <div>
+                <h3>Paket & Harga</h3>
+                <p class="muted">Atur nama paket dan harga. Harga di sini yang dipakai website.</p>
+              </div>
+              <button id="addPlanBtn" class="btn">＋ Tambah Paket</button>
+            </div>
+            <div id="plansEditorList"></div>
+          </div>
+
+          <div class="editor-actions">
+            <button id="saveProductBtn" class="btn primary">💾 Simpan Produk</button>
+          </div>
+          <p id="productFormError" class="error"></p>
+        </div>
+
+        <div id="productsList" class="products-list"></div>
+      </section>
 
       <section class="panel orders-panel">
 
