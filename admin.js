@@ -1173,6 +1173,52 @@ function exportOrdersCsv(){
   URL.revokeObjectURL(url);
 }
 
+function exportOrdersXlsx(){
+  const orders=getFilteredOrders();
+  if(!orders.length){ alert("Tidak ada pesanan untuk diekspor."); return; }
+
+  const rows=[["ID Pesanan","Tanggal","Nama","WhatsApp","Status","Produk","Total","Detail Pengiriman"]];
+  orders.forEach(o=>{
+    const items=Array.isArray(o.items)?o.items:[];
+    const products=items.map(x=>(x.name||"Produk")+" - "+(x.plan||"")+" x"+Number(x.qty||1)).join(" | ");
+    const d=new Date(o.created_at);
+    const date=Number.isNaN(d.getTime())?(o.created_at||""):d.toLocaleString("id-ID",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false});
+    rows.push([String(o.order_id||""),date,String(o.customer_name||""),String(o.customer_wa||""),String(o.status||""),products,o.total_label||rupiah(o.total),String(o.delivery_details||"")]);
+  });
+
+  const xmlEsc=v=>String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const colName=n=>{let s="";while(n){let r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;};
+  const sheetRows=rows.map((row,ri)=>"<row r=\""+(ri+1)+"\">"+row.map((v,ci)=>"<c r=\""+colName(ci+1)+(ri+1)+"\" t=\"inlineStr\"><is><t xml:space=\"preserve\">"+xmlEsc(v)+"</t></is></c>").join("")+"</row>").join("");
+  const sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+sheetRows+"</sheetData></worksheet>";
+
+  const files={
+    "[Content_Types].xml":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+    "_rels/.rels":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+    "xl/workbook.xml":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Pesanan CAMXD" sheetId="1" r:id="rId1"/></sheets></workbook>',
+    "xl/_rels/workbook.xml.rels":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>',
+    "xl/worksheets/sheet1.xml":sheet
+  };
+
+  const enc=new TextEncoder(), crcTable=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+  const crc32=u8=>{let c=0xffffffff;for(const b of u8)c=crcTable[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;};
+  const parts=[];let offset=0;
+  const u16=n=>new Uint8Array([n&255,(n>>>8)&255]),u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
+  const join=arrs=>{let n=arrs.reduce((s,a)=>s+a.length,0),o=new Uint8Array(n);let p=0;for(const a of arrs){o.set(a,p);p+=a.length;}return o;};
+  const central=[];
+  Object.entries(files).forEach(([name,text])=>{
+    const data=enc.encode(text), nameU=enc.encode(name), crc=crc32(data);
+    const local=join([new Uint8Array([80,75,3,4,20,0,0,0,0,0,0,0,0,0]),u32(crc),u32(data.length),u32(data.length),u16(nameU.length),u16(0),nameU,data]);
+    parts.push(local);
+    central.push(join([new Uint8Array([80,75,1,2,20,0,20,0,0,0,0,0,0,0]),u32(crc),u32(data.length),u32(data.length),u16(nameU.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),nameU]));
+    offset+=local.length;
+  });
+  const cd=join(central), body=join(parts), end=join([new Uint8Array([80,75,5,6,0,0,0,0]),u16(central.length),u16(central.length),u32(cd.length),u32(body.length),u16(0)]);
+  const blob=new Blob([body,cd,end],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download="CAMXD-Store-Laporan-"+new Date().toISOString().slice(0,10)+".xlsx";
+  document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+}
+$("#exportXlsxBtn")?.addEventListener("click",exportOrdersXlsx);
 $("#exportCsvBtn")?.addEventListener("click",exportOrdersCsv);
 $("#orderSearch")?.addEventListener("input",renderOrders);
 $("#dateFrom")?.addEventListener("change",renderOrders);
