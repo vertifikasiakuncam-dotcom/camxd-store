@@ -164,7 +164,7 @@ function sendProof(){
  if(!pendingOrder)return;
 
  const o=pendingOrder;
- const lines=String(o.lines||"").split("\\n").filter(Boolean);
+ const lines=String(o.lines||"").split(/\r?\n/).filter(Boolean);
 
  const msg=[
   "🛍️ *CAMXD STORE*",
