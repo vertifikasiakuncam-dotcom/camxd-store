@@ -132,7 +132,15 @@ jobs:
           fi
           $GRADLE --no-daemon :app:assembleRelease
           mkdir -p ../signed
-          printf '%s' "$CAMXD_KEYSTORE_BASE64" | base64 -d > ../signed/key.jks
+          python3 - <<'PY'
+import base64, os
+s = os.environ["CAMXD_KEYSTORE_BASE64"]
+s = "".join(s.split())
+s += "=" * ((4 - len(s) % 4) % 4)
+with open("../signed/key.jks", "wb") as f:
+    f.write(base64.b64decode(s, validate=False))
+PY
+          keytool -list -keystore ../signed/key.jks -storepass "$CAMXD_KEYSTORE_PASSWORD" -alias "$CAMXD_KEY_ALIAS" >/dev/null
           BT="$ANDROID_HOME/build-tools/35.0.0"
           "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk ../signed/aligned.apk
           "$BT/apksigner" sign --ks ../signed/key.jks --ks-key-alias "$CAMXD_KEY_ALIAS" --ks-pass env:CAMXD_KEYSTORE_PASSWORD --key-pass env:CAMXD_KEY_PASSWORD --out ../signed/CAMXD-Admin.apk ../signed/aligned.apk
