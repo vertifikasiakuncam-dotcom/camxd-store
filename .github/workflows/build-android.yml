@@ -29,83 +29,90 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
-      - name: Generate Android project
+      - name: Prepare Android project
         shell: bash
         run: |
           set -e
           rm -rf android
           mkdir -p android
-          mkdir -p "$HOME/.bubblewrap"
 
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          cat > android/twa-manifest.json <<'EOF'
           {
-            "jdkPath": "$JAVA_HOME_17_X64",
-            "androidSdkPath": "$ANDROID_HOME"
+            "packageId": "com.camxd.store",
+            "host": "vertifikasiakuncam-dotcom.github.io",
+            "name": "CAMXD Store",
+            "launcherName": "CAMXD Store",
+            "display": "standalone",
+            "themeColor": "#ffd000",
+            "themeColorDark": "#050505",
+            "navigationColor": "#050505",
+            "navigationColorDark": "#050505",
+            "navigationDividerColor": "#050505",
+            "navigationDividerColorDark": "#050505",
+            "backgroundColor": "#050505",
+            "startUrl": "/camxd-store/",
+            "iconUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/camxd-logo.png",
+            "splashScreenFadeOutDuration": 300,
+            "signingKey": {
+              "path": "android-keystore",
+              "alias": "android"
+            },
+            "appVersionName": "1.0.0",
+            "appVersionCode": 1,
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": {
+              "enabled": false
+            },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/",
+            "minSdkVersion": 23,
+            "orientation": "portrait-primary",
+            "fingerprints": [],
+            "additionalTrustedOrigins": [],
+            "retainedBundles": [],
+            "protocolHandlers": [],
+            "fileHandlers": [],
+            "launchHandlerClientMode": "",
+            "displayOverride": [
+              "standalone"
+            ],
+            "appVersion": "1.0.0"
           }
           EOF
 
-          yes '' | bubblewrap init \
-            --manifest="https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest" \
-            --directory=android
+          keytool -genkeypair -v             -keystore android/android-keystore             -alias android             -storepass camxd-test-signing             -keypass camxd-test-signing             -keyalg RSA             -keysize 2048             -validity 10000             -dname "CN=CAMXD Store, OU=CAMXD, O=CAMXD Store, C=ID"
 
-      - name: Build Android package
+      - name: Build and sign Android package
         working-directory: android
-        run: bubblewrap build --skipSigning --skipPwaValidation
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: camxd-test-signing
+          BUBBLEWRAP_KEY_PASSWORD: camxd-test-signing
+        run: |
+          bubblewrap build             --manifest=android             --signingKeyPath=android/android-keystore             --signingKeyAlias=android             --skipPwaValidation
 
-      - name: Sign APK for testing
+      - name: Verify signed APK
         shell: bash
         run: |
           set -e
-
-          UNSIGNED_APK=""
-          for candidate in \
-            "android/app-release-unsigned-aligned.apk" \
-            "android/app/build/outputs/apk/release/app-release-unsigned.apk"; do
-            if [ -f "$candidate" ]; then
-              UNSIGNED_APK="$candidate"
-              break
-            fi
-          done
-
-          if [ -z "$UNSIGNED_APK" ]; then
-            echo "Unsigned APK not found"
+          APK="android/app-release-signed.apk"
+          if [ ! -f "$APK" ]; then
+            echo "Signed APK not found. Available APK files:"
             find android -type f -name "*.apk" -print
             exit 1
           fi
-
           BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
-          KEYSTORE="$RUNNER_TEMP/camxd-test.keystore"
-          ALIGNED_APK="$RUNNER_TEMP/CAMXD-Store-aligned.apk"
-          SIGNED_APK="$RUNNER_TEMP/CAMXD-Store-signed.apk"
-          STOREPASS=$(openssl rand -hex 24)
-
-          keytool -genkeypair -v \
-            -keystore "$KEYSTORE" \
-            -alias camxd-test \
-            -storepass "$STOREPASS" \
-            -keypass "$STOREPASS" \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=CAMXD Store, OU=CAMXD, O=CAMXD Store, C=ID"
-
-          "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
-
-          "$BUILD_TOOLS/apksigner" sign \
-            --ks "$KEYSTORE" \
-            --ks-pass "pass:$STOREPASS" \
-            --out "$SIGNED_APK" \
-            "$ALIGNED_APK"
-
-          "$BUILD_TOOLS/apksigner" verify --verbose "$SIGNED_APK"
-
-          mkdir -p dist
-          cp "$SIGNED_APK" "dist/CAMXD-Store-signed.apk"
+          "$BUILD_TOOLS/apksigner" verify --verbose "$APK"
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
           name: CAMXD-Store-Signed-APK
-          path: dist/CAMXD-Store-signed.apk
+          path: android/app-release-signed.apk
           if-no-files-found: error
           retention-days: 14
