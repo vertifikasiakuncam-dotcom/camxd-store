@@ -163,9 +163,25 @@ function closePayment(){
 function sendProof(){
  if(!pendingOrder)return;
  const o=pendingOrder;
- const msg=`Halo CAMXD Store 👋\n\nSaya ingin order:\nID Pesanan: ${o.orderId}\n\n${o.lines}\n\nTotal: ${o.total}\nNama: ${o.name}\nNomor WA: ${o.wa}\n\nSaya sudah melakukan pembayaran melalui QRIS CAMXD Store.\nSaya lampirkan bukti pembayaran pada chat ini.\nMohon dicek dan diproses. Terima kasih 🙏`;
+ const msg=[
+  "Halo CAMXD Store 👋",
+  "",
+  "Saya ingin melakukan pembayaran untuk pesanan:",
+  "ID Pesanan: "+o.orderId,
+  "",
+  o.lines,
+  "",
+  "Total: "+o.total,
+  "Nama: "+o.name,
+  "Nomor WA: "+o.wa,
+  "",
+  "Saya sudah melakukan pembayaran melalui QRIS CAMXD Store.",
+  "Saya lampirkan bukti pembayaran pada chat ini.",
+  "Mohon dicek dan diproses. Terima kasih 🙏"
+ ].join("\\n");
  window.open(`https://wa.me/${STORE_WA}?text=${encodeURIComponent(msg)}`,"_blank");
 }
+
 
 async function copyOrderId(){
  const id=$("#paymentOrderId").textContent;
