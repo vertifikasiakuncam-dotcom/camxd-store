@@ -516,13 +516,19 @@ async function deleteOrder(id){
   );
   if(!ok) return;
 
-  const {error}=await sb.from("orders").delete().eq("id",id);
+  const {data: deleted, error}=await sb.rpc("delete_order_admin", {p_order_id: id});
   if(error){
-    alert("Gagal menghapus pesanan: "+error.message);
+    alert("Gagal menghapus pesanan: " + error.message);
+    return;
+  }
+
+  if(deleted !== true){
+    alert("Pesanan tidak dihapus. Pastikan statusnya Dibatalkan dan akun ini adalah admin.");
     return;
   }
 
   allOrders=allOrders.filter(o=>Number(o.id)!==Number(id));
+  unreadOrderIds.delete(String(id));
   alert("Pesanan "+(order.order_id||"")+" berhasil dihapus.");
   updateStats();
   renderOrders();
