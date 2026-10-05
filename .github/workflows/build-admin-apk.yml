@@ -38,7 +38,7 @@ jobs:
         run: |
           set -e
           rm -rf admin-android
-          mkdir -p admin-android/app/src/main/java/com/camxd/admin admin-android/app/src/main/res/values admin-android/app/src/main/res/drawable
+          mkdir -p admin-android/app/src/main/java/com/camxd/admin admin-android/app/src/main/res/values admin-android/app/src/main/res/drawable admin-android/app/src/main/res/drawable-nodpi
           cat > admin-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
@@ -54,13 +54,16 @@ jobs:
             defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 1; versionName '1.0.0' }
           }
           EOF
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin
+          rsvg-convert -w 512 -h 512 camxd-admin-icon.svg -o admin-android/app/src/main/res/drawable-nodpi/camxd_admin_icon.png
           cat > admin-android/app/src/main/res/values/styles.xml <<'EOF'
           <resources><style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"><item name="android:colorAccent">#ffd000</item><item name="android:statusBarColor">#080808</item><item name="android:navigationBarColor">#050505</item><item name="android:windowLightStatusBar">false</item></style></resources>
           EOF
           cat > admin-android/app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET"/>
-            <application android:theme="@style/AppTheme" android:label="CAMXD Admin" android:allowBackup="false">
+            <application android:theme="@style/AppTheme" android:label="CAMXD Admin" android:icon="@drawable/camxd_admin_icon" android:allowBackup="false">
               <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait">
                 <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
               </activity>
