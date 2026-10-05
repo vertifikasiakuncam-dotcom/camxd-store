@@ -88,7 +88,8 @@ function updateStats(){
   $("#statProcess").textContent = process.length;
   $("#statDone").textContent = done.length;
   $("#statRevenue").textContent = rupiah(revenue);
-  $("#statAverage").textContent = rupiah(done.length ? revenue / done.length : 0);
+  const average = done.length > 0 ? Math.round(revenue / done.length) : 0;
+  $("#statAverage").textContent = rupiah(average);
 
   renderOverview();
 }
@@ -130,8 +131,11 @@ function renderOverview(){
     const days=[];
     for(let i=6;i>=0;i--){
       const d=new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate()-i);
-      const key=d.toISOString().slice(0,10);
-      const val=done.filter(o=>String(o.created_at||"").slice(0,10)===key).reduce((s,o)=>s+Number(o.total||0),0);
+      const key=d.toLocaleDateString("en-CA");
+      const val=done.filter(o=>{
+        const od=new Date(o.created_at);
+        return od.toLocaleDateString("en-CA")===key;
+      }).reduce((s,o)=>s+Number(o.total||0),0);
       days.push({key,val,label:d.toLocaleDateString("id-ID",{weekday:"short"})});
     }
     const max=Math.max(1,...days.map(x=>x.val));
