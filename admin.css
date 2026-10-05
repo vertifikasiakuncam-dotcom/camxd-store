@@ -79,3 +79,33 @@ input:focus,select:focus{border-color:var(--yellow)}
 .image-upload-controls{display:flex;flex-direction:column;justify-content:center;gap:5px}
 .image-upload-controls input[type=file]{width:100%;padding:10px;border:1px solid #444;border-radius:12px;background:#111;color:#ddd}
 @media(max-width:800px){.image-upload-box{grid-template-columns:1fr}.product-image-preview{height:170px}}
+
+
+/* ADMIN OVERVIEW */
+.stats{grid-template-columns:repeat(4,1fr)}
+.admin-overview{padding:20px;margin-bottom:20px}
+.overview-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end}
+.overview-head h2{margin:0 0 5px;font-size:24px}
+.overview-filters{display:grid;grid-template-columns:minmax(180px,1.5fr) 135px 135px auto;gap:8px;min-width:560px}
+.overview-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:18px}
+.mini-chart-card{border:1px solid #2d2d2d;border-radius:18px;background:#0b0b0b;padding:16px;min-height:220px}
+.mini-card-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}
+.mini-card-title span{color:#aaa}
+.mini-card-title strong{color:var(--yellow)}
+.revenue-bars{height:145px;display:flex;align-items:flex-end;gap:8px;border-bottom:1px solid #333;padding:0 4px}
+.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}
+.bar{width:100%;max-width:34px;border-radius:7px 7px 0 0;background:var(--yellow);opacity:.85;min-height:5px}
+.bar-wrap span{font-size:10px;color:#777}
+.top-products{display:grid;gap:8px}
+.top-product-row{display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid #252525;color:#ddd}
+.top-product-row b{color:var(--yellow);margin-right:5px}
+.top-product-row strong{color:#aaa;white-space:nowrap;font-size:12px}
+.status.process{color:#ffd95a}
+@media(max-width:800px){
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .overview-head{display:block}
+ .overview-filters{min-width:0;grid-template-columns:1fr 1fr}
+ .overview-filters input[type=search]{grid-column:1/-1}
+ .overview-filters .btn{grid-column:1/-1}
+ .overview-grid{grid-template-columns:1fr}
+}
