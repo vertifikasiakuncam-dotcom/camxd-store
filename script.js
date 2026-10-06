@@ -74,6 +74,7 @@ async function loadProducts(){
       render();
       renderFeaturedProducts();
       renderSavedProducts();
+      renderRecentProducts();
     }
   }catch(error){
     console.warn("Katalog Supabase gagal dimuat, memakai katalog lokal:",error);
@@ -144,6 +145,7 @@ function render(){
 
 function openDetail(id){
  selectedProduct=products.find(p=>p.id===id); if(!selectedProduct)return; selectedPlan=selectedProduct.plans[0];
+ addRecentProduct(selectedProduct.id);
  $("#detailImage").src=selectedProduct.image; $("#detailImage").alt=selectedProduct.name;
  $("#detailBadge").textContent=selectedProduct.badge; $("#detailTitle").textContent=selectedProduct.name; $("#detailDesc").textContent=selectedProduct.detail;
  updateFavoriteButton();
@@ -210,6 +212,47 @@ function updateFavoriteButton(){
   const active=isFavorite(selectedProduct.id);
   btn.textContent=active?"♥ Tersimpan":"♡ Simpan Produk";
   btn.setAttribute("aria-pressed",String(active));
+}
+
+function getRecentProducts(){
+  try{
+    const raw=localStorage.getItem("camxd_recent_v1");
+    const saved=raw?JSON.parse(raw):[];
+    return Array.isArray(saved)?saved.filter(Boolean):[];
+  }catch(e){return [];}
+}
+
+function saveRecentProducts(list){
+  try{localStorage.setItem("camxd_recent_v1",JSON.stringify(list.slice(0,6)));}catch(e){}
+}
+
+function addRecentProduct(id){
+  if(!id)return;
+  const list=getRecentProducts().filter(x=>x!==id);
+  list.unshift(id);
+  saveRecentProducts(list);
+  renderRecentProducts();
+}
+
+function renderRecentProducts(){
+  const section=$("#terakhir-dilihat"), box=$("#recentProducts");
+  if(!section||!box)return;
+  const list=getRecentProducts().map(id=>products.find(p=>p.id===id)).filter(Boolean);
+  section.hidden=!list.length;
+  if(!list.length){box.innerHTML="";return;}
+  box.innerHTML=list.map(p=>{
+    const price=p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan";
+    return `<article class="recent-card">
+      <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">
+      <div class="recent-card-body">
+        <span class="featured-card-badge">◷ TERAKHIR DILIHAT</span>
+        <h3>${escapeHtml(p.name)}</h3>
+        <p>${escapeHtml(p.desc||"Produk digital CAMXD Store")}</p>
+        <div class="saved-card-bottom"><strong>${price}</strong><button type="button" class="choose" data-recent-id="${escapeHtml(p.id)}">Lihat →</button></div>
+      </div>
+    </article>`;
+  }).join("");
+  box.querySelectorAll("[data-recent-id]").forEach(btn=>btn.onclick=()=>openDetail(btn.dataset.recentId));
 }
 
 function renderSavedProducts(){
@@ -479,6 +522,7 @@ render();
 renderFeaturedProducts();
 openSharedProduct();
 renderSavedProducts();
+renderRecentProducts();
 loadProducts();
 
 
