@@ -300,6 +300,13 @@ document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.da
 $("#search").addEventListener("input",render);
 $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click",e=>{if(e.target.id==="detailModal")closeDetail();});
 $("#addToCart").onclick=addToCart;
+$("#mobileCart")?.addEventListener("click",openCart);
+const backTop=$("#backTop");
+window.addEventListener("scroll",()=>{
+  if(backTop) backTop.classList.toggle("show",window.scrollY>500);
+},{passive:true});
+backTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
 $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart;
 $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#copyOrderId").onclick=copyOrderId;
 $("#orderCheckForm").addEventListener("submit",checkOrder);
