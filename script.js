@@ -1,5 +1,12 @@
 const STORE_WA="6282133942994";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let sb=null;
+try{
+  if(window.supabase && typeof SUPABASE_URL!=="undefined" && typeof SUPABASE_PUBLISHABLE_KEY!=="undefined"){
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  }
+}catch(error){
+  console.warn("Supabase tidak tersedia, menggunakan katalog lokal:",error);
+}
 
 let products=[];
 
@@ -17,12 +24,16 @@ const FALLBACK_PRODUCTS=[
 
 async function loadProducts(){
   const featuredBox=$("#featuredProducts");
-  if(featuredBox){
-    featuredBox.innerHTML='<div class="featured-loading"><span class="featured-spinner"></span><span>Menyiapkan produk unggulan...</span></div>';
-  }
+
+  // Render katalog lokal terlebih dahulu supaya produk selalu terlihat.
+  products=FALLBACK_PRODUCTS;
+  render();
+  renderFeaturedProducts();
+
+  if(!sb) return;
 
   try{
-    const [productResult,planResult]=await Promise.all([
+    const queryPromise=Promise.all([
       sb.from("products")
         .select("id,product_key,name,description,category,image_url,badge,detail,sort_order")
         .eq("is_active",true)
@@ -33,6 +44,12 @@ async function loadProducts(){
         .order("sort_order",{ascending:true})
     ]);
 
+    const timeoutPromise=new Promise((_,reject)=>
+      setTimeout(()=>reject(new Error("Supabase timeout")),7000)
+    );
+
+    const [productResult,planResult]=await Promise.race([queryPromise,timeoutPromise]);
+
     if(productResult.error) throw productResult.error;
     if(planResult.error) throw planResult.error;
 
@@ -42,7 +59,7 @@ async function loadProducts(){
       plansByProduct[row.product_id].push([row.plan_name,Number(row.price||0)]);
     });
 
-    products=(productResult.data||[]).map(p=>({
+    const remoteProducts=(productResult.data||[]).map(p=>({
       id:p.product_key,
       dbId:p.id,
       name:p.name,
@@ -53,15 +70,19 @@ async function loadProducts(){
       plans:plansByProduct[p.id]||[],
       detail:p.detail
     })).filter(p=>p.plans.length);
+
+    // Ganti katalog lokal hanya jika database benar-benar mengembalikan data.
+    if(remoteProducts.length){
+      products=remoteProducts;
+      render();
+      renderFeaturedProducts();
+    }
   }catch(error){
-    console.error("Gagal mengambil produk dari Supabase:",error);
-    products=FALLBACK_PRODUCTS;
+    console.warn("Katalog Supabase gagal dimuat, memakai katalog lokal:",error);
+  }finally{
+    if(window.refreshPremiumMotion) window.refreshPremiumMotion();
   }
-
-  render();
-  renderFeaturedProducts();
 }
-
 
 
 function escapeHtml(value){
