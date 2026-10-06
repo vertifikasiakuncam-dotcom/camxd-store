@@ -226,3 +226,65 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
  .order-bottom strong{font-size:22px}
  .delivery-details summary{padding:11px 2px}
 }
+
+
+/* STAGE 3 — MOBILE FIRST ADMIN */
+@media(max-width:800px){
+  html{font-size:16px}
+  body{overflow-x:hidden;-webkit-text-size-adjust:100%}
+  button,.btn,input,select,textarea{font-size:16px}
+  .admin-shell{width:100%;max-width:100%;padding:10px 10px 34px}
+  .admin-head{gap:10px;margin-bottom:12px}
+  .admin-head h1{font-size:30px;line-height:1.02}
+  .admin-head p{font-size:12px}
+  .head-actions{width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .head-actions .new-order-alert{grid-column:1/-1;min-height:44px}
+  .head-actions .btn{min-height:44px;padding:10px 8px;border-radius:12px;white-space:nowrap}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .stat{min-height:104px;padding:13px;border-radius:14px}
+  .stat .stat-icon{font-size:18px;margin-bottom:8px}
+  .stat span{font-size:11px;line-height:1.25}
+  .stat strong{font-size:24px;margin-top:4px}
+  .stat-revenue strong,.stat-today-revenue strong{font-size:20px}
+  .admin-overview,.orders-panel,.products-panel{border-radius:16px;padding:13px;margin-top:12px}
+  .section-title{font-size:20px}
+  .overview-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+  .overview-filters input[type="search"]{grid-column:1/-1;width:100%}
+  .overview-filters input[type="date"]{width:100%;min-width:0}
+  .overview-filters .btn{min-height:44px}
+  .orders-panel > .panel-head,.orders-header{gap:10px;align-items:flex-start}
+  .orders-panel select{min-height:44px;width:100%;max-width:220px}
+  .order-card{padding:13px;border-radius:15px}
+  .order-top{gap:8px}
+  .order-id{font-size:18px}
+  .order-customer{margin:11px 0;padding:9px 10px}
+  .customer-main strong{font-size:14px}
+  .customer-main span{font-size:11px}
+  .order-item-count{font-size:10px}
+  .items{padding:6px 10px}
+  .item-line{font-size:13px;gap:8px}
+  .delivery-details{margin-top:10px}
+  .delivery-details summary{min-height:44px;font-size:13px}
+  .delivery-input{font-size:16px;min-height:130px;padding:12px}
+  .delivery-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .delivery-actions .btn{min-height:46px;min-width:0;width:100%;padding:10px 8px}
+  .delivery-actions .send-wa{grid-column:1/-1}
+  .order-bottom{gap:9px}
+  .order-bottom .btn,.order-bottom select{min-height:46px}
+  .mini-chart-card{min-height:175px}
+  .mini-chart-card h4{font-size:12px}
+  .revenue-bars{height:105px}
+  .bar-wrap span{font-size:9px}
+}
+@media(max-width:390px){
+  .admin-shell{padding-left:7px;padding-right:7px}
+  .admin-head h1{font-size:27px}
+  .head-actions .btn{font-size:14px;padding:9px 5px}
+  .stat{min-height:98px;padding:11px}
+  .stat strong{font-size:22px}
+  .stat-revenue strong,.stat-today-revenue strong{font-size:18px}
+  .order-customer{align-items:flex-start}
+  .order-item-count{display:none}
+  .delivery-actions{grid-template-columns:1fr}
+  .delivery-actions .send-wa{grid-column:auto}
+}
