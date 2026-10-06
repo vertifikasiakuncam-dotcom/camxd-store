@@ -30,20 +30,27 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   install?.addEventListener("click",async()=>{
-    if(!deferredAdminInstallPrompt){
+    if(deferredAdminInstallPrompt){
+      deferredAdminInstallPrompt.prompt();
+      try{
+        await deferredAdminInstallPrompt.userChoice;
+      }catch(err){
+        console.warn("CAMXD Admin install:",err);
+      }
+      deferredAdminInstallPrompt=null;
+      showAdminInstallButton(false);
       return;
     }
 
-    deferredAdminInstallPrompt.prompt();
-
-    try{
-      await deferredAdminInstallPrompt.userChoice;
-    }catch(err){
-      console.warn("CAMXD Admin install:",err);
+    const message =
+      "Instalasi otomatis belum tersedia di browser ini.\\n\\n" +
+      "Android Chrome: tekan ⋮ → Tambahkan ke layar utama / Install app.\\n" +
+      "Jika pilihan itu belum muncul, buka halaman Admin melalui Chrome dan pastikan halaman sudah selesai dimuat.";
+    if(typeof window.showAdminToast==="function"){
+      window.showAdminToast("Install Admin",message);
+    }else{
+      alert(message);
     }
-
-    deferredAdminInstallPrompt=null;
-    showAdminInstallButton(false);
   });
 
   if("serviceWorker" in navigator){
