@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080808">
   <link rel="manifest" href="admin-manifest.webmanifest">
   <title>CAMXD Store — Admin</title>
-  <link rel="stylesheet" href="admin.css?v=20261006-17">
+  <link rel="stylesheet" href="admin.css?v=20261006-18">
 </head>
 <body>
   <main class="admin-shell">
@@ -64,6 +64,47 @@
               <span id="adminRole">Administrator</span>
               <small id="adminProfileEmail"></small>
             </div>
+          </div>
+          <button id="editProfileBtn" class="btn admin-profile-edit">✏️ Edit Profil</button>
+
+          <div id="profileEditor" class="profile-editor" hidden>
+            <div class="profile-editor-head">
+              <div>
+                <p class="eyebrow">PROFIL ADMIN</p>
+                <h3>Edit Profil</h3>
+                <p class="muted">Perubahan disimpan ke profil akun Supabase.</p>
+              </div>
+              <button id="closeProfileEditorBtn" class="btn" type="button">Tutup</button>
+            </div>
+
+            <div class="profile-form-grid">
+              <div>
+                <label for="profileNameInput">Nama Admin</label>
+                <input id="profileNameInput" type="text" maxlength="60" placeholder="Nama admin">
+              </div>
+              <div>
+                <label for="profileUsernameInput">Username</label>
+                <input id="profileUsernameInput" type="text" maxlength="30" placeholder="Username">
+              </div>
+              <div class="full">
+                <label for="profileAvatarInput">URL Foto Profil</label>
+                <input id="profileAvatarInput" type="url" placeholder="https://...">
+                <small class="form-help">Gunakan URL gambar publik. Kosongkan jika ingin memakai inisial.</small>
+              </div>
+            </div>
+
+            <div class="profile-preview-row">
+              <div id="profileEditorAvatar" class="admin-avatar">A</div>
+              <div>
+                <strong id="profilePreviewName">Admin CAMXD Store</strong>
+                <span id="profilePreviewUsername">admin</span>
+              </div>
+            </div>
+
+            <div class="profile-editor-actions">
+              <button id="saveProfileBtn" class="btn primary profile-save-btn" type="button">💾 Simpan Profil</button>
+            </div>
+            <p id="profileFormError" class="error"></p>
           </div>
         </div>
 
@@ -261,7 +302,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261006-17"></script>
+  <script src="admin.js?v=20261006-18"></script>
   <script src="admin-pwa.js?v=20261006-6"></script>
 
 </body>
