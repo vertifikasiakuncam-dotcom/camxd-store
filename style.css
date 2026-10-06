@@ -471,3 +471,65 @@ html{scroll-padding-top:90px}
   border:1px dashed #444;border-radius:20px;background:rgba(10,10,10,.72);
   padding:42px 20px;margin-top:16px;
 }
+
+
+/* V15 — Trust & social proof */
+.trust-section{position:relative}
+.trust-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.trust-card{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:18px;
+  border:1px solid rgba(255,208,0,.16);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(12,12,12,.9),rgba(7,7,7,.72));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.trust-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,208,0,.45);
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+}
+.trust-icon{
+  width:40px;height:40px;flex:0 0 40px;
+  display:grid;place-items:center;
+  border:1px solid rgba(255,208,0,.28);
+  border-radius:12px;
+  background:rgba(255,208,0,.07);
+  font-size:19px;
+}
+.trust-card strong{display:block;font-size:15px}
+.trust-card p{margin:5px 0 0;color:#a8a8a8;font-size:12px;line-height:1.45}
+.trust-strip{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  margin-top:14px;
+  border:1px solid rgba(255,208,0,.14);
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(5,5,5,.72);
+}
+.trust-strip div{
+  padding:16px 12px;
+  text-align:center;
+  border-right:1px solid #222;
+}
+.trust-strip div:last-child{border-right:0}
+.trust-strip strong{display:block;color:var(--yellow);font-size:20px}
+.trust-strip span{display:block;margin-top:3px;color:#999;font-size:11px}
+@media(max-width:900px){
+  .trust-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .trust-grid{grid-template-columns:1fr}
+  .trust-card{padding:15px}
+  .trust-strip{grid-template-columns:repeat(2,1fr)}
+  .trust-strip div:nth-child(2){border-right:0}
+  .trust-strip div:nth-child(-n+2){border-bottom:1px solid #222}
+}
