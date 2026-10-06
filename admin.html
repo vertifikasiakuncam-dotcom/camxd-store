@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080808">
   <link rel="manifest" href="admin-manifest.webmanifest">
   <title>CAMXD Store — Admin</title>
-  <link rel="stylesheet" href="admin.css?v=20261005-6">
+  <link rel="stylesheet" href="admin.css?v=20261006-11">
 </head>
 <body>
   <main class="admin-shell">
@@ -80,13 +80,15 @@
 
       <div class="stats">
 
-        <article class="stat"><span>Total Pesanan</span><strong id="statTotal">0</strong></article>
-        <article class="stat"><span>Menunggu Pembayaran</span><strong id="statWaiting">0</strong></article>
-        <article class="stat"><span>Menunggu Verifikasi</span><strong id="statVerify">0</strong></article>
-        <article class="stat"><span>Sedang Diproses</span><strong id="statProcess">0</strong></article>
-        <article class="stat"><span>Selesai</span><strong id="statDone">0</strong></article>
-        <article class="stat"><span>Omzet Selesai</span><strong id="statRevenue">Rp 0</strong></article>
-        <article class="stat"><span>Rata-rata Order</span><strong id="statAverage">Rp 0</strong></article>
+        <article class="stat stat-main"><div class="stat-icon">🧾</div><span>Total Pesanan</span><strong id="statTotal">0</strong></article>
+        <article class="stat stat-wait"><div class="stat-icon">💳</div><span>Menunggu Pembayaran</span><strong id="statWaiting">0</strong></article>
+        <article class="stat stat-verify"><div class="stat-icon">🔎</div><span>Menunggu Verifikasi</span><strong id="statVerify">0</strong></article>
+        <article class="stat stat-process"><div class="stat-icon">⚙️</div><span>Sedang Diproses</span><strong id="statProcess">0</strong></article>
+        <article class="stat stat-done"><div class="stat-icon">✅</div><span>Selesai</span><strong id="statDone">0</strong></article>
+        <article class="stat stat-revenue"><div class="stat-icon">💰</div><span>Omzet Selesai</span><strong id="statRevenue">Rp 0</strong></article>
+        <article class="stat stat-average"><div class="stat-icon">📊</div><span>Rata-rata Order</span><strong id="statAverage">Rp 0</strong></article>
+        <article class="stat stat-today"><div class="stat-icon">📅</div><span>Pesanan Hari Ini</span><strong id="statToday">0</strong></article>
+        <article class="stat stat-today-revenue"><div class="stat-icon">💵</div><span>Omzet Hari Ini</span><strong id="statTodayRevenue">Rp 0</strong></article>
 
       </div>
 
@@ -98,7 +100,7 @@
             <p class="muted">Ringkasan berdasarkan pesanan yang tersimpan di database.</p>
           </div>
           <div class="overview-filters">
-            <input id="orderSearch" type="search" placeholder="🔎 Cari ID, nama, WhatsApp...">
+            <input id="orderSearch" type="search" placeholder="🔎 Cari ID, nama, WhatsApp, produk...">
             <input id="dateFrom" type="date" title="Dari tanggal">
             <input id="dateTo" type="date" title="Sampai tanggal">
             <button id="clearFiltersBtn" class="btn">Reset</button><button id="exportCsvBtn" class="btn">📥 Export CSV</button><button id="exportXlsxBtn" class="btn">📊 Export Excel</button>
@@ -249,7 +251,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261006-10"></script>
+  <script src="admin.js?v=20261006-11"></script>
   <script src="admin-pwa.js?v=20261006-6"></script>
 
 </body>
