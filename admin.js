@@ -41,10 +41,19 @@ function updateNewOrderAlert(){
   );
   const alert = $("#newOrderAlert");
   const count = $("#newOrderCount");
+  const markBtn = $("#markOrdersReadBtn");
   if(!alert || !count) return;
 
   count.textContent = pending.length;
   alert.hidden = pending.length === 0;
+  if(markBtn) markBtn.hidden = pending.length === 0;
+
+  if(markBtn){
+    markBtn.onclick = () => {
+      pending.forEach(o => unreadOrderIds.delete(String(o.id)));
+      updateNewOrderAlert();
+    };
+  }
 
   alert.onclick = () => {
     $("#statusFilter").value = "all";
@@ -1490,4 +1499,21 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
   $("#bulkDeleteOrdersBtn")?.addEventListener("click",bulkDeleteOrders);
   updateBulkDeleteUi();
+});
+
+
+function requestAdminNotifications(){
+  if(!("Notification" in window)) return;
+  if(Notification.permission==="default"){
+    Notification.requestPermission().catch(()=>{});
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const markBtn=$("#markOrdersReadBtn");
+  markBtn?.addEventListener("click",()=>updateNewOrderAlert());
+  document.addEventListener("click",e=>{
+    if(e.target.closest("#newOrderAlert")) requestAdminNotifications();
+  });
+  requestAdminNotifications();
 });
