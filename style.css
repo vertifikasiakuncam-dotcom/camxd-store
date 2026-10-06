@@ -533,3 +533,18 @@ html{scroll-padding-top:90px}
   .trust-strip div:nth-child(2){border-right:0}
   .trust-strip div:nth-child(-n+2){border-bottom:1px solid #222}
 }
+
+
+/* V16 — FAQ polish */
+.info-card details{transition:background .18s ease}
+.info-card details[open]{background:rgba(255,208,0,.025);border-radius:12px;padding-left:12px;padding-right:12px}
+.info-card summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.info-card summary::-webkit-details-marker{display:none}
+.info-card summary:after{content:"+";color:var(--yellow);font-size:22px;font-weight:400}
+.info-card details[open] summary:after{content:"−"}
+.info-card details p{line-height:1.55;margin:10px 0 2px}
+@media(max-width:760px){
+ .info-grid{grid-template-columns:1fr}
+ .info-card{padding:18px}
+ .info-card h2{font-size:26px}
+}
