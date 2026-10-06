@@ -117,7 +117,6 @@ function renderFeaturedProducts(){
    updateCart();
    openCart();
  });
- if(window.refreshPremiumMotion) window.refreshPremiumMotion();
 }
 
 const rupiah=n=>"Rp "+Number(n).toLocaleString("id-ID");
