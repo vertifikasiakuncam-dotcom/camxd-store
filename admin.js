@@ -342,7 +342,7 @@ async function bulkDeleteOrders(){
   if(!ids.length) return;
   const orders=allOrders.filter(o=>ids.includes(Number(o.id)) && o.status!=="Selesai");
   if(!orders.length) return;
-  const ok=confirm("HAPUS "+orders.length+" PESANAN SECARA PERMANEN?\n\nPesanan yang dipilih berstatus Dibatalkan dan akan dihapus dari database.\nTindakan ini tidak bisa dibatalkan.");
+  const ok=confirm("HAPUS "+orders.length+" PESANAN SECARA PERMANEN?\n\nPesanan yang dipilih (kecuali Selesai) akan dihapus dari database.\nTindakan ini tidak bisa dibatalkan.");
   if(!ok) return;
   const btn=$("#bulkDeleteOrdersBtn");
   if(btn){btn.disabled=true;btn.textContent="⏳ Menghapus...";}
@@ -406,7 +406,7 @@ function renderOrders(){
           : "#";
 
       return `
-      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">\n        <label class="order-select">\n          <input type="checkbox" class="order-check" data-id="${o.id}" ${o.status !== "Selesai" ? "" : "disabled"} ${selectedOrderIds.has(String(o.id)) ? "checked" : ""}>\n          <span>${o.status === "Dibatalkan" ? "Pilih untuk dihapus" : "Pesanan Selesai tidak dapat dihapus"}</span>\n        </label>
+      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">\n        <label class="order-select">\n          <input type="checkbox" class="order-check" data-id="${o.id}" ${o.status !== "Selesai" ? "" : "disabled"} ${selectedOrderIds.has(String(o.id)) ? "checked" : ""}>\n          <span>${o.status !== "Selesai" ? "Pilih untuk dihapus" : "Pesanan Selesai tidak dapat dihapus"}</span>\n        </label>
 
         <div class="order-top">
 
