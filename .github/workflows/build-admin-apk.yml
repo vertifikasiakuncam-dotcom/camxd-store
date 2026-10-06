@@ -59,7 +59,7 @@ jobs:
           rsvg-convert -w 512 -h 512 camxd-admin-icon.svg -o admin-android/app/src/main/res/drawable-nodpi/camxd_admin_icon.png
           cat > admin-android/app/src/main/res/drawable/splash_background.xml <<'EOF'
           <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-            <item android:drawable="#080808"/>
+            <item android:drawable="@android:color/black"/>
             <item><bitmap android:src="@drawable/camxd_admin_icon" android:gravity="center"/></item>
           </layer-list>
           EOF
