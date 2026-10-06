@@ -627,3 +627,11 @@ html{scroll-padding-top:90px}
   .brand img{width:44px;height:44px}
   .cart-btn{padding:7px 9px}
 }
+
+
+/* V25 — Force mobile menu visibility */
+@media screen and (max-width:900px){
+  header.topbar button.menu-btn{display:block!important}
+  header.topbar nav#navMenu{display:none!important}
+  header.topbar nav#navMenu.open{display:flex!important}
+}
