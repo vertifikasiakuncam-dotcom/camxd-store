@@ -831,10 +831,41 @@ async function showDashboard(){
     return;
   }
 
-  $("#adminEmail").textContent =
-    admin.email ||
-    user.email ||
-    "";
+  const meta = user.user_metadata || {};
+  const profileName =
+    meta.full_name ||
+    meta.display_name ||
+    meta.name ||
+    "Admin CAMXD Store";
+  const profileRole = admin.role || meta.role || "Administrator";
+  const profileEmail = admin.email || user.email || "";
+  const avatarUrl = meta.avatar_url || meta.picture || "";
+
+  $("#adminEmail").textContent = profileEmail;
+
+  const profile = $("#adminProfile");
+  const avatar = $("#adminAvatar");
+  if(profile){
+    profile.hidden = false;
+    $("#adminName").textContent = profileName;
+    $("#adminRole").textContent = profileRole;
+    $("#adminProfileEmail").textContent = profileEmail;
+
+    if(avatarUrl){
+      avatar.innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="">';
+      avatar.classList.add("has-image");
+    }else{
+      const initials = String(profileName)
+        .trim()
+        .split(/\s+/)
+        .slice(0,2)
+        .map(x => x[0])
+        .join("")
+        .toUpperCase() || "A";
+      avatar.textContent = initials;
+      avatar.classList.remove("has-image");
+    }
+  }
 
   $("#loginView").hidden = true;
   $("#dashboardView").hidden = false;
