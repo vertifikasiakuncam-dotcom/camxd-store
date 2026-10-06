@@ -885,7 +885,7 @@ async function saveAdminProfile(){
   showAdminToast("Profil tersimpan", "Profil admin berhasil diperbarui.");
 }
 
-function showDashboard(){
+async function showDashboard(){
 
   const {
     data:{user}
