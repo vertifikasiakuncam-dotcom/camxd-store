@@ -558,3 +558,12 @@ html{scroll-padding-top:90px}
 /* V20 — Consistent cart backdrop */
 .cart-backdrop::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.06);pointer-events:none;}
 .cart-drawer{box-shadow:-18px 0 55px rgba(0,0,0,.72);}
+
+
+/* V21 — Mobile performance guardrails */
+@media(max-width:760px){
+  .topbar,.store-announcement{backdrop-filter:none;-webkit-backdrop-filter:none;}
+  .detail-backdrop,.cart-backdrop,.payment-backdrop{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
+  .product,.featured-card,.trust-card,.deal-banner,.order-check-card,.info-card{box-shadow:0 10px 28px rgba(0,0,0,.28);}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}
