@@ -51,7 +51,7 @@ jobs:
           cat > admin-android/app/build.gradle <<'EOF'
           plugins { id 'com.android.application' }
           android { namespace 'com.camxd.admin'; compileSdk 35
-            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 2; versionName '1.0.1' }
+            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 3; versionName '1.0.2' }
           }
           EOF
           sudo apt-get update -qq
@@ -111,7 +111,7 @@ jobs:
                   return true;
                 }
               });
-              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-8");
+              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-9");
             }
             @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==FILE_REQUEST && fileCallback!=null){
