@@ -484,3 +484,11 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
   border-color:rgba(255,208,0,.65)!important;
   box-shadow:0 0 12px rgba(255,208,0,.12);
 }
+
+
+.order-card .btn.is-busy{
+  opacity:.65!important;
+  cursor:wait!important;
+  border-color:rgba(255,208,0,.65)!important;
+  box-shadow:0 0 12px rgba(255,208,0,.12);
+}
