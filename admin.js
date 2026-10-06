@@ -5,14 +5,14 @@ function syncQuickStatusFilters(){
   });
 }
 
-document.querySelectorAll(".quick-status-btn").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const filter=$("#statusFilter");
-    if(!filter) return;
-    filter.value=btn.dataset.status;
-    syncQuickStatusFilters();
-    renderOrders();
-  });
+document.addEventListener("click",(event)=>{
+  const btn=event.target.closest(".quick-status-btn");
+  if(!btn) return;
+  const filter=$("#statusFilter");
+  if(!filter) return;
+  filter.value=btn.dataset.status;
+  syncQuickStatusFilters();
+  renderOrders();
 });
 
 function updateAdminConnectionStatus(online, polling=false){
