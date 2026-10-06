@@ -345,6 +345,16 @@ async function bulkDeleteOrders(){
   if(!orders.length) return;
   const ok=confirm("HAPUS "+orders.length+" PESANAN SECARA PERMANEN?\n\nPesanan yang dipilih (kecuali Selesai) akan dihapus dari database.\nTindakan ini tidak bisa dibatalkan.");
   if(!ok) return;
+
+  const pending=orders.filter(o=>o.status!=="Dibatalkan");
+  if(pending.length){
+    const prepared=await Promise.all(pending.map(o=>sb.from("orders").update({status:"Dibatalkan"}).eq("id",Number(o.id))));
+    const failedPrepare=prepared.filter(r=>r.error);
+    if(failedPrepare.length){
+      alert("Gagal menyiapkan "+failedPrepare.length+" pesanan. Tidak ada penghapusan untuk pesanan yang gagal disiapkan.");
+      return;
+    }
+  }
   const btn=$("#bulkDeleteOrdersBtn");
   if(btn){btn.disabled=true;btn.textContent="⏳ Menghapus...";}
   const results=await Promise.all(orders.map(async o=>{
