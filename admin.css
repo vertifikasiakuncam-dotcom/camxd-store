@@ -131,3 +131,51 @@ input:focus,select:focus{border-color:var(--yellow)}
 @media(max-width:800px){
   .new-order-alert{grid-column:1/-1;justify-content:center}
 }
+
+
+/* CAMXD ADMIN PREMIUM POLISH */
+:root{--yellow:#ffd000;--yellow-soft:rgba(255,208,0,.10);--green:#76e08b;--red:#ff7b7b;--blue:#74b9ff}
+body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transparent 30%),radial-gradient(circle at 100% 20%,rgba(255,208,0,.06),transparent 25%),var(--bg)}
+.admin-shell{max-width:1240px}
+.admin-head{padding:6px 2px 4px}
+.admin-head h1{letter-spacing:-.8px}
+.stats{gap:12px}
+.stat{position:relative;overflow:hidden;min-height:122px;background:linear-gradient(145deg,rgba(24,24,24,.98),rgba(10,10,10,.98));box-shadow:0 10px 28px rgba(0,0,0,.16);transition:transform .18s ease,border-color .18s ease}
+.stat:hover{transform:translateY(-2px);border-color:#444}
+.stat:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-35px;bottom:-45px;background:var(--yellow-soft)}
+.stat .stat-icon{font-size:20px;margin-bottom:12px;filter:saturate(.9)}
+.stat span{font-size:12px;font-weight:800;letter-spacing:.2px}
+.stat strong{font-size:27px;letter-spacing:-.5px}
+.stat-revenue strong,.stat-today-revenue strong{font-size:23px}
+.stat-done{border-color:rgba(118,224,139,.22)}
+.stat-done strong{color:var(--green)}
+.stat-revenue{border-color:rgba(255,208,0,.28)}
+.stat-today-revenue{border-color:rgba(255,208,0,.22)}
+.admin-overview,.orders-panel,.products-panel{box-shadow:0 12px 35px rgba(0,0,0,.14)}
+.overview-filters input,.overview-filters .btn{height:46px}
+.overview-filters .btn{display:flex;align-items:center;justify-content:center}
+.order-card{background:linear-gradient(145deg,#0d0d0d,#090909);box-shadow:0 8px 25px rgba(0,0,0,.12);transition:border-color .18s ease,transform .18s ease}
+.order-card:hover{border-color:#444}
+.status.process{color:#74b9ff;border-color:rgba(116,185,255,.35)}
+.delivery-box{margin-top:15px;padding-top:14px;border-top:1px solid #252525}
+.delivery-input{width:100%;background:#080808;color:#fff;border:1px solid #3b3b3b;border-radius:14px;padding:13px;resize:vertical;min-height:120px;font-family:inherit;line-height:1.45}
+.delivery-input:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,208,0,.07)}
+.delivery-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.delivery-actions .btn{flex:1;min-width:150px;text-align:center}
+.delivery-note{display:block;color:#777;margin-top:9px;line-height:1.4}
+@media(max-width:800px){
+  .admin-shell{padding:12px 9px 36px}
+  .admin-head h1{font-size:32px}
+  .head-actions{display:grid;grid-template-columns:1fr 1fr}
+  .head-actions .new-order-alert{grid-column:1/-1}
+  .head-actions .btn{width:100%;text-align:center}
+  .stats{gap:8px}
+  .stat{min-height:112px;padding:14px}
+  .stat strong{font-size:23px}
+  .stat-revenue strong,.stat-today-revenue strong{font-size:20px}
+  .orders-panel,.admin-overview,.products-panel{padding:15px}
+  .order-card{padding:14px}
+  .delivery-actions{display:grid;grid-template-columns:1fr 1fr}
+  .delivery-actions .send-wa{grid-column:1/-1}
+  .actions{gap:7px}
+}
