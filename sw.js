@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-store-v6";
+const CACHE_NAME="camxd-store-v7";
 const APP_SHELL=[
   "./",
   "./index.html",
