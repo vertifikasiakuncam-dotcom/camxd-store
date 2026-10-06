@@ -291,7 +291,13 @@
             <button type="button" id="bulkDeleteOrdersBtn" class="btn danger" disabled>🗑️ Hapus Terpilih (0)</button>
           </div>
 
-          <select id="statusFilter">
+          <div class="quick-status-filters" aria-label="Filter cepat pesanan">
+  <button type="button" class="quick-status-btn active" data-status="all">📋 Semua</button>
+  <button type="button" class="quick-status-btn" data-status="Menunggu Pembayaran">🟡 Menunggu Bayar</button>
+  <button type="button" class="quick-status-btn" data-status="Menunggu Verifikasi">🔵 Verifikasi</button>
+  <button type="button" class="quick-status-btn" data-status="Sedang Diproses">⚙️ Diproses</button>
+  <button type="button" class="quick-status-btn" data-status="Selesai">🟢 Selesai</button>
+</div><select id="statusFilter">
             <option value="all">Semua Status</option>
             <option>Menunggu Pembayaran</option>
             <option>Menunggu Verifikasi</option>
