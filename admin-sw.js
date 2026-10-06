@@ -1,9 +1,10 @@
-const CACHE_NAME="camxd-admin-v2";
+const CACHE_NAME="camxd-admin-v3";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
   "./admin.js",
   "./admin-pwa.js",
+  "./admin-profile.js",
   "./admin-manifest.webmanifest",
   "./supabase-config.js",
   "./camxd-logo.png"
