@@ -291,29 +291,29 @@ function buildWhatsAppUrl(order, details){
   ).join("\n");
 
   const message = [
-    "Halo " + (order.customer_name || "Kak") + " 👋",
+    "Halo " + (order.customer_name || "Kak") + " \u{1F44B}",
     "",
-    "━━━━━━━━━━━━━━━━━━",
-    "🛍️ CAMXD STORE",
-    "📦 PESANAN SELESAI",
-    "━━━━━━━━━━━━━━━━━━",
+    "==================",
+    "\u{1F6CD}\u{FE0F} CAMXD STORE",
+    "\u{1F4E6} PESANAN SELESAI",
+    "==================",
     "",
-    "🆔 ID Pesanan : " + order.order_id,
-    "📌 Status     : Selesai ✅",
+    "\u{1F194} ID Pesanan : " + order.order_id,
+    "\u{1F4CC} Status     : Selesai \u{2705}",
     "",
-    "🛒 DETAIL PESANAN",
+    "\u{1F6D2} DETAIL PESANAN",
     itemText || "   1. Pesanan CAMXD Store",
     "",
-    "💰 TOTAL PEMBAYARAN",
+    "\u{1F4B0} TOTAL PEMBAYARAN",
     "   " + (order.total_label || rupiah(order.total)),
     "",
-    "🔐 DETAIL PRODUK / AKUN",
+    "\u{1F510} DETAIL PRODUK / AKUN",
     details || "Email: -\nPassword: -\nKode: -\nMasa aktif: -",
     "",
-    "━━━━━━━━━━━━━━━━━━",
-    "📌 Mohon simpan informasi akun/kode ini dengan baik.",
+    "==================",
+    "\u{1F4CC} Mohon simpan informasi akun/kode ini dengan baik.",
     "",
-    "Terima kasih telah berbelanja di CAMXD Store 🙏",
+    "Terima kasih telah berbelanja di CAMXD Store \u{1F64F}",
     "Jika ada kendala, silakan hubungi admin kami.",
     "",
     "— CAMXD STORE —"
@@ -433,7 +433,7 @@ function renderOrders(){
 
         <details class="delivery-details" ${o.delivery_details ? "open" : ""}>
           <summary>
-            <span>🔐 Detail Produk / Akun</span>
+            <span>\u{1F510} Detail Produk / Akun</span>
             <small>${o.delivery_details ? "Tersimpan" : "Belum diisi"}</small>
           </summary>
 
@@ -1271,7 +1271,7 @@ async function deleteProduct(id){
 function showProductsPanel(){
   $("#productsPanel").hidden = false;
   $(".orders-panel").hidden = true;
-  $("#productsBtn").textContent = "🛍️ Produk Aktif";
+  $("#productsBtn").textContent = "\u{1F6CD}\u{FE0F} Produk Aktif";
   loadProductsAdmin();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -1279,7 +1279,7 @@ function showProductsPanel(){
 function showOrdersPanel(){
   $("#productsPanel").hidden = true;
   $(".orders-panel").hidden = false;
-  $("#productsBtn").textContent = "🛍️ Kelola Produk";
+  $("#productsBtn").textContent = "\u{1F6CD}\u{FE0F} Kelola Produk";
   loadOrders();
   window.scrollTo({top:0,behavior:"smooth"});
 }
