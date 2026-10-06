@@ -1,3 +1,13 @@
+function updateAdminConnectionStatus(online, polling=false){
+  const box=$("#adminConnectionStatus");
+  if(!box) return;
+  box.classList.toggle("online", !!online);
+  box.classList.toggle("offline", !online);
+  box.classList.toggle("polling", !!polling);
+  const label=box.querySelector(".connection-label");
+  if(label) label.textContent = online ? (polling ? "Online • Auto cek aktif" : "Online") : "Offline";
+}
+
 function normalizeRefreshButton(){
   const btn=$("#refreshBtn");
   if(!btn) return;
@@ -193,6 +203,7 @@ async function loadOrders(){
   }
 
   allOrders = nextOrders;
+  updateAdminConnectionStatus(true, true);
 
   updateStats();
   renderOrders();
@@ -1025,6 +1036,7 @@ let orderPollingTimer = null;
 
 function startOrderPolling(){
   clearInterval(orderPollingTimer);
+  updateAdminConnectionStatus(true, true);
   orderPollingTimer = setInterval(async()=>{
     if(!document.hidden) await loadOrders();
   }, 30000);
