@@ -298,3 +298,11 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
 @media(max-width:800px){
  .admin-toast{top:12px;right:10px;width:calc(100vw - 20px);padding:13px 14px}
 }
+
+
+/* STAGE 5 — PERFORMANCE STATS */
+.stat-completion strong{color:#63e6a8}
+.stat-pending-value strong{color:#ffd000}
+@media(max-width:800px){
+  .stat-completion strong,.stat-pending-value strong{font-size:20px}
+}
