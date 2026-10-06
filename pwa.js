@@ -2,7 +2,7 @@ let deferredInstallPrompt=null;
 
 function showInstallButton(show){
   const btn=document.getElementById("installApp");
-  const sectionBtn=document.getElementById("installAppSection");
+  const sectionBtn=document.getElementById("installPwaSection");
   if(btn) btn.hidden=false;
   if(sectionBtn) sectionBtn.disabled=false;
 }
@@ -46,10 +46,10 @@ window.addEventListener("appinstalled",()=>{
 
 document.addEventListener("DOMContentLoaded",()=>{
   const install=document.getElementById("installApp");
-  const sectionInstall=document.getElementById("installAppSection");
+  const sectionInstall=document.getElementById("installPwaSection");
   const mobileCart=document.getElementById("mobileCart");
 
-  install?.addEventListener("click",installStoreApp);
+  install?.addEventListener("click",()=>{});
   sectionInstall?.addEventListener("click",installStoreApp);
 
   mobileCart?.addEventListener("click",()=>{
