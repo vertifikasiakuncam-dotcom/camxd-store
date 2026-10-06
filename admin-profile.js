@@ -27,7 +27,7 @@
     if(!allowed.includes(file.type)) throw new Error("Format foto harus JPG, PNG, atau WebP.");
     const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
     const path=userId+"/avatar-"+Date.now()+"."+ext;
-    const {error:uploadError}=await sb.storage.from("avatars").upload(path,file,{upsert:true,contentType:file.type});
+    const {error:uploadError}=await sb.storage.from("avatars").upload(path,file,{upsert:false,contentType:file.type});
     if(uploadError) throw uploadError;
     const {data}=sb.storage.from("avatars").getPublicUrl(path);
     return data.publicUrl;
