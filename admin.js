@@ -27,6 +27,7 @@ const STATUSES = [
 ];
 
 let allOrders = [];
+let selectedOrderIds = new Set();
 
 let seenOrderIds = new Set();
 let unreadOrderIds = new Set();
@@ -322,6 +323,43 @@ function buildWhatsAppUrl(order, details){
   return "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
 }
 
+function updateBulkDeleteUi(){
+  const btn=$("#bulkDeleteOrdersBtn");
+  const selectAll=$("#selectAllOrdersBtn");
+  if(btn){
+    btn.disabled=selectedOrderIds.size===0;
+    btn.textContent="🗑️ Hapus Terpilih ("+selectedOrderIds.size+")";
+  }
+  if(selectAll){
+    const eligible=allOrders.filter(o=>o.status==="Dibatalkan").length;
+    selectAll.disabled=eligible===0;
+    selectAll.textContent=eligible && selectedOrderIds.size===eligible ? "☑️ Batalkan Pilih Semua" : "☑️ Pilih Semua Dibatalkan";
+  }
+}
+
+async function bulkDeleteOrders(){
+  const ids=[...selectedOrderIds].map(Number);
+  if(!ids.length) return;
+  const orders=allOrders.filter(o=>ids.includes(Number(o.id)) && o.status==="Dibatalkan");
+  if(!orders.length) return;
+  const ok=confirm("HAPUS "+orders.length+" PESANAN SECARA PERMANEN?\n\nPesanan yang dipilih berstatus Dibatalkan dan akan dihapus dari database.\nTindakan ini tidak bisa dibatalkan.");
+  if(!ok) return;
+  const btn=$("#bulkDeleteOrdersBtn");
+  if(btn){btn.disabled=true;btn.textContent="⏳ Menghapus...";}
+  const results=await Promise.all(orders.map(async o=>{
+    const {data,error}=await sb.rpc("delete_order_admin",{p_order_id:Number(o.id)});
+    return {o,data,error};
+  }));
+  const failed=results.filter(r=>r.error || r.data!==true);
+  const deletedIds=results.filter(r=>!r.error && r.data===true).map(r=>String(r.o.id));
+  selectedOrderIds=new Set([...selectedOrderIds].filter(id=>!deletedIds.includes(String(id))));
+  allOrders=allOrders.filter(o=>!deletedIds.includes(String(o.id)));
+  if(failed.length) alert("Sebagian pesanan gagal dihapus: "+failed.length+" pesanan.");
+  else alert(orders.length+" pesanan berhasil dihapus.");
+  updateStats();
+  renderOrders();
+}
+
 function renderOrders(){
 
   const filter=$("#statusFilter").value;
@@ -368,7 +406,7 @@ function renderOrders(){
           : "#";
 
       return `
-      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">
+      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">\n        <label class="order-select">\n          <input type="checkbox" class="order-check" data-id="${o.id}" ${o.status === "Dibatalkan" ? "" : "disabled"} ${selectedOrderIds.has(String(o.id)) ? "checked" : ""}>\n          <span>${o.status === "Dibatalkan" ? "Pilih untuk dihapus" : "Hanya pesanan Dibatalkan yang dapat dihapus"}</span>\n        </label>
 
         <div class="order-top">
 
@@ -542,6 +580,8 @@ Masa aktif: 30 hari"
       `;
 
     }).join("");
+
+  document.querySelectorAll(".order-check").forEach(el=>{ el.addEventListener("change",()=>{ const id=String(el.dataset.id); if(el.checked) selectedOrderIds.add(id); else selectedOrderIds.delete(id); updateBulkDeleteUi(); }); });
 
   document
     .querySelectorAll(".status-select")
@@ -1436,4 +1476,17 @@ $("#clearFiltersBtn")?.addEventListener("click",()=>{
   $("#dateTo").value="";
   renderOrders();
   renderOverview();
+});
+
+
+document.addEventListener("DOMContentLoaded",()=>{
+  $("#selectAllOrdersBtn")?.addEventListener("click",()=>{
+    const eligible=allOrders.filter(o=>o.status==="Dibatalkan").map(o=>String(o.id));
+    if(eligible.length && eligible.every(id=>selectedOrderIds.has(id))) eligible.forEach(id=>selectedOrderIds.delete(id));
+    else eligible.forEach(id=>selectedOrderIds.add(id));
+    renderOrders();
+    updateBulkDeleteUi();
+  });
+  $("#bulkDeleteOrdersBtn")?.addEventListener("click",bulkDeleteOrders);
+  updateBulkDeleteUi();
 });
