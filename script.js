@@ -134,7 +134,10 @@ async function checkoutCart(){
   const lines=cart.map((x,i)=>(i+1)+". "+x.name+" — "+x.plan+" x"+x.qty+" = "+(x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan")).join("\n");
   const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(cartTotal());
   const orderItems=cart.map(x=>({product_id:x.productId,name:x.name,plan:x.plan,price:Number(x.price||0),qty:Number(x.qty||1)}));
-  const {error}=await sb.from("orders").insert({order_id:orderId,customer_name:name,customer_wa:wa,items:orderItems,total:cartTotal(),total_label:total,status:"Menunggu Pembayaran"});
+  if(!navigator.onLine) throw new Error("iPhone sedang tidak terhubung ke internet.");
+  const insertPromise=sb.from("orders").insert({order_id:orderId,customer_name:name,customer_wa:wa,items:orderItems,total:cartTotal(),total_label:total,status:"Menunggu Pembayaran"});
+  const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Koneksi ke server terlalu lama. Silakan cek internet iPhone lalu coba lagi.")),12000));
+  const {error}=await Promise.race([insertPromise,timeoutPromise]);
   if(error)throw error;
   pendingOrder={orderId,name,wa,lines,total};
   $("#paymentOrderId").textContent=orderId;
