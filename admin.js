@@ -1,3 +1,20 @@
+function syncQuickStatusFilters(){
+  const current=$("#statusFilter")?.value || "all";
+  document.querySelectorAll(".quick-status-btn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.status===current);
+  });
+}
+
+document.querySelectorAll(".quick-status-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const filter=$("#statusFilter");
+    if(!filter) return;
+    filter.value=btn.dataset.status;
+    syncQuickStatusFilters();
+    renderOrders();
+  });
+});
+
 function updateAdminConnectionStatus(online, polling=false){
   const box=$("#adminConnectionStatus");
   if(!box) return;
