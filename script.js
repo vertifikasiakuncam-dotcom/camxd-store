@@ -73,6 +73,7 @@ async function loadProducts(){
       products=remoteProducts;
       render();
       renderFeaturedProducts();
+      renderSavedProducts();
     }
   }catch(error){
     console.warn("Katalog Supabase gagal dimuat, memakai katalog lokal:",error);
@@ -211,6 +212,28 @@ function updateFavoriteButton(){
   btn.setAttribute("aria-pressed",String(active));
 }
 
+function renderSavedProducts(){
+  const section=$("#tersimpan"), box=$("#savedProducts");
+  if(!section||!box)return;
+  const ids=getFavorites();
+  const list=ids.map(id=>products.find(p=>p.id===id)).filter(Boolean);
+  section.hidden=!list.length;
+  if(!list.length){box.innerHTML="";return;}
+  box.innerHTML=list.map(p=>{
+    const price=p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan";
+    return `<article class="saved-card">
+      <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">
+      <div class="saved-card-body">
+        <span class="featured-card-badge">♥ TERSIMPAN</span>
+        <h3>${escapeHtml(p.name)}</h3>
+        <p>${escapeHtml(p.desc||"Produk digital CAMXD Store")}</p>
+        <div class="saved-card-bottom"><strong>${price}</strong><button type="button" class="choose" data-saved-id="${escapeHtml(p.id)}">Lihat →</button></div>
+      </div>
+    </article>`;
+  }).join("");
+  box.querySelectorAll("[data-saved-id]").forEach(btn=>btn.onclick=()=>openDetail(btn.dataset.savedId));
+}
+
 function toggleFavorite(){
   if(!selectedProduct)return;
   const list=getFavorites();
@@ -222,6 +245,7 @@ function toggleFavorite(){
   }
   saveFavorites(list);
   updateFavoriteButton();
+  renderSavedProducts();
 }
 
 function addToCart(){
@@ -454,6 +478,7 @@ updateCart();
 render();
 renderFeaturedProducts();
 openSharedProduct();
+renderSavedProducts();
 loadProducts();
 
 
