@@ -43,7 +43,6 @@ html{scroll-padding-top:90px}
 
 .btn:hover,.choose:hover{filter:brightness(1.04);box-shadow:0 10px 30px rgba(255,208,0,.16)}
 
-
 .app-install{background:rgba(255,208,0,.08);color:var(--yellow);margin-top:0}
 .mobile-bottom-nav{display:none}
 @media(max-width:760px){
@@ -65,7 +64,6 @@ html{scroll-padding-top:90px}
   .mobile-bottom-nav button span{font-family:Inter,Arial,sans-serif}
   .mobile-bottom-nav button{font-size:19px}
 }
-
 
 /* ORDER TRACKING — Customer */
 .order-check-section{padding-top:20px}
@@ -102,7 +100,6 @@ html{scroll-padding-top:90px}
  .order-result-total strong{font-size:22px}
 }
 
-
 .store-announcement{
   min-height:34px;display:flex;align-items:center;justify-content:center;gap:9px;
   padding:7px 16px;background:linear-gradient(90deg,#090909,#181300,#090909);
@@ -123,7 +120,6 @@ html{scroll-padding-top:90px}
   .back-top{right:14px;bottom:130px}
 }
 
-
 .featured-store{padding-top:22px;padding-bottom:28px}
 .featured-head{margin-bottom:16px}
 .featured-head .text-link{color:var(--yellow);font-weight:800;font-size:13px;text-decoration:none}
@@ -142,7 +138,6 @@ html{scroll-padding-top:90px}
 @media(max-width:900px){.featured-products{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.featured-products{grid-template-columns:1fr}.featured-card{grid-template-columns:100px 1fr}.featured-card img{width:100px;height:82px}}
 
-
 .deals-section{padding-top:8px;padding-bottom:28px}
 .deal-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px 24px;border:1px solid rgba(255,208,0,.28);border-radius:20px;background:radial-gradient(circle at 90% 20%,rgba(255,208,0,.12),transparent 36%),linear-gradient(120deg,rgba(20,20,20,.96),rgba(10,10,10,.96));overflow:hidden}
 .deal-banner:after{content:"";position:absolute;width:180px;height:180px;right:-80px;bottom:-100px;border-radius:50%;border:1px solid rgba(255,208,0,.16)}
@@ -150,8 +145,8 @@ html{scroll-padding-top:90px}
 .deal-points{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;position:relative;z-index:1}.deal-points span{padding:9px 11px;border:1px solid #333;border-radius:999px;background:#0c0c0c;color:#ddd;font-size:11px}
 @media(max-width:700px){.deal-banner{display:block;padding:18px}.deal-copy h2{font-size:19px}.deal-points{justify-content:flex-start;margin-top:14px}.deal-points span{font-size:10px;padding:7px 9px}}
 @media(max-width:700px){.floating-wa{right:10px;bottom:76px;width:42px;height:42px;padding:0;justify-content:center;border-radius:50%;box-shadow:0 7px 20px rgba(0,0,0,.5)}.floating-wa span{font-size:19px}.floating-wa b{display:none}}
-/* V7 — customer checkout persistence + order timeline */\n.order-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 8px;padding:14px;border:1px solid #292929;border-radius:16px;background:#090909}.timeline-step{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;color:#555;font-size:10px;line-height:1.25}.timeline-step i{display:flex;width:27px;height:27px;align-items:center;justify-content:center;border:1px solid #444;border-radius:50%;font-style:normal;font-weight:900;background:#111}.timeline-step.active{color:#ddd}.timeline-step.active i{color:#111;background:var(--yellow);border-color:var(--yellow)}.order-timeline.cancelled{grid-template-columns:1fr}.order-timeline.cancelled .timeline-step.active{color:#ff8a88}.order-timeline.cancelled .timeline-step.active i{background:#ff7675;border-color:#ff7675}@media(max-width:760px){.order-timeline{gap:3px;padding:11px 7px}.timeline-step{font-size:9px}.timeline-step i{width:24px;height:24px}}\n
-
+/* V7 — customer checkout persistence + order timeline */
+.order-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 8px;padding:14px;border:1px solid #292929;border-radius:16px;background:#090909}.timeline-step{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;color:#555;font-size:10px;line-height:1.25}.timeline-step i{display:flex;width:27px;height:27px;align-items:center;justify-content:center;border:1px solid #444;border-radius:50%;font-style:normal;font-weight:900;background:#111}.timeline-step.active{color:#ddd}.timeline-step.active i{color:#111;background:var(--yellow);border-color:var(--yellow)}.order-timeline.cancelled{grid-template-columns:1fr}.order-timeline.cancelled .timeline-step.active{color:#ff8a88}.order-timeline.cancelled .timeline-step.active i{background:#ff7675;border-color:#ff7675}@media(max-width:760px){.order-timeline{gap:3px;padding:11px 7px}.timeline-step{font-size:9px}.timeline-step i{width:24px;height:24px}}
 
 /* V8 — Professional Store UI */
 .hero-card{
@@ -209,7 +204,6 @@ html{scroll-padding-top:90px}
   .product-body{min-height:0}
 }
 
-
 /* V9 — Mobile product grid */
 @media(max-width:620px){
   .products{
@@ -260,7 +254,6 @@ html{scroll-padding-top:90px}
     font-size:8px;
   }
 }
-
 
 /* V10 — Two-column catalog on phones and narrow tablets */
 @media(max-width:760px){
@@ -313,7 +306,6 @@ html{scroll-padding-top:90px}
   }
 }
 
-
 /* V10 — Enforce 2-column catalog on tablet/mobile */
 @media(max-width:900px){
   .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -321,7 +313,6 @@ html{scroll-padding-top:90px}
 @media(max-width:620px){
   .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 }
-
 
 /* V11 — Mobile/compact catalog fallback */
 @media(max-width:1000px){
@@ -334,7 +325,6 @@ html{scroll-padding-top:90px}
   .products{gap:8px}
   .product-body{padding-left:9px;padding-right:9px}
 }
-
 
 /* V12 — Compact mobile navigation */
 @media(max-width:760px){
@@ -362,7 +352,6 @@ html{scroll-padding-top:90px}
     bottom:120px;
   }
 }
-
 
 /* V13 — Premium checkout & order tracking */
 .payment-modal{
@@ -455,12 +444,10 @@ html{scroll-padding-top:90px}
   .order-timeline:before{left:12%;right:12%;top:24px}
 }
 
-
 .empty{
   border:1px dashed #444;border-radius:20px;background:rgba(10,10,10,.72);
   padding:42px 20px;margin-top:16px;
 }
-
 
 /* V15 — Trust & social proof */
 .trust-section{position:relative}
@@ -523,7 +510,6 @@ html{scroll-padding-top:90px}
   .trust-strip div:nth-child(-n+2){border-bottom:1px solid #222}
 }
 
-
 /* V16 — FAQ polish */
 .info-card details{}
 .info-card details[open]{background:rgba(255,208,0,.025);border-radius:12px;padding-left:12px;padding-right:12px}
@@ -538,16 +524,13 @@ html{scroll-padding-top:90px}
  .info-card h2{font-size:26px}
 }
 
-
 /* V19 — Cleaner product detail backdrop */
 .detail-backdrop::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.10);pointer-events:none;}
 .detail-modal{z-index:1;}
 
-
 /* V20 — Consistent cart backdrop */
 .cart-backdrop::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.06);pointer-events:none;}
 .cart-drawer{box-shadow:-18px 0 55px rgba(0,0,0,.72);}
-
 
 /* V21 — Mobile performance guardrails */
 @media(max-width:760px){
