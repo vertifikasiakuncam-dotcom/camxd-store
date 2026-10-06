@@ -110,7 +110,8 @@ function restoreCart(){try{const raw=localStorage.getItem("camxd_cart_v1");const
 function render(){
  const q=$("#search").value.trim().toLowerCase();
  const list=products.filter(p=>(activeFilter==="all"||p.category===activeFilter)&&(!q||(`${p.name} ${p.desc}`).toLowerCase().includes(q)));
- $("#productCount").textContent=`${list.length} produk`;
+ $("#productCount").textContent=q ? `${list.length} hasil` : `${list.length} produk`;
+ const clear=$("#searchClear"); if(clear) clear.hidden=!q;
  $("#empty").hidden=list.length>0;
  $("#products").innerHTML=list.map(p=>`
   <article class="product">
@@ -122,6 +123,7 @@ function render(){
    </div>
   </article>`).join("");
  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openDetail(b.dataset.id));
+ const clear=$("#searchClear"); if(clear) clear.onclick=()=>{const input=$("#search");input.value="";render();input.focus();};
 }
 
 function openDetail(id){
