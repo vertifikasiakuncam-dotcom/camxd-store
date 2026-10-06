@@ -56,12 +56,11 @@ jobs:
         run: |
           set -e
           mkdir -p "$HOME/.bubblewrap"
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
-          {
-            "jdkPath": "$JAVA_HOME_17_X64",
-            "androidSdkPath": "$ANDROID_HOME"
-          }
-          EOF
+
+          # Let Bubblewrap write/validate its own config instead of relying
+          # on a manually-created config that older Bubblewrap versions may reject.
+          bubblewrap updateConfig --jdkPath "$JAVA_HOME_17_X64"
+          bubblewrap updateConfig --androidSdkPath "$ANDROID_HOME"
           bubblewrap doctor
 
       - name: Prepare TWA project
