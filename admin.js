@@ -973,10 +973,21 @@ $("#logoutBtn")
   );
 
 $("#refreshBtn")
-  .addEventListener(
-    "click",
-    loadOrders
-  );
+  .addEventListener("click", async ()=>{
+    const btn=$("#refreshBtn");
+    if(!btn || btn.dataset.working==="1") return;
+    btn.dataset.working="1";
+    btn.classList.add("is-working");
+    const label=btn.querySelector(".refresh-label");
+    if(label) label.textContent="Memuat...";
+    try{
+      await loadOrders();
+    }finally{
+      btn.dataset.working="0";
+      btn.classList.remove("is-working");
+      if(label) label.textContent="Refresh";
+    }
+  });
 
 $("#statusFilter")
   .addEventListener(
