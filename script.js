@@ -16,58 +16,51 @@ const FALLBACK_PRODUCTS=[
 ];
 
 async function loadProducts(){
-  const {data: productRows, error: productError}=await sb
-    .from("products")
-    .select("id,product_key,name,description,category,image_url,badge,detail,sort_order")
-    .eq("is_active",true)
-    .order("sort_order",{ascending:true});
-
-  if(productError){
-    console.error("Gagal mengambil produk dari Supabase:",productError);
-    products=FALLBACK_PRODUCTS;
-    render();
-    renderFeaturedProducts();
-    return;
+  const featuredBox=$("#featuredProducts");
+  if(featuredBox){
+    featuredBox.innerHTML='<div class="featured-loading"><span class="featured-spinner"></span><span>Menyiapkan produk unggulan...</span></div>';
   }
 
-  const {data: planRows, error: planError}=await sb
-    .from("product_plans")
-    .select("product_id,plan_name,price,sort_order")
-    .eq("is_active",true)
-    .order("sort_order",{ascending:true});
-
-  if(planError){
-    console.error("Gagal mengambil paket produk dari Supabase:",planError);
-    products=FALLBACK_PRODUCTS;
-    render();
-    return;
-  }
-
-  const plansByProduct={};
-  (planRows||[]).forEach(row=>{
-    if(!plansByProduct[row.product_id]) plansByProduct[row.product_id]=[];
-    plansByProduct[row.product_id].push([
-      row.plan_name,
-      Number(row.price||0)
+  try{
+    const [productResult,planResult]=await Promise.all([
+      sb.from("products")
+        .select("id,product_key,name,description,category,image_url,badge,detail,sort_order")
+        .eq("is_active",true)
+        .order("sort_order",{ascending:true}),
+      sb.from("product_plans")
+        .select("product_id,plan_name,price,sort_order")
+        .eq("is_active",true)
+        .order("sort_order",{ascending:true})
     ]);
-  });
 
-  products=(productRows||[]).map(p=>({
-    id:p.product_key,
-    dbId:p.id,
-    name:p.name,
-    desc:p.description,
-    category:p.category,
-    image:p.image_url,
-    badge:p.badge,
-    plans:plansByProduct[p.id]||[],
-    detail:p.detail
-  })).filter(p=>p.plans.length);
+    if(productResult.error) throw productResult.error;
+    if(planResult.error) throw planResult.error;
+
+    const plansByProduct={};
+    (planResult.data||[]).forEach(row=>{
+      if(!plansByProduct[row.product_id]) plansByProduct[row.product_id]=[];
+      plansByProduct[row.product_id].push([row.plan_name,Number(row.price||0)]);
+    });
+
+    products=(productResult.data||[]).map(p=>({
+      id:p.product_key,
+      dbId:p.id,
+      name:p.name,
+      desc:p.description,
+      category:p.category,
+      image:p.image_url,
+      badge:p.badge,
+      plans:plansByProduct[p.id]||[],
+      detail:p.detail
+    })).filter(p=>p.plans.length);
+  }catch(error){
+    console.error("Gagal mengambil produk dari Supabase:",error);
+    products=FALLBACK_PRODUCTS;
+  }
 
   render();
   renderFeaturedProducts();
 }
-
 
 
 
