@@ -341,6 +341,7 @@ async function bulkDeleteOrders(){
   const ids=[...selectedOrderIds].map(Number);
   if(!ids.length) return;
   const orders=allOrders.filter(o=>ids.includes(Number(o.id)) && o.status!=="Selesai");
+  // Pesanan non-Selesai akan disiapkan sebagai Dibatalkan sebelum proses penghapusan.
   if(!orders.length) return;
   const ok=confirm("HAPUS "+orders.length+" PESANAN SECARA PERMANEN?\n\nPesanan yang dipilih (kecuali Selesai) akan dihapus dari database.\nTindakan ini tidak bisa dibatalkan.");
   if(!ok) return;
