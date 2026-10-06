@@ -43,8 +43,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
 
     const message =
-      "Instalasi otomatis belum tersedia di browser ini.\\n\\n" +
-      "Android Chrome: tekan ⋮ → Tambahkan ke layar utama / Install app.\\n" +
+      "Instalasi otomatis belum tersedia di browser ini.\n\n" +
+      "Android Chrome: tekan ⋮ → Tambahkan ke layar utama / Install app.\n" +
       "Jika pilihan itu belum muncul, buka halaman Admin melalui Chrome dan pastikan halaman sudah selesai dimuat.";
     if(typeof window.showAdminToast==="function"){
       window.showAdminToast("Install Admin",message);
