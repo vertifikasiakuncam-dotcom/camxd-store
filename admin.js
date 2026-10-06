@@ -139,6 +139,14 @@ function updateStats(){
   const average = done.length > 0 ? Math.round(revenue / done.length) : 0;
   $("#statAverage").textContent = rupiah(average);
 
+  const todayKey = new Date().toLocaleDateString("en-CA");
+  const todayOrders = allOrders.filter(o => String(o.created_at || "").slice(0,10) === todayKey);
+  const todayRevenue = todayOrders
+    .filter(o => o.status === "Selesai")
+    .reduce((s,o) => s + Number(o.total || 0), 0);
+  if($("#statToday")) $("#statToday").textContent = todayOrders.length;
+  if($("#statTodayRevenue")) $("#statTodayRevenue").textContent = rupiah(todayRevenue);
+
   renderOverview();
   updateNewOrderAlert();
 }
@@ -148,7 +156,7 @@ function getFilteredOrders(){
   const from=$("#dateFrom")?.value||"";
   const to=$("#dateTo")?.value||"";
   return allOrders.filter(o=>{
-    const text=[o.order_id,o.customer_name,o.customer_wa].join(" ").toLowerCase();
+    const text=[o.order_id,o.customer_name,o.customer_wa,...(Array.isArray(o.items)?o.items.map(x=>x.name||""):[])].join(" ").toLowerCase();
     const day=String(o.created_at||"").slice(0,10);
     return (!q||text.includes(q)) && (!from||day>=from) && (!to||day<=to);
   });
@@ -243,7 +251,7 @@ function renderOrders(){
   const from=$("#dateFrom")?.value||"";
   const to=$("#dateTo")?.value||"";
   const orders=base.filter(o=>{
-    const text=[o.order_id,o.customer_name,o.customer_wa].join(" ").toLowerCase();
+    const text=[o.order_id,o.customer_name,o.customer_wa,...(Array.isArray(o.items)?o.items.map(x=>x.name||""):[])].join(" ").toLowerCase();
     const day=String(o.created_at||"").slice(0,10);
     return (!query||text.includes(query)) && (!from||day>=from) && (!to||day<=to);
   });
@@ -487,14 +495,21 @@ Masa aktif: 30 hari"
     .querySelectorAll(".send-wa")
     .forEach(el => {
 
-      el.addEventListener(
-        "click",
-        () =>
-          saveDelivery(
-            Number(el.dataset.id),
-            true
-          )
-      );
+      el.addEventListener("click", () => {
+        const order = allOrders.find(o => Number(o.id) === Number(el.dataset.id));
+        if(!order) return;
+
+        const ok = confirm(
+          "Kirim pesanan melalui WhatsApp?\\n\\n" +
+          "ID: " + (order.order_id || "-") + "\\n" +
+          "Pelanggan: " + (order.customer_name || "-") + "\\n" +
+          "Status akan diubah menjadi Selesai."
+        );
+
+        if(ok){
+          saveDelivery(Number(el.dataset.id), true);
+        }
+      });
 
     });
 }
