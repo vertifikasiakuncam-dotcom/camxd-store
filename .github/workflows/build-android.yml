@@ -1,6 +1,7 @@
 name: Build CAMXD Store Signed APK
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "index.html"
@@ -9,172 +10,279 @@ on:
       - "pwa.js"
       - "manifest.webmanifest"
       - ".github/workflows/build-android.yml"
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-android:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - name: Configure Android SDK
-        shell: bash
         run: |
           set -e
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          echo "/usr/local/lib/android/sdk/cmdline-tools/16.0/bin" >> "$GITHUB_PATH"
           echo "/usr/local/lib/android/sdk/platform-tools" >> "$GITHUB_PATH"
+          echo "/usr/local/lib/android/sdk/build-tools/35.0.0" >> "$GITHUB_PATH"
+
+      - name: Install Android SDK packages
+        run: |
+          set -e
           SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -type f -name sdkmanager -print -quit)"
           echo "Using sdkmanager: $SDKMANAGER"
           test -n "$SDKMANAGER"
-          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Install Bubblewrap
-        run: npm install -g @bubblewrap/cli
-
-      - name: Configure Bubblewrap
+      - name: Create native Android WebView project
         shell: bash
         run: |
           set -e
-          mkdir -p "$HOME/.bubblewrap"
+          rm -rf store-android
+          mkdir -p store-android/app/src/main/java/com/camxd/store
+          mkdir -p store-android/app/src/main/res/values
+          mkdir -p store-android/app/src/main/res/values-v31
+          mkdir -p store-android/app/src/main/res/drawable-nodpi
 
-          # Bubblewrap validates the SDK root itself. The hosted runner's
-          # cmdline-tools layout does not expose a top-level bin directory,
-          # so Configure Android SDK creates that compatibility link first.
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
+          cp camxd-logo.png store-android/app/src/main/res/drawable-nodpi/camxd_logo.png
+
+          cat > store-android/settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name="CAMXDStore"
+          include(":app")
+          EOF
+
+          cat > store-android/build.gradle <<'EOF'
+          plugins { id 'com.android.application' version '8.7.3' apply false }
+          EOF
+
+          cat > store-android/app/build.gradle <<'EOF'
+          plugins { id 'com.android.application' }
+          android {
+            namespace 'com.camxd.store'
+            compileSdk 35
+            defaultConfig {
+              applicationId 'com.camxd.store'
+              minSdk 23
+              targetSdk 35
+              versionCode 1
+              versionName '1.0.0'
+            }
           }
           EOF
 
-          echo "Bubblewrap config:"
-          cat "$HOME/.bubblewrap/config.json"
-          test -x "$JAVA_HOME/bin/java"
-          test -x "$ANDROID_HOME/bin/sdkmanager"
-          test -x "$ANDROID_HOME/build-tools/36.1.0/apksigner"
+          cat > store-android/app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+            <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+              <item name="android:fontFamily">sans</item>
+              <item name="android:colorAccent">#ffd000</item>
+              <item name="android:statusBarColor">#080808</item>
+              <item name="android:navigationBarColor">#050505</item>
+              <item name="android:windowLightStatusBar">false</item>
+              <item name="android:windowBackground">#080808</item>
+            </style>
+          </resources>
+          EOF
 
-          bubblewrap doctor
+          cat > store-android/app/src/main/res/values-v31/styles.xml <<'EOF'
+          <resources>
+            <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+              <item name="android:fontFamily">sans</item>
+              <item name="android:colorAccent">#ffd000</item>
+              <item name="android:statusBarColor">#080808</item>
+              <item name="android:navigationBarColor">#050505</item>
+              <item name="android:windowLightStatusBar">false</item>
+              <item name="android:windowBackground">#080808</item>
+              <item name="android:windowSplashScreenBackground">#080808</item>
+              <item name="android:windowSplashScreenAnimatedIcon">@drawable/camxd_logo</item>
+              <item name="android:windowSplashScreenAnimationDuration">500</item>
+            </style>
+          </resources>
+          EOF
 
-      - name: Prepare TWA project
-        shell: bash
-        run: |
-          set -e
-          rm -rf android
-          mkdir -p android
+          cat > store-android/app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <application
+              android:theme="@style/AppTheme"
+              android:label="CAMXD STORE"
+              android:icon="@drawable/camxd_logo"
+              android:allowBackup="false"
+              android:usesCleartextTraffic="false">
+              <activity
+                android:name=".MainActivity"
+                android:exported="true"
+                android:screenOrientation="portrait">
+                <intent-filter>
+                  <action android:name="android.intent.action.MAIN"/>
+                  <category android:name="android.intent.category.LAUNCHER"/>
+                </intent-filter>
+              </activity>
+            </application>
+          </manifest>
+          EOF
 
-          cat > android/twa-manifest.json <<'EOF'
-          {
-            "packageId": "com.camxd.store",
-            "host": "vertifikasiakuncam-dotcom.github.io",
-            "name": "CAMXD Store",
-            "launcherName": "CAMXD Store",
-            "display": "standalone",
-            "themeColor": "#ffd000",
-            "themeColorDark": "#050505",
-            "navigationColor": "#050505",
-            "navigationColorDark": "#050505",
-            "navigationDividerColor": "#050505",
-            "navigationDividerColorDark": "#050505",
-            "backgroundColor": "#050505",
-            "startUrl": "/camxd-store/",
-            "iconUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/camxd-logo.png",
-            "splashScreenFadeOutDuration": 300,
-            "signingKey": {
-              "path": "android-keystore",
-              "alias": "android"
-            },
-            "appVersionName": "1.0.2",
-            "appVersionCode": 3,
-            "shortcuts": [],
-            "generatorApp": "bubblewrap-cli",
-            "webManifestUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest",
-            "fallbackType": "customtabs",
-            "features": {},
-            "alphaDependencies": {
-              "enabled": false
-            },
-            "enableSiteSettingsShortcut": true,
-            "isChromeOSOnly": false,
-            "isMetaQuest": false,
-            "fullScopeUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/",
-            "minSdkVersion": 23,
-            "orientation": "portrait-primary",
-            "fingerprints": [],
-            "additionalTrustedOrigins": [],
-            "retainedBundles": [],
-            "protocolHandlers": [],
-            "fileHandlers": [],
-            "launchHandlerClientMode": "",
-            "displayOverride": [
-              "standalone"
-            ],
-            "appVersion": "1.0.2"
+          cat > store-android/app/src/main/java/com/camxd/store/MainActivity.java <<'EOF'
+          package com.camxd.store;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.content.Intent;
+          import android.net.Uri;
+          import android.widget.Toast;
+
+          public class MainActivity extends Activity {
+            private WebView webView;
+            private long lastBackPress = 0;
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+              super.onCreate(savedInstanceState);
+              webView = new WebView(this);
+              setContentView(webView);
+
+              WebSettings s = webView.getSettings();
+              s.setJavaScriptEnabled(true);
+              s.setDomStorageEnabled(true);
+              s.setDatabaseEnabled(true);
+              s.setSupportZoom(false);
+              s.setBuiltInZoomControls(false);
+              s.setDisplayZoomControls(false);
+              s.setMediaPlaybackRequiresUserGesture(false);
+
+              webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                  String url = request.getUrl().toString();
+
+                  if (url.endsWith(".apk") || url.contains("/downloads/")) {
+                    try {
+                      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                      startActivity(intent);
+                    } catch (Exception e) {
+                      Toast.makeText(MainActivity.this, "Tidak dapat membuka file APK", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                  }
+
+                  if (url.startsWith("http://") || url.startsWith("https://")) {
+                    view.loadUrl(url);
+                    return true;
+                  }
+
+                  try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                  } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Aplikasi untuk membuka link tidak ditemukan", Toast.LENGTH_SHORT).show();
+                  }
+                  return true;
+                }
+              });
+
+              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261006-store");
+            }
+
+            @Override
+            public void onBackPressed() {
+              if (webView.canGoBack()) {
+                webView.goBack();
+                return;
+              }
+
+              long now = System.currentTimeMillis();
+              if (now - lastBackPress < 1800) {
+                super.onBackPressed();
+                return;
+              }
+
+              lastBackPress = now;
+              Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            protected void onDestroy() {
+              if (webView != null) webView.destroy();
+              super.onDestroy();
+            }
           }
           EOF
 
-          SIGN_PASS="$(openssl rand -hex 16)"
-          echo "SIGN_PASS=$SIGN_PASS" >> "$GITHUB_ENV"
-
-          keytool -genkeypair -v             -keystore android/android-keystore             -alias android             -storepass "$SIGN_PASS"             -keypass "$SIGN_PASS"             -keyalg RSA             -keysize 2048             -validity 10000             -dname "CN=CAMXD Store, OU=CAMXD, O=CAMXD Store, C=ID"
-
-      - name: Build with official Bubblewrap
+      - name: Build and sign
+        working-directory: store-android
         shell: bash
         env:
-          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ env.SIGN_PASS }}
-          BUBBLEWRAP_KEY_PASSWORD: ${{ env.SIGN_PASS }}
+          CAMXD_KEYSTORE_BASE64: ${{ secrets.CAMXD_KEYSTORE_BASE64 }}
+          CAMXD_KEYSTORE_PASSWORD: ${{ secrets.CAMXD_KEYSTORE_PASSWORD }}
+          CAMXD_KEY_PASSWORD: ${{ secrets.CAMXD_KEY_PASSWORD }}
+          CAMXD_KEY_ALIAS: ${{ secrets.CAMXD_KEY_ALIAS }}
         run: |
           set -e
-          bubblewrap build             --manifest=android             --signingKeyPath=android/android-keystore             --signingKeyAlias=android             --skipPwaValidation
 
-      - name: Verify with Android apksigner
-        shell: bash
-        run: |
-          set -e
-          APK="android/app-release-signed.apk"
-          test -f "$APK"
-          BUILD_TOOLS=$(ls -d "$ANDROID_HOME/build-tools/"* | sort -V | tail -n 1)
-          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          curl -fsSL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          export GRADLE=/tmp/gradle-8.10.2/bin/gradle
+
+          $GRADLE --no-daemon :app:assembleRelease
+
+          mkdir -p ../signed
+
+          python3 - <<'PY'
+          import base64, os
+          s = os.environ["CAMXD_KEYSTORE_BASE64"]
+          s = "".join(s.split())
+          s += "=" * ((4 - len(s) % 4) % 4)
+          with open("../signed/key.jks", "wb") as f:
+              f.write(base64.b64decode(s, validate=False))
+          PY
+
+          keytool -list -keystore ../signed/key.jks -storepass "$CAMXD_KEYSTORE_PASSWORD" -alias "$CAMXD_KEY_ALIAS" >/dev/null
+
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+
+          "$BT/zipalign" -f 4             app/build/outputs/apk/release/app-release-unsigned.apk             ../signed/aligned.apk
+
+          "$BT/apksigner" sign             --ks ../signed/key.jks             --ks-key-alias "$CAMXD_KEY_ALIAS"             --ks-pass env:CAMXD_KEYSTORE_PASSWORD             --key-pass env:CAMXD_KEY_PASSWORD             --out ../signed/CAMXD-Store.apk             ../signed/aligned.apk
+
+          "$BT/apksigner" verify --verbose ../signed/CAMXD-Store.apk
+
+          rm -f ../signed/key.jks ../signed/aligned.apk
 
       - name: Publish APK to website
         shell: bash
         run: |
           set -e
           mkdir -p downloads
-          cp android/app-release-signed.apk downloads/CAMXD-Store.apk
+          cp signed/CAMXD-Store.apk downloads/CAMXD-Store.apk
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add -f downloads/CAMXD-Store.apk
-          if git diff --cached --quiet; then
-            echo "APK tidak berubah."
-          else
-            git commit -m "Publish CAMXD Store APK"
-            git push origin HEAD:${{ github.ref_name }}
-          fi
+          git commit -m "Publish CAMXD Store APK"
+          git push origin HEAD:${{ github.ref_name }}
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: CAMXD-Store-Signed-APK
-          path: android/app-release-signed.apk
+          name: CAMXD-Store-APK
+          path: signed/CAMXD-Store.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
