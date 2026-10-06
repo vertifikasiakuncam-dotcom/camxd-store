@@ -141,6 +141,7 @@ async function checkoutCart(){
   const {error}=await Promise.race([insertPromise,timeoutPromise]);
   if(error)throw error;
   pendingOrder={orderId,name,wa,lines,total};
+  closeCart();
   $("#paymentOrderId").textContent=orderId;
   $("#paymentTotal").textContent=total;
   $("#paymentModal").hidden=false;
