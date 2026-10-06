@@ -360,3 +360,37 @@ $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
 restoreCart(); updateCart(); loadProducts();
+
+
+/* Premium motion — viewport based and lightweight */
+(function initPremiumMotion(){
+  document.documentElement.classList.add("js-motion");
+  const targets=()=>{
+    const nodes=[
+      ...document.querySelectorAll(".section"),
+      ...document.querySelectorAll(".product"),
+      ...document.querySelectorAll(".featured-card"),
+      ...document.querySelectorAll(".trust-card")
+    ];
+    return [...new Set(nodes)];
+  };
+  const markVisible=el=>{
+    el.classList.add("motion-ready");
+    el.style.setProperty("--motion-delay",((Number(el.dataset.motionIndex)||0)*45)+"ms");
+  };
+  const nodes=targets();
+  nodes.forEach((el,i)=>el.dataset.motionIndex=String(i%6));
+  if(!("IntersectionObserver" in window)){
+    nodes.forEach(markVisible);
+    return;
+  }
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        markVisible(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  },{rootMargin:"0px 0px -8% 0px",threshold:.08});
+  nodes.forEach(el=>observer.observe(el));
+})();
