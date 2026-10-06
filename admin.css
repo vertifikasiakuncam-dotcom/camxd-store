@@ -555,3 +555,14 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
   background:#3a3a3a;
   color:#fff;
 }
+
+
+.admin-activity-panel{margin-top:16px}
+.admin-activity-log{display:grid;gap:7px}
+.activity-row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid #242424;border-radius:12px;background:#0b0b0b}
+.activity-icon{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(255,208,0,.12);color:var(--yellow);font-weight:900}
+.activity-main{min-width:0;display:grid;gap:3px}
+.activity-main strong{font-size:12px;color:#eee}
+.activity-main span{font-size:11px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.activity-row time{font-size:10px;color:#777;white-space:nowrap}
+@media(max-width:800px){.activity-row{grid-template-columns:28px 1fr}.activity-row time{grid-column:2}}
