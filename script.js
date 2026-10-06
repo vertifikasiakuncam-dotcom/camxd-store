@@ -104,6 +104,8 @@ function renderFeaturedProducts(){
 const rupiah=n=>"Rp "+Number(n).toLocaleString("id-ID");
 const $=s=>document.querySelector(s);
 let activeFilter="all", selectedProduct=null, selectedPlan=null, cart=[];
+function saveCart(){try{localStorage.setItem("camxd_cart_v1",JSON.stringify(cart));}catch(e){}}
+function restoreCart(){try{const raw=localStorage.getItem("camxd_cart_v1");const saved=raw?JSON.parse(raw):[];if(Array.isArray(saved))cart=saved.filter(x=>x&&x.productId&&x.plan&&Number(x.qty)>0).map(x=>({...x,qty:Number(x.qty)}));}catch(e){cart=[];}}
 
 function render(){
  const q=$("#search").value.trim().toLowerCase();
@@ -142,6 +144,7 @@ function removeCart(index){cart.splice(index,1);updateCart();}
 function changeQty(index,delta){cart[index].qty=Math.max(1,cart[index].qty+delta);updateCart();}
 function cartTotal(){return cart.reduce((s,x)=>s+(x.price*x.qty),0);}
 function updateCart(){
+ saveCart();
  const count=cart.reduce((s,x)=>s+x.qty,0); $("#cartCount").textContent=count; $("#cartItems").innerHTML=cart.length?cart.map((x,i)=>`<div class="cart-item"><img src="${x.image}" alt=""><div class="cart-item-main"><strong>${x.name}</strong><small>${x.plan}</small><b>${x.price?rupiah(x.price):"Sesuai kebutuhan"}</b><div class="qty"><button data-q="-" data-i="${i}">−</button><span>${x.qty}</span><button data-q="+" data-i="${i}">+</button><button class="remove" data-remove="${i}">Hapus</button></div></div></div>`).join(""):"<div class='cart-empty'>Keranjang masih kosong.<br>Pilih produk untuk mulai berbelanja.</div>";
  $("#cartTotal").textContent=cart.some(x=>!x.price)?"Cek nominal":""+rupiah(cartTotal());
  document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>changeQty(Number(b.dataset.i),b.dataset.q==="+"?1:-1));
@@ -251,6 +254,14 @@ function statusClass(status){
  return "waiting";
 }
 
+function renderOrderTimeline(status){
+ const current=String(status||"Menunggu Pembayaran");
+ if(current.includes("Dibatalkan")) return '<div class="order-timeline cancelled"><div class="timeline-step active"><i>×</i><span>Pesanan dibatalkan</span></div></div>';
+ const steps=["Menunggu Pembayaran","Menunggu Verifikasi","Sedang Diproses","Selesai"];
+ let idx=steps.findIndex(x=>current===x); if(idx<0) idx=steps.findIndex(x=>current.includes(x)); if(idx<0) idx=0;
+ return '<div class="order-timeline">'+steps.map((step,i)=>'<div class="timeline-step '+(i<=idx?"active":"")+'"><i>'+(i<idx?"✓":(i===idx?"•":"○"))+'</i><span>'+step+'</span></div>').join("")+'</div>';
+}
+
 function renderOrderCheck(order){
  const result=$("#orderCheckResult");
  const items=Array.isArray(order.items)?order.items:[];
@@ -346,4 +357,4 @@ $("#orderCheckForm").addEventListener("submit",checkOrder);
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
-updateCart(); loadProducts();
+restoreCart(); updateCart(); loadProducts();
