@@ -1,3 +1,31 @@
+const ADMIN_ACTIVITY_KEY="camxd_admin_activity_v1";
+
+function addAdminActivity(action, detail=""){
+  try{
+    const email=$("#adminEmail")?.textContent?.trim() || "Admin";
+    const logs=JSON.parse(localStorage.getItem(ADMIN_ACTIVITY_KEY)||"[]");
+    logs.unshift({action,detail,email,time:new Date().toISOString()});
+    localStorage.setItem(ADMIN_ACTIVITY_KEY,JSON.stringify(logs.slice(0,50)));
+  }catch{}
+  renderAdminActivity();
+}
+
+function renderAdminActivity(){
+  const box=$("#adminActivityLog");
+  if(!box) return;
+  let logs=[];
+  try{ logs=JSON.parse(localStorage.getItem(ADMIN_ACTIVITY_KEY)||"[]"); }catch{}
+  if(!logs.length){
+    box.innerHTML='<div class="empty">Belum ada aktivitas admin.</div>';
+    return;
+  }
+  box.innerHTML=logs.slice(0,10).map(x=>{
+    const when=new Date(x.time);
+    const time=when.toLocaleString("id-ID",{dateStyle:"short",timeStyle:"short"});
+    return '<div class="activity-row"><div class="activity-icon">•</div><div class="activity-main"><strong>'+escapeHtml(x.action)+'</strong><span>'+escapeHtml(x.detail||"")+'</span></div><time>'+escapeHtml(time)+'</time></div>';
+  }).join("");
+}
+
 function syncQuickStatusFilters(){
   const current=$("#statusFilter")?.value || "all";
   document.querySelectorAll(".quick-status-btn").forEach(btn=>{
@@ -717,7 +745,8 @@ async function deleteOrder(id){
 
   allOrders=allOrders.filter(o=>Number(o.id)!==Number(id));
   unreadOrderIds.delete(String(id));
-  alert("Pesanan "+(order.order_id||"")+" berhasil dihapus.");
+  addAdminActivity("Pesanan dihapus", order.order_id||"Pesanan");
+    alert("Pesanan "+(order.order_id||"")+" berhasil dihapus.");
   updateStats();
   renderOrders();
 }
@@ -806,12 +835,14 @@ async function saveDelivery(id, sendAfter){
       }
 
       await loadOrders();
+      addAdminActivity("Pesanan dikirim via WhatsApp", order.order_id||"Pesanan");
       window.location.href = url;
       return;
     }
 
     order.delivery_details = details;
     order.delivered_at = new Date().toISOString();
+    addAdminActivity("Detail produk disimpan", order.order_id||"Pesanan");
     alert("Detail produk berhasil disimpan.");
     renderOrders();
   }finally{
@@ -1595,6 +1626,12 @@ $("#clearFiltersBtn")?.addEventListener("click",()=>{
 
 
 document.addEventListener("DOMContentLoaded",()=>{
+  renderAdminActivity();
+  $("#clearActivityLogBtn")?.addEventListener("click",()=>{
+    if(!confirm("Bersihkan riwayat aktivitas admin di perangkat ini?")) return;
+    localStorage.removeItem(ADMIN_ACTIVITY_KEY);
+    renderAdminActivity();
+  });
   normalizeRefreshButton();
   $("#selectAllOrdersBtn")?.addEventListener("click",()=>{
     const eligible=allOrders.filter(o=>!["Selesai"].includes(o.status)).map(o=>String(o.id));
