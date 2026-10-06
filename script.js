@@ -22,13 +22,10 @@ const FALLBACK_PRODUCTS=[
  {id:"certificate",name:"Jasa Pembuatan Sertifikat",desc:"Jasa pembuatan sertifikat",category:"jasa",image:"jasa-sertifikat.jpg",badge:"JASA",plans:[["1 Sertifikat",20000],["1 Sertifikat + Laminating",25000]],detail:"Jasa pembuatan sertifikat. Laminating tersedia sebagai pilihan tambahan sesuai paket."}
 ];
 
+products=FALLBACK_PRODUCTS;
+
 async function loadProducts(){
   const featuredBox=$("#featuredProducts");
-
-  // Render katalog lokal terlebih dahulu supaya produk selalu terlihat.
-  products=FALLBACK_PRODUCTS;
-  render();
-  renderFeaturedProducts();
 
   if(!sb) return;
 
@@ -382,60 +379,10 @@ $("#orderCheckForm").addEventListener("submit",checkOrder);
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
-restoreCart(); updateCart(); loadProducts();
+restoreCart();
+updateCart();
+render();
+renderFeaturedProducts();
+loadProducts();
 
 
-/* Premium motion — viewport based, lightweight, and safe for async-rendered products */
-(function initPremiumMotion(){
-  document.documentElement.classList.add("js-motion");
-
-  let observer=null;
-  let motionIndex=0;
-
-  const getTargets=()=>{
-    const nodes=[
-      ...document.querySelectorAll(".section"),
-      ...document.querySelectorAll(".product"),
-      ...document.querySelectorAll(".featured-card"),
-      ...document.querySelectorAll(".trust-card")
-    ];
-    return [...new Set(nodes)];
-  };
-
-  const markVisible=el=>{
-    el.classList.add("motion-ready");
-    el.style.setProperty("--motion-delay",((Number(el.dataset.motionIndex)||0)*45)+"ms");
-  };
-
-  window.refreshPremiumMotion=()=>{
-    const nodes=getTargets();
-    nodes.forEach(el=>{
-      if(!el.dataset.motionIndex){
-        el.dataset.motionIndex=String(motionIndex%6);
-        motionIndex++;
-      }
-    });
-
-    if(!("IntersectionObserver" in window)){
-      nodes.forEach(markVisible);
-      return;
-    }
-
-    if(!observer){
-      observer=new IntersectionObserver(entries=>{
-        entries.forEach(entry=>{
-          if(entry.isIntersecting){
-            markVisible(entry.target);
-            observer.unobserve(entry.target);
-          }
-        });
-      },{rootMargin:"0px 0px -8% 0px",threshold:.08});
-    }
-
-    nodes.forEach(el=>{
-      if(!el.classList.contains("motion-ready")) observer.observe(el);
-    });
-  };
-
-  window.refreshPremiumMotion();
-})();
