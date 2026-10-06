@@ -151,6 +151,41 @@ function openDetail(id){
 }
 function closeDetail(){ $("#detailModal").hidden=true; document.body.style.overflow=""; }
 
+async function shareProduct(){
+  if(!selectedProduct) return;
+  const url=new URL(window.location.href);
+  url.searchParams.set("product",selectedProduct.id);
+  url.hash="produk";
+  const shareData={
+    title:selectedProduct.name+" — CAMXD Store",
+    text:selectedProduct.desc||"Lihat produk di CAMXD Store",
+    url:url.toString()
+  };
+  try{
+    if(navigator.share){
+      await navigator.share(shareData);
+      return;
+    }
+    await navigator.clipboard.writeText(url.toString());
+    alert("Link produk berhasil disalin.");
+  }catch(error){
+    if(error&&error.name==="AbortError") return;
+    try{
+      await navigator.clipboard.writeText(url.toString());
+      alert("Link produk berhasil disalin.");
+    }catch(e){
+      prompt("Salin link produk ini:",url.toString());
+    }
+  }
+}
+
+function openSharedProduct(){
+  const id=new URLSearchParams(window.location.search).get("product");
+  if(!id) return;
+  const product=products.find(p=>p.id===id);
+  if(product) openDetail(id);
+}
+
 function addToCart(){
  const item={productId:selectedProduct.id,plan:selectedPlan[0],price:selectedPlan[1],name:selectedProduct.name,image:selectedProduct.image};
  const existing=cart.find(x=>x.productId===item.productId&&x.plan===item.plan);
@@ -361,6 +396,7 @@ document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.da
 $("#search").addEventListener("input",render);
 $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click",e=>{if(e.target.id==="detailModal")closeDetail();});
 $("#addToCart").onclick=addToCart;
+$("#shareProduct")?.addEventListener("click",shareProduct);
 $("#mobileCart")?.addEventListener("click",openCart);
 const backTop=$("#backTop");
 window.addEventListener("scroll",()=>{
@@ -378,6 +414,7 @@ restoreCart();
 updateCart();
 render();
 renderFeaturedProducts();
+openSharedProduct();
 loadProducts();
 
 
