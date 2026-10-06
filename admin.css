@@ -533,6 +533,7 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
   width:100%;
   padding-right:38px;
 }
+.clear-order-search[hidden]{display:none!important}
 .clear-order-search{
   position:absolute;
   right:7px;
@@ -544,6 +545,10 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
   color:#bbb;
   font-weight:900;
   cursor:pointer;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .clear-order-search:hover{
   background:#3a3a3a;
