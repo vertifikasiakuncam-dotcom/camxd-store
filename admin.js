@@ -309,16 +309,17 @@ function renderOrders(){
 
         </div>
 
-        <div class="customer">
-
-          <strong>
-            ${escapeHtml(o.customer_name)}
-          </strong>
-
-          <span>
-            ${escapeHtml(o.customer_wa)}
-          </span>
-
+        <div class="customer order-customer">
+          <div class="customer-avatar">
+            ${escapeHtml((o.customer_name || "?").trim().charAt(0).toUpperCase())}
+          </div>
+          <div class="customer-main">
+            <strong>${escapeHtml(o.customer_name)}</strong>
+            <span>📱 ${escapeHtml(o.customer_wa)}</span>
+          </div>
+          <div class="order-item-count">
+            ${items.length} produk
+          </div>
         </div>
 
         <div class="items">
@@ -350,6 +351,12 @@ function renderOrders(){
           `).join("")}
 
         </div>
+
+        <details class="delivery-details" ${o.delivery_details ? "open" : ""}>
+          <summary>
+            <span>🔐 Detail Produk / Akun</span>
+            <small>${o.delivery_details ? "Tersimpan" : "Belum diisi"}</small>
+          </summary>
 
         <div class="delivery-box">
 
@@ -399,6 +406,8 @@ Masa aktif: 30 hari"
 
         </div>
 
+
+        </details>
         <div class="order-bottom">
 
           <div>
