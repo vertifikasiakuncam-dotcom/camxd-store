@@ -1566,13 +1566,29 @@ function exportOrdersXlsx(){
 }
 $("#exportXlsxBtn")?.addEventListener("click",exportOrdersXlsx);
 $("#exportCsvBtn")?.addEventListener("click",exportOrdersCsv);
-$("#orderSearch")?.addEventListener("input",renderOrders);
+$("#orderSearch")?.addEventListener("input",()=>{
+  const q=$("#orderSearch");
+  const clear=$("#clearOrderSearch");
+  if(clear) clear.hidden=!q.value;
+  renderOrders();
+});
+$("#clearOrderSearch")?.addEventListener("click",()=>{
+  const q=$("#orderSearch");
+  if(!q) return;
+  q.value="";
+  q.focus();
+  const clear=$("#clearOrderSearch");
+  if(clear) clear.hidden=true;
+  renderOrders();
+});
 $("#dateFrom")?.addEventListener("change",renderOrders);
 $("#dateTo")?.addEventListener("change",renderOrders);
 $("#clearFiltersBtn")?.addEventListener("click",()=>{
   $("#orderSearch").value="";
   $("#dateFrom").value="";
   $("#dateTo").value="";
+  const clear=$("#clearOrderSearch");
+  if(clear) clear.hidden=true;
   renderOrders();
   renderOverview();
 });
