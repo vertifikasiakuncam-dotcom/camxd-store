@@ -337,3 +337,31 @@ html{scroll-padding-top:90px}
   .products{gap:8px}
   .product-body{padding-left:9px;padding-right:9px}
 }
+
+
+/* V12 — Compact mobile navigation */
+@media(max-width:760px){
+  .mobile-bottom-nav{
+    left:12px;
+    right:12px;
+    bottom:8px;
+    padding:5px 4px calc(5px + env(safe-area-inset-bottom));
+    border-radius:18px;
+  }
+  .mobile-bottom-nav a,
+  .mobile-bottom-nav button{
+    min-height:42px;
+    font-size:18px;
+    gap:1px;
+  }
+  .mobile-bottom-nav span{
+    font-size:8px;
+    line-height:1.1;
+  }
+  .floating-wa{
+    bottom:68px;
+  }
+  .back-top{
+    bottom:120px;
+  }
+}
