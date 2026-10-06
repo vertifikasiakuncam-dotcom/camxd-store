@@ -358,7 +358,7 @@ async function bulkDeleteOrders(){
   const btn=$("#bulkDeleteOrdersBtn");
   if(btn){btn.disabled=true;btn.textContent="⏳ Menghapus...";}
   const results=await Promise.all(orders.map(async o=>{
-    const {data,error}=await sb.rpc("delete_order_admin",{p_order_id:Number(o.id)});
+    const {data,error}=await sb.rpc("delete_orders_admin_bulk",{p_order_ids:[Number(o.id)]});
     return {o,data,error};
   }));
   const failed=results.filter(r=>r.error || r.data!==true);
