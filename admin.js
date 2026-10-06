@@ -52,25 +52,27 @@ function updateNewOrderAlert(){
   if(!alert || !count) return;
 
   count.textContent = pending.length;
-  alert.hidden = pending.length === 0;
-  if(markBtn) markBtn.hidden = pending.length === 0;
+  alert.hidden = false;
 
   if(markBtn){
+    markBtn.hidden = false;
+    markBtn.disabled = pending.length === 0;
+    markBtn.setAttribute("aria-disabled", pending.length === 0 ? "true" : "false");
     markBtn.onclick = () => {
+      if(!pending.length) return;
       pending.forEach(o => unreadOrderIds.delete(String(o.id)));
       updateNewOrderAlert();
     };
   }
 
   alert.onclick = () => {
+    if(!pending.length) return;
     $("#statusFilter").value = "all";
     renderOrders();
     const first = pending[0];
     if(first){
       const el = document.querySelector('[data-order-id="' + CSS.escape(String(first.order_id)) + '"]');
       el?.scrollIntoView({behavior:"smooth",block:"center"});
-    }else{
-      window.scrollTo({top: document.querySelector(".panel")?.offsetTop || 0, behavior:"smooth"});
     }
   };
 }
