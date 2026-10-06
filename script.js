@@ -77,7 +77,6 @@ async function loadProducts(){
   }catch(error){
     console.warn("Katalog Supabase gagal dimuat, memakai katalog lokal:",error);
   }finally{
-    if(window.refreshPremiumMotion) window.refreshPremiumMotion();
   }
 }
 
