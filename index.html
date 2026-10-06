@@ -194,14 +194,14 @@
     <input id="cartName" class="input" placeholder="Nama lengkap">
     <input id="cartWa" class="input" placeholder="Nomor WhatsApp">
     <div class="payment-box"><strong>💳 Bayar via GoPay / QRIS</strong><p>Setelah checkout, bayar sesuai total lalu kirim bukti pembayaran ke admin WhatsApp.</p></div>
-    <button class="btn primary wide" id="checkoutCart">Lanjut ke Pembayaran QRIS →</button>
+    <button type="button" class="btn primary wide" id="checkoutCart" onclick="checkoutCart(); return false;">Lanjut ke Pembayaran QRIS →</button>
   </div>
 </aside>
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="script.js?v=20261006-6"></script>
+  <script src="script.js?v=20261006-7"></script>
   <script src="pwa.js"></script>
 </body>
 </html>
