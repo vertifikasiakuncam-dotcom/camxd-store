@@ -566,3 +566,20 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
 .activity-main span{font-size:11px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .activity-row time{font-size:10px;color:#777;white-space:nowrap}
 @media(max-width:800px){.activity-row{grid-template-columns:28px 1fr}.activity-row time{grid-column:2}}
+
+
+.notification-enable-btn{
+  border-color:rgba(116,185,255,.55)!important;
+  background:rgba(116,185,255,.10)!important;
+  color:#74b9ff!important;
+}
+.notification-enable-btn:hover{
+  background:rgba(116,185,255,.18)!important;
+}
+.notification-enable-btn:disabled{
+  opacity:.7;
+  cursor:default;
+}
+@media(max-width:800px){
+  .notification-enable-btn,.notification-read-btn{width:100%;text-align:center}
+}
