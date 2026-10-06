@@ -558,3 +558,20 @@ html{scroll-padding-top:90px}
   background:var(--yellow);
   color:#111;
 }
+
+
+/* V21 — Save product */
+#favoriteProduct{
+  color:#fff;
+  background:rgba(255,255,255,.055);
+  border-color:#555;
+}
+#favoriteProduct[aria-pressed="true"]{
+  color:var(--yellow);
+  border-color:rgba(255,208,0,.75);
+  background:rgba(255,208,0,.08);
+}
+#favoriteProduct[aria-pressed="true"]:hover{
+  background:var(--yellow);
+  color:#111;
+}
