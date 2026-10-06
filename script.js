@@ -131,11 +131,11 @@ function render(){
  $("#empty").hidden=list.length>0;
  $("#products").innerHTML=list.map(p=>`
   <article class="product">
-   <span class="badge">${p.badge}</span>
-   <div class="product-image"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>
+   <span class="badge">${escapeHtml(p.badge)}</span>
+   <div class="product-image"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy"></div>
    <div class="product-body">
-    <h3>${p.name}</h3><p>${p.desc}</p>
-    <div class="price-row"><div><small>Mulai dari</small><div class="price">${p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan"}</div></div><button class="choose" data-id="${p.id}">Lihat Detail →</button></div>
+    <h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p>
+    <div class="price-row"><div><small>Mulai dari</small><div class="price">${p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan"}</div></div><button class="choose" data-id="${escapeHtml(p.id)}">Lihat Detail →</button></div>
    </div>
   </article>`).join("");
  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openDetail(b.dataset.id));
@@ -162,7 +162,7 @@ function changeQty(index,delta){cart[index].qty=Math.max(1,cart[index].qty+delta
 function cartTotal(){return cart.reduce((s,x)=>s+(x.price*x.qty),0);}
 function updateCart(){
  saveCart();
- const count=cart.reduce((s,x)=>s+x.qty,0); $("#cartCount").textContent=count; $("#cartItems").innerHTML=cart.length?cart.map((x,i)=>`<div class="cart-item"><img src="${x.image}" alt=""><div class="cart-item-main"><strong>${x.name}</strong><small>${x.plan}</small><b>${x.price?rupiah(x.price):"Sesuai kebutuhan"}</b><div class="qty"><button data-q="-" data-i="${i}">−</button><span>${x.qty}</span><button data-q="+" data-i="${i}">+</button><button class="remove" data-remove="${i}">Hapus</button></div></div></div>`).join(""):"<div class='cart-empty'>Keranjang masih kosong.<br>Pilih produk untuk mulai berbelanja.</div>";
+ const count=cart.reduce((s,x)=>s+x.qty,0); $("#cartCount").textContent=count; $("#cartItems").innerHTML=cart.length?cart.map((x,i)=>`<div class="cart-item"><img src="${escapeHtml(x.image)}" alt=""><div class="cart-item-main"><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.plan)}</small><b>${x.price?rupiah(x.price):"Sesuai kebutuhan"}</b><div class="qty"><button data-q="-" data-i="${i}">−</button><span>${x.qty}</span><button data-q="+" data-i="${i}">+</button><button class="remove" data-remove="${i}">Hapus</button></div></div></div>`).join(""):"<div class='cart-empty'>Keranjang masih kosong.<br>Pilih produk untuk mulai berbelanja.</div>";
  $("#cartTotal").textContent=cart.some(x=>!x.price)?"Cek nominal":""+rupiah(cartTotal());
  document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>changeQty(Number(b.dataset.i),b.dataset.q==="+"?1:-1));
  document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeCart(Number(b.dataset.remove)));
@@ -282,13 +282,13 @@ function renderOrderTimeline(status){
 function renderOrderCheck(order){
  const result=$("#orderCheckResult");
  const items=Array.isArray(order.items)?order.items:[];
- const itemHtml=items.length?items.map(x=>`<div class="order-result-item"><span>${x.name||"Produk"} — ${x.plan||""} ×${x.qty||1}</span><strong>${Number(x.price||0)?rupiah(Number(x.price||0)*Number(x.qty||1)):"Konfirmasi admin"}</strong></div>`).join(""):"<div class='order-result-item'><span>Detail produk</span><strong>-</strong></div>";
+ const itemHtml=items.length?items.map(x=>`<div class="order-result-item"><span>${escapeHtml(x.name||"Produk")} — ${escapeHtml(x.plan||"")} ×${Number(x.qty||1)}</span><strong>${Number(x.price||0)?rupiah(Number(x.price||0)*Number(x.qty||1)):"Konfirmasi admin"}</strong></div>`).join(""):"<div class='order-result-item'><span>Detail produk</span><strong>-</strong></div>";
  result.innerHTML=`
   <div class="order-result-head">
-   <div><span class="eyebrow">PESANAN DITEMUKAN</span><h3>${order.order_id}</h3></div>
-   <span class="order-status ${statusClass(order.status)}">${order.status||"Menunggu Pembayaran"}</span>
+   <div><span class="eyebrow">PESANAN DITEMUKAN</span><h3>${escapeHtml(order.order_id)}</h3></div>
+   <span class="order-status ${statusClass(order.status)}">${escapeHtml(order.status||"Menunggu Pembayaran")}</span>
   </div>
-  <div class="order-result-meta"><span>Nama</span><strong>${order.customer_name||"-"}</strong></div>
+  <div class="order-result-meta"><span>Nama</span><strong>${escapeHtml(order.customer_name||"-")}</strong></div>
   <div class="order-result-meta"><span>Dibuat</span><strong>${new Date(order.created_at).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}</strong></div>
   <div class="order-result-items">${itemHtml}</div>
   <div class="order-result-total"><span>Total</span><strong>${order.total_label||rupiah(order.total||0)}</strong></div>
