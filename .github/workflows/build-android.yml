@@ -1,10 +1,18 @@
 name: Build CAMXD Store Signed APK
 
 on:
+  push:
+    paths:
+      - "index.html"
+      - "script.js"
+      - "style.css"
+      - "pwa.js"
+      - "manifest.webmanifest"
+      - ".github/workflows/build-android.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -77,8 +85,8 @@ jobs:
               "path": "android-keystore",
               "alias": "android"
             },
-            "appVersionName": "1.0.0",
-            "appVersionCode": 1,
+            "appVersionName": "1.0.1",
+            "appVersionCode": 2,
             "shortcuts": [],
             "generatorApp": "bubblewrap-cli",
             "webManifestUrl": "https://vertifikasiakuncam-dotcom.github.io/camxd-store/manifest.webmanifest",
@@ -102,7 +110,7 @@ jobs:
             "displayOverride": [
               "standalone"
             ],
-            "appVersion": "1.0.0"
+            "appVersion": "1.0.1"
           }
           EOF
 
@@ -128,6 +136,22 @@ jobs:
           test -f "$APK"
           BUILD_TOOLS=$(ls -d "$ANDROID_HOME/build-tools/"* | sort -V | tail -n 1)
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+
+      - name: Publish APK to website
+        shell: bash
+        run: |
+          set -e
+          mkdir -p downloads
+          cp android/app-release-signed.apk downloads/CAMXD-Store.apk
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f downloads/CAMXD-Store.apk
+          if git diff --cached --quiet; then
+            echo "APK tidak berubah."
+          else
+            git commit -m "Publish CAMXD Store APK"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
