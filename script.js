@@ -124,35 +124,31 @@ async function checkoutCart(){
  if(!cart.length)return;
  const name=$("#cartName").value.trim(), wa=$("#cartWa").value.trim();
  if(!name||!wa){alert("Silakan isi nama lengkap dan nomor WhatsApp terlebih dahulu.");return;}
- const orderId="CX"+Date.now().toString().slice(-8);
- const lines=cart.map((x,i)=>`${i+1}. ${x.name} — ${x.plan} x${x.qty} = ${x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan"}`).join("\n");
- const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(cartTotal());
- const orderItems = cart.map(x => ({
-  product_id: x.productId,
-  name: x.name,
-  plan: x.plan,
-  price: Number(x.price || 0),
-  qty: Number(x.qty || 1)
- }));
- const { error } = await sb.from("orders").insert({
-  order_id: orderId,
-  customer_name: name,
-  customer_wa: wa,
-  items: orderItems,
-  total: cartTotal(),
-  total_label: total,
-  status: "Menunggu Pembayaran"
- });
- if(error){
-  console.error(error);
-  alert("Pesanan belum tersimpan ke sistem. Silakan coba lagi.\n\n" + error.message);
-  return;
+ const button=$("#checkoutCart");
+ if(button.disabled)return;
+ const originalText=button.textContent;
+ button.disabled=true;
+ button.textContent="Memproses pesanan…";
+ try{
+  const orderId="CX"+Date.now().toString().slice(-8);
+  const lines=cart.map((x,i)=>(i+1)+". "+x.name+" — "+x.plan+" x"+x.qty+" = "+(x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan")).join("\n");
+  const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(cartTotal());
+  const orderItems=cart.map(x=>({product_id:x.productId,name:x.name,plan:x.plan,price:Number(x.price||0),qty:Number(x.qty||1)}));
+  const {error}=await sb.from("orders").insert({order_id:orderId,customer_name:name,customer_wa:wa,items:orderItems,total:cartTotal(),total_label:total,status:"Menunggu Pembayaran"});
+  if(error)throw error;
+  pendingOrder={orderId,name,wa,lines,total};
+  $("#paymentOrderId").textContent=orderId;
+  $("#paymentTotal").textContent=total;
+  $("#paymentModal").hidden=false;
+  $("#paymentModal").scrollTop=0;
+  document.body.style.overflow="hidden";
+ }catch(error){
+  console.error("Checkout CAMXD:",error);
+  alert("Checkout belum berhasil. Periksa koneksi internet lalu coba lagi.\n\nDetail: "+(error&&error.message?error.message:"Terjadi kesalahan saat menyimpan pesanan."));
+ }finally{
+  button.disabled=false;
+  button.textContent=originalText;
  }
- pendingOrder={orderId,name,wa,lines,total};
- $("#paymentOrderId").textContent=orderId;
- $("#paymentTotal").textContent=total;
- $("#paymentModal").hidden=false;
- document.body.style.overflow="hidden";
 }
 
 function closePayment(){
