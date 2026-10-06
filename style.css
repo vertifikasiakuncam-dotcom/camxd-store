@@ -101,3 +101,24 @@ html{scroll-padding-top:90px}
  .order-result-total{font-size:16px}
  .order-result-total strong{font-size:22px}
 }
+
+
+.store-announcement{
+  min-height:34px;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:7px 16px;background:linear-gradient(90deg,#090909,#181300,#090909);
+  border-bottom:1px solid rgba(255,208,0,.18);font-size:12px;color:#ddd;
+}
+.store-announcement strong{color:var(--yellow);letter-spacing:1px}.store-announcement a{color:var(--yellow);font-weight:800;margin-left:6px}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);max-width:620px;margin-top:28px;border:1px solid #333;border-radius:18px;overflow:hidden;background:rgba(0,0,0,.38)}
+.hero-stats div{padding:13px 16px;border-right:1px solid #333;display:grid;gap:2px}.hero-stats div:last-child{border-right:0}
+.hero-stats strong{font-size:20px;color:var(--yellow)}.hero-stats span{font-size:11px;color:#999}
+.floating-wa{position:fixed;right:20px;bottom:24px;z-index:45;display:flex;align-items:center;gap:8px;padding:12px 16px;border:1px solid rgba(0,212,106,.55);border-radius:999px;background:rgba(5,15,10,.92);box-shadow:0 10px 35px rgba(0,0,0,.45);color:#b8ffd7}
+.floating-wa span{font-size:20px}.floating-wa b{font-size:12px}.back-top{position:fixed;right:20px;bottom:82px;z-index:44;width:42px;height:42px;border-radius:50%;border:1px solid #444;background:#111;color:#fff;font-size:20px;cursor:pointer;opacity:0;pointer-events:none;transition:.2s}
+.back-top.show{opacity:1;pointer-events:auto}.back-top:hover{border-color:var(--yellow);color:var(--yellow)}
+.product{transition:transform .2s,border-color .2s,box-shadow .2s}.product:hover{box-shadow:0 24px 60px rgba(0,0,0,.5)}
+@media(max-width:700px){
+  .store-announcement{justify-content:flex-start;overflow:hidden;white-space:nowrap}.store-announcement span{overflow:hidden;text-overflow:ellipsis}.store-announcement a{display:none}
+  .hero-stats{grid-template-columns:repeat(3,1fr)}.hero-stats div{padding:10px 8px}.hero-stats strong{font-size:16px}.hero-stats span{font-size:9px}
+  .floating-wa{right:14px;bottom:78px;padding:11px 13px}.floating-wa b{display:none}.floating-wa span{font-size:22px}
+  .back-top{right:14px;bottom:130px}
+}
