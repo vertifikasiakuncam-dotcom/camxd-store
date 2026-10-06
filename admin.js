@@ -107,10 +107,10 @@ function updateNewOrderAlert(){
   if(!alert || !count) return;
 
   count.textContent = pending.length;
-  alert.hidden = false;
+  alert.hidden = pending.length === 0;
 
   if(markBtn){
-    markBtn.hidden = false;
+    markBtn.hidden = pending.length === 0;
     markBtn.disabled = pending.length === 0;
     markBtn.setAttribute("aria-disabled", pending.length === 0 ? "true" : "false");
     markBtn.onclick = () => {
@@ -1645,18 +1645,46 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 
-function requestAdminNotifications(){
-  if(!("Notification" in window)) return;
-  if(Notification.permission==="default"){
-    Notification.requestPermission().catch(()=>{});
+function updateNotificationPermissionUi(){
+  const btn=$("#enableNotificationsBtn");
+  if(!btn) return;
+  if(!("Notification" in window)){
+    btn.textContent="🔔 Notifikasi tidak didukung";
+    btn.disabled=true;
+    return;
   }
+  if(Notification.permission==="granted"){
+    btn.textContent="🔔 Notifikasi Aktif";
+    btn.disabled=true;
+    return;
+  }
+  if(Notification.permission==="denied"){
+    btn.textContent="🔕 Notifikasi Diblokir";
+    btn.disabled=true;
+    return;
+  }
+  btn.textContent="🔔 Izinkan Notifikasi";
+  btn.disabled=false;
+}
+
+async function requestAdminNotifications(){
+  if(!("Notification" in window)) return;
+  if(Notification.permission==="granted"){
+    updateNotificationPermissionUi();
+    return;
+  }
+  if(Notification.permission==="denied"){
+    updateNotificationPermissionUi();
+    return;
+  }
+  try{
+    await Notification.requestPermission();
+  }catch{}
+  updateNotificationPermissionUi();
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
-  const markBtn=$("#markOrdersReadBtn");
-  markBtn?.addEventListener("click",()=>updateNewOrderAlert());
-  document.addEventListener("click",e=>{
-    if(e.target.closest("#newOrderAlert")) requestAdminNotifications();
-  });
-  requestAdminNotifications();
+  $("#enableNotificationsBtn")?.addEventListener("click",requestAdminNotifications);
+  updateNotificationPermissionUi();
+  updateNewOrderAlert();
 });
