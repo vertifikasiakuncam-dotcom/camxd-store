@@ -531,6 +531,7 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
 }
 .order-search-wrap #orderSearch{
   width:100%;
+  min-width:0;
   padding-right:38px;
 }
 .clear-order-search[hidden]{display:none!important}
