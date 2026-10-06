@@ -128,6 +128,7 @@ async function checkoutCart(){
  if(button.disabled)return;
  const originalText=button.textContent;
  button.disabled=true;
+ button.setAttribute("aria-busy","true");
  button.textContent="Memproses pesanan…";
  try{
   const orderId="CX"+Date.now().toString().slice(-8);
@@ -151,6 +152,7 @@ async function checkoutCart(){
  }finally{
   button.disabled=false;
   button.textContent=originalText;
+  button.removeAttribute("aria-busy");
  }
 }
 
@@ -294,7 +296,7 @@ document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.da
 $("#search").addEventListener("input",render);
 $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click",e=>{if(e.target.id==="detailModal")closeDetail();});
 $("#addToCart").onclick=addToCart;
-$("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart; $("#checkoutCart").onclick=checkoutCart;
+$("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart;
 $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#copyOrderId").onclick=copyOrderId;
 $("#orderCheckForm").addEventListener("submit",checkOrder);
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
