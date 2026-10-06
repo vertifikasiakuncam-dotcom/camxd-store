@@ -9,8 +9,13 @@
   "orientation": "portrait-primary",
   "background_color": "#050505",
   "theme_color": "#ffd000",
+  "prefer_related_applications": false,
   "icons": [
-    {"src":"./camxd-logo.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./camxd-logo.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "./camxd-admin-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
