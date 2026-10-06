@@ -142,9 +142,10 @@ function render(){
 }
 
 function openDetail(id){
- selectedProduct=products.find(p=>p.id===id); selectedPlan=selectedProduct.plans[0];
+ selectedProduct=products.find(p=>p.id===id); if(!selectedProduct)return; selectedPlan=selectedProduct.plans[0];
  $("#detailImage").src=selectedProduct.image; $("#detailImage").alt=selectedProduct.name;
  $("#detailBadge").textContent=selectedProduct.badge; $("#detailTitle").textContent=selectedProduct.name; $("#detailDesc").textContent=selectedProduct.detail;
+ updateFavoriteButton();
  $("#detailPlans").innerHTML=selectedProduct.plans.map((p,i)=>`<button class="plan ${i===0?"selected":""}" data-i="${i}"><span>${p[0]}</span><strong>${p[1]?rupiah(p[1]):"Sesuai kebutuhan"}</strong></button>`).join("");
  document.querySelectorAll("#detailPlans .plan").forEach(b=>b.onclick=()=>{selectedPlan=selectedProduct.plans[Number(b.dataset.i)];document.querySelectorAll("#detailPlans .plan").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");});
  $("#detailModal").hidden=false; document.body.style.overflow="hidden";
@@ -184,6 +185,43 @@ function openSharedProduct(){
   if(!id) return;
   const product=products.find(p=>p.id===id);
   if(product) openDetail(id);
+}
+
+function getFavorites(){
+  try{
+    const raw=localStorage.getItem("camxd_favorites_v1");
+    const saved=raw?JSON.parse(raw):[];
+    return Array.isArray(saved)?saved.filter(Boolean):[];
+  }catch(e){return [];}
+}
+
+function saveFavorites(list){
+  try{localStorage.setItem("camxd_favorites_v1",JSON.stringify(list));}catch(e){}
+}
+
+function isFavorite(id){
+  return getFavorites().includes(id);
+}
+
+function updateFavoriteButton(){
+  const btn=$("#favoriteProduct");
+  if(!btn||!selectedProduct)return;
+  const active=isFavorite(selectedProduct.id);
+  btn.textContent=active?"♥ Tersimpan":"♡ Simpan Produk";
+  btn.setAttribute("aria-pressed",String(active));
+}
+
+function toggleFavorite(){
+  if(!selectedProduct)return;
+  const list=getFavorites();
+  const index=list.indexOf(selectedProduct.id);
+  if(index>=0){
+    list.splice(index,1);
+  }else{
+    list.push(selectedProduct.id);
+  }
+  saveFavorites(list);
+  updateFavoriteButton();
 }
 
 function addToCart(){
@@ -397,6 +435,7 @@ $("#search").addEventListener("input",render);
 $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click",e=>{if(e.target.id==="detailModal")closeDetail();});
 $("#addToCart").onclick=addToCart;
 $("#shareProduct")?.addEventListener("click",shareProduct);
+$("#favoriteProduct")?.addEventListener("click",toggleFavorite);
 $("#mobileCart")?.addEventListener("click",openCart);
 const backTop=$("#backTop");
 window.addEventListener("scroll",()=>{
