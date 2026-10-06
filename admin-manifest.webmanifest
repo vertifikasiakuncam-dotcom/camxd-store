@@ -16,12 +16,6 @@
       "sizes": "any",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "./camxd-admin-icon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
     }
   ]
 }
