@@ -660,3 +660,16 @@ html{scroll-padding-top:90px}
     opacity:1!important;
   }
 }
+
+
+/* V26 — Mobile/tablet header hard fallback */
+@media screen and (max-width:1200px){
+  header.topbar{height:76px!important;padding:9px 12px!important;gap:6px!important}
+  header.topbar .menu-btn{display:block!important;order:3!important;font-size:28px!important;padding:4px 5px!important;line-height:1!important}
+  header.topbar nav#navMenu{display:none!important;position:absolute!important;left:10px!important;right:10px!important;top:70px!important;flex-direction:column!important;gap:0!important;padding:7px!important;background:#0b0b0b!important;border:1px solid rgba(255,208,0,.3)!important;border-radius:16px!important;box-shadow:0 15px 45px #000!important}
+  header.topbar nav#navMenu.open{display:flex!important}
+  header.topbar nav#navMenu a{padding:11px 13px!important;font-size:14px!important}
+  header.topbar .brand{font-size:20px!important;gap:7px!important;min-width:0!important}
+  header.topbar .brand img{width:48px!important;height:48px!important}
+  header.topbar .cart-btn{margin-left:auto!important;margin-right:2px!important;padding:8px 10px!important;font-size:13px!important}
+}
