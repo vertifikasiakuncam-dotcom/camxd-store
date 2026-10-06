@@ -173,10 +173,10 @@ html{scroll-padding-top:90px}
   color:var(--yellow);
 }
 .hero-actions .app-install:hover{background:var(--yellow);color:#111}
-.section:not(.hero):not(.deals-section):not(.featured-store):not(.app-download-section){
+.section:not(.hero):not(.deals-section):not(.featured-store){
   position:relative;
 }
-.section:not(.hero):not(.deals-section):not(.featured-store):not(.app-download-section):before{
+.section:not(.hero):not(.deals-section):not(.featured-store):before{
   content:"";
   position:absolute;
   top:0;left:8%;right:8%;
