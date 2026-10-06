@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-admin-v4";
+const CACHE_NAME="camxd-admin-v5";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
