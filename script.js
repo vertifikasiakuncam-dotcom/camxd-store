@@ -65,6 +65,7 @@ async function loadProducts(){
   })).filter(p=>p.plans.length);
 
   render();
+  renderFeaturedProducts();
 }
 
 
