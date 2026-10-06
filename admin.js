@@ -189,6 +189,16 @@ function updateStats(){
   if($("#statToday")) $("#statToday").textContent = todayOrders.length;
   if($("#statTodayRevenue")) $("#statTodayRevenue").textContent = rupiah(todayRevenue);
 
+  const completedRate = allOrders.length
+    ? Math.round((done.length / allOrders.length) * 100)
+    : 0;
+  if($("#statCompletion")) $("#statCompletion").textContent = completedRate + "%";
+
+  const pendingValue = allOrders
+    .filter(o => !["Selesai","Dibatalkan"].includes(o.status))
+    .reduce((s,o) => s + Number(o.total || 0), 0);
+  if($("#statPendingValue")) $("#statPendingValue").textContent = rupiah(pendingValue);
+
   renderOverview();
   updateNewOrderAlert();
 }
