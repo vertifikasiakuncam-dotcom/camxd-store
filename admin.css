@@ -435,3 +435,5 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
   .admin-profile-edit{width:100%;text-align:center}
   .profile-save-btn{width:100%!important}
 }
+
+.orders-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}.orders-toolbar .btn{min-height:42px}.order-select{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:-2px 0 10px;border:1px solid #292929;border-radius:10px;background:#0b0b0b;color:#aaa;font-size:12px}.order-select input{width:18px;height:18px;accent-color:#ffd000}.order-select:has(input:not(:disabled)){color:#fff}.order-select input:disabled{opacity:.35}
