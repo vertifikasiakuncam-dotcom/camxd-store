@@ -816,6 +816,14 @@ async function updateStatus(id, status){
   const order = allOrders.find(o => Number(o.id) === Number(id));
   if(!order) return;
 
+  const select = document.querySelector(`.status-select[data-id="${id}"]`);
+  if(select?.dataset.updating === "1") return;
+  if(select) {
+    select.dataset.updating = "1";
+    select.disabled = true;
+    select.classList.add("is-updating");
+  }
+
   const important = status === "Selesai" || status === "Dibatalkan";
   if(important && order.status !== status){
     const action = status === "Selesai"
@@ -840,14 +848,11 @@ async function updateStatus(id, status){
       .eq("id", id);
 
   if(error){
-
     alert(
       "Gagal mengubah status: " +
       error.message
     );
-
     await loadOrders();
-
     return;
   }
 
