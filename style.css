@@ -141,3 +141,12 @@ html{scroll-padding-top:90px}
 .featured-loading{padding:25px;text-align:center;color:#888;border:1px dashed #333;border-radius:16px}
 @media(max-width:900px){.featured-products{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.featured-products{grid-template-columns:1fr}.featured-card{grid-template-columns:100px 1fr}.featured-card img{width:100px;height:82px}}
+
+
+.deals-section{padding-top:8px;padding-bottom:28px}
+.deal-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px 24px;border:1px solid rgba(255,208,0,.28);border-radius:20px;background:radial-gradient(circle at 90% 20%,rgba(255,208,0,.12),transparent 36%),linear-gradient(120deg,rgba(20,20,20,.96),rgba(10,10,10,.96));overflow:hidden}
+.deal-banner:after{content:"";position:absolute;width:180px;height:180px;right:-80px;bottom:-100px;border-radius:50%;border:1px solid rgba(255,208,0,.16)}
+.deal-copy{position:relative;z-index:1}.deal-copy h2{margin:5px 0 6px;font-size:24px}.deal-copy p{margin:0;color:#999;font-size:13px}
+.deal-points{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;position:relative;z-index:1}.deal-points span{padding:9px 11px;border:1px solid #333;border-radius:999px;background:#0c0c0c;color:#ddd;font-size:11px}
+@media(max-width:700px){.deal-banner{display:block;padding:18px}.deal-copy h2{font-size:19px}.deal-points{justify-content:flex-start;margin-top:14px}.deal-points span{font-size:10px;padding:7px 9px}}
+@media(max-width:700px){.floating-wa{right:10px;bottom:76px;width:42px;height:42px;padding:0;justify-content:center;border-radius:50%;box-shadow:0 7px 20px rgba(0,0,0,.5)}.floating-wa span{font-size:19px}.floating-wa b{display:none}}
