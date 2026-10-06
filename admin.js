@@ -221,7 +221,7 @@ function buildWhatsAppUrl(order, details){
     "   " + (order.total_label || rupiah(order.total)),
     "",
     "🔐 DETAIL PRODUK / AKUN",
-    details || "(detail belum diisi)",
+    details || "Email: -\nPassword: -\nKode: -\nMasa aktif: -",
     "",
     "━━━━━━━━━━━━━━━━━━",
     "📌 Mohon simpan informasi akun/kode ini dengan baik.",
@@ -558,33 +558,26 @@ async function saveDelivery(id, sendAfter){
 
   if(!order) return;
 
-  if(!details){
+  // Detail akun bersifat opsional saat mengirim.
+  // Jika belum diisi, pesan WhatsApp tetap memakai format CAMXD
+  // dengan tanda "-" pada bagian detail akun.
+  if(details){
+    const {error: detailError} =
+      await sb
+        .from("orders")
+        .update({
+          delivery_details: details,
+          delivered_at: new Date().toISOString()
+        })
+        .eq("id", id);
 
-    alert(
-      "Isi detail produk/akun/kode terlebih dahulu."
-    );
-
-    return;
-  }
-
-  // Simpan detail produk dan waktu pengiriman
-  const {error: detailError} =
-    await sb
-      .from("orders")
-      .update({
-        delivery_details: details,
-        delivered_at: new Date().toISOString()
-      })
-      .eq("id", id);
-
-  if(detailError){
-
-    alert(
-      "Gagal menyimpan detail: " +
-      detailError.message
-    );
-
-    return;
+    if(detailError){
+      alert(
+        "Gagal menyimpan detail: " +
+        detailError.message
+      );
+      return;
+    }
   }
 
   // Jika tombol "Simpan & Kirim WhatsApp" ditekan,
