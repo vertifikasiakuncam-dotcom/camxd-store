@@ -6,15 +6,32 @@ function showInstallButton(show){
   if(btn) btn.hidden=false;
   if(sectionBtn) sectionBtn.disabled=false;
 }
+
 async function installStoreApp(){
-  if(deferredInstallPrompt){
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt=null;
-    return;
+  try{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const choice=await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt=null;
+      if(choice?.outcome==="accepted") showInstallButton(false);
+      return;
+    }
+
+    const ua=navigator.userAgent||"";
+    const isIOS=/iphone|ipad|ipod/i.test(ua);
+    if(isIOS){
+      alert("Untuk iPhone/iPad:\n\n1. Tekan tombol Bagikan (□↑) di Safari.\n2. Pilih “Tambahkan ke Layar Utama”.\n3. Tekan Tambahkan.");
+      return;
+    }
+
+    alert("Instalasi otomatis belum tersedia di browser ini.\n\nCoba buka CAMXD Store di Chrome, lalu pilih menu ⋮ → Instal aplikasi / Tambahkan ke layar utama.");
+  }catch(error){
+    console.warn("Install CAMXD Store:",error);
+    alert("Instalasi belum tersedia. Silakan gunakan menu browser → Instal aplikasi / Tambahkan ke layar utama.");
   }
-  alert("Untuk memasang CAMXD Store:\n\nAndroid/Chrome: gunakan menu browser lalu pilih 'Instal aplikasi' atau 'Tambahkan ke layar utama'.\n\niPhone/iPad: tekan Bagikan di Safari → Tambahkan ke Layar Utama.");
 }
+
+window.installStoreApp=installStoreApp;
 
 window.addEventListener("beforeinstallprompt",event=>{
   event.preventDefault();
@@ -29,10 +46,11 @@ window.addEventListener("appinstalled",()=>{
 
 document.addEventListener("DOMContentLoaded",()=>{
   const install=document.getElementById("installApp");
+  const sectionInstall=document.getElementById("installAppSection");
   const mobileCart=document.getElementById("mobileCart");
 
   install?.addEventListener("click",installStoreApp);
-  document.getElementById("installAppSection")?.addEventListener("click",installStoreApp);
+  sectionInstall?.addEventListener("click",installStoreApp);
 
   mobileCart?.addEventListener("click",()=>{
     document.getElementById("cartBtn")?.click();
@@ -40,7 +58,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
-      navigator.serviceWorker.register("./sw.js").catch(err=>console.warn("PWA:",err));
+      navigator.serviceWorker.register("./sw.js?v=20261006-2")
+        .catch(err=>console.warn("PWA:",err));
     });
   }
 });
