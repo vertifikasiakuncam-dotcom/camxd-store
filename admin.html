@@ -276,7 +276,19 @@
         <div id="productsList" class="products-list"></div>
       </section>
 
-      <section class="panel orders-panel">
+      <section class="panel admin-activity-panel">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">AKTIVITAS ADMIN</span>
+      <h2>Riwayat Aktivitas</h2>
+      <p class="muted">Catatan tindakan admin pada perangkat ini.</p>
+    </div>
+    <button type="button" id="clearActivityLogBtn" class="btn">🧹 Bersihkan</button>
+  </div>
+  <div id="adminActivityLog" class="admin-activity-log"></div>
+</section>
+
+<section class="panel orders-panel">
 
         <div class="section-head">
 
@@ -322,7 +334,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261006-27"></script>
+  <script src="admin.js?v=20261006-28"></script>
   <script src="admin-profile.js?v=20261006-4"></script>
 
 </body>
