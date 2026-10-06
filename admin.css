@@ -476,3 +476,11 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
 .admin-connection-status.polling .connection-dot{animation:connectionPulse 1.5s ease-in-out infinite}
 @keyframes connectionPulse{50%{transform:scale(1.35);opacity:.65}}
 @media(max-width:800px){.admin-connection-status{width:100%;justify-content:center;min-height:40px}}
+
+
+.status-select.is-updating{
+  opacity:.65;
+  cursor:wait;
+  border-color:rgba(255,208,0,.65)!important;
+  box-shadow:0 0 12px rgba(255,208,0,.12);
+}
