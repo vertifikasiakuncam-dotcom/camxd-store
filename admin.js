@@ -331,16 +331,16 @@ function updateBulkDeleteUi(){
     btn.textContent="🗑️ Hapus Terpilih ("+selectedOrderIds.size+")";
   }
   if(selectAll){
-    const eligible=allOrders.filter(o=>o.status==="Dibatalkan").length;
+    const eligible=allOrders.filter(o=>!["Selesai"].includes(o.status)).length;
     selectAll.disabled=eligible===0;
-    selectAll.textContent=eligible && selectedOrderIds.size===eligible ? "☑️ Batalkan Pilih Semua" : "☑️ Pilih Semua Dibatalkan";
+    selectAll.textContent=eligible && selectedOrderIds.size===eligible ? "☑️ Batalkan Pilih Semua" : "☑️ Pilih Semua (kecuali Selesai)";
   }
 }
 
 async function bulkDeleteOrders(){
   const ids=[...selectedOrderIds].map(Number);
   if(!ids.length) return;
-  const orders=allOrders.filter(o=>ids.includes(Number(o.id)) && o.status==="Dibatalkan");
+  const orders=allOrders.filter(o=>ids.includes(Number(o.id)) && o.status!=="Selesai");
   if(!orders.length) return;
   const ok=confirm("HAPUS "+orders.length+" PESANAN SECARA PERMANEN?\n\nPesanan yang dipilih berstatus Dibatalkan dan akan dihapus dari database.\nTindakan ini tidak bisa dibatalkan.");
   if(!ok) return;
@@ -406,7 +406,7 @@ function renderOrders(){
           : "#";
 
       return `
-      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">\n        <label class="order-select">\n          <input type="checkbox" class="order-check" data-id="${o.id}" ${o.status === "Dibatalkan" ? "" : "disabled"} ${selectedOrderIds.has(String(o.id)) ? "checked" : ""}>\n          <span>${o.status === "Dibatalkan" ? "Pilih untuk dihapus" : "Hanya pesanan Dibatalkan yang dapat dihapus"}</span>\n        </label>
+      <article class="order-card" data-order-id="${escapeHtml(o.order_id)}">\n        <label class="order-select">\n          <input type="checkbox" class="order-check" data-id="${o.id}" ${o.status !== "Selesai" ? "" : "disabled"} ${selectedOrderIds.has(String(o.id)) ? "checked" : ""}>\n          <span>${o.status === "Dibatalkan" ? "Pilih untuk dihapus" : "Pesanan Selesai tidak dapat dihapus"}</span>\n        </label>
 
         <div class="order-top">
 
@@ -1481,7 +1481,7 @@ $("#clearFiltersBtn")?.addEventListener("click",()=>{
 
 document.addEventListener("DOMContentLoaded",()=>{
   $("#selectAllOrdersBtn")?.addEventListener("click",()=>{
-    const eligible=allOrders.filter(o=>o.status==="Dibatalkan").map(o=>String(o.id));
+    const eligible=allOrders.filter(o=>!["Selesai"].includes(o.status)).map(o=>String(o.id));
     if(eligible.length && eligible.every(id=>selectedOrderIds.has(id))) eligible.forEach(id=>selectedOrderIds.delete(id));
     else eligible.forEach(id=>selectedOrderIds.add(id));
     renderOrders();
