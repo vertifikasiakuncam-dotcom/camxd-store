@@ -58,8 +58,6 @@ function updateNewOrderAlert(){
   alert.onclick = () => {
     $("#statusFilter").value = "all";
     renderOrders();
-    pending.forEach(o => unreadOrderIds.delete(String(o.id)));
-    alert.hidden = true;
     const first = pending[0];
     if(first){
       const el = document.querySelector('[data-order-id="' + CSS.escape(String(first.order_id)) + '"]');
