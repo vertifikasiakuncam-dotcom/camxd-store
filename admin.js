@@ -771,24 +771,41 @@ async function login(e){
   const password =
     $("#password").value;
 
-  const {error} =
-    await sb.auth.signInWithPassword({
-      email,
-      password
-    });
-
-  if(error){
-
-    $("#loginError").textContent =
-      error.message;
-
-    return;
+  const submit = e.submitter || document.querySelector("#loginForm button[type="submit"]");
+  if(submit){
+    submit.disabled = true;
+    submit.dataset.originalText = submit.textContent;
+    submit.textContent = "Memeriksa...";
   }
 
-  await showDashboard();
+  try{
+    const {error} =
+      await sb.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    if(error){
+      $("#loginError").textContent =
+        error.message;
+      return;
+    }
+
+    await showDashboard();
+
+  }catch(err){
+    console.error("CAMXD login error:", err);
+    $("#loginError").textContent =
+      "Login gagal diproses: " + (err?.message || String(err));
+  }finally{
+    if(submit){
+      submit.disabled = false;
+      submit.textContent = submit.dataset.originalText || "Masuk ke Dashboard";
+    }
+  }
 }
 
-async function normalizeUsername(value){
+function normalizeUsername(value){
   return String(value || "")
     .trim()
     .toLowerCase()
