@@ -38,7 +38,7 @@ jobs:
         run: |
           set -e
           rm -rf admin-android
-          mkdir -p admin-android/app/src/main/java/com/camxd/admin admin-android/app/src/main/res/values admin-android/app/src/main/res/drawable admin-android/app/src/main/res/drawable-nodpi
+          mkdir -p admin-android/app/src/main/java/com/camxd/admin admin-android/app/src/main/res/values admin-android/app/src/main/res/values-v31 admin-android/app/src/main/res/drawable admin-android/app/src/main/res/drawable-nodpi
           cat > admin-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
@@ -51,19 +51,28 @@ jobs:
           cat > admin-android/app/build.gradle <<'EOF'
           plugins { id 'com.android.application' }
           android { namespace 'com.camxd.admin'; compileSdk 35
-            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 3; versionName '1.0.2' }
+            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 4; versionName '1.0.3' }
           }
           EOF
           sudo apt-get update -qq
           sudo apt-get install -y -qq librsvg2-bin
           rsvg-convert -w 512 -h 512 camxd-admin-icon.svg -o admin-android/app/src/main/res/drawable-nodpi/camxd_admin_icon.png
+          cat > admin-android/app/src/main/res/drawable/splash_background.xml <<'EOF'
+          <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+            <item android:drawable="#080808"/>
+            <item><bitmap android:src="@drawable/camxd_admin_icon" android:gravity="center"/></item>
+          </layer-list>
+          EOF
           cat > admin-android/app/src/main/res/values/styles.xml <<'EOF'
-          <resources><style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"><item name="android:colorAccent">#ffd000</item><item name="android:statusBarColor">#080808</item><item name="android:navigationBarColor">#050505</item><item name="android:windowLightStatusBar">false</item></style></resources>
+          <resources><style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"><item name="android:colorAccent">#ffd000</item><item name="android:statusBarColor">#080808</item><item name="android:navigationBarColor">#050505</item><item name="android:windowLightStatusBar">false</item><item name="android:windowBackground">@drawable/splash_background</item></style></resources>
+          EOF
+          cat > admin-android/app/src/main/res/values-v31/styles.xml <<'EOF'
+          <resources><style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"><item name="android:colorAccent">#ffd000</item><item name="android:statusBarColor">#080808</item><item name="android:navigationBarColor">#050505</item><item name="android:windowLightStatusBar">false</item><item name="android:windowBackground">@drawable/splash_background</item><item name="android:windowSplashScreenBackground">#080808</item><item name="android:windowSplashScreenAnimatedIcon">@drawable/camxd_admin_icon</item><item name="android:windowSplashScreenAnimationDuration">500</item></style></resources>
           EOF
           cat > admin-android/app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET"/>
-            <application android:theme="@style/AppTheme" android:label="CAMXD Admin" android:icon="@drawable/camxd_admin_icon" android:allowBackup="false">
+            <application android:theme="@style/AppTheme" android:label="CAMXD STORE" android:icon="@drawable/camxd_admin_icon" android:allowBackup="false">
               <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait">
                 <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
               </activity>
@@ -111,7 +120,7 @@ jobs:
                   return true;
                 }
               });
-              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-9");
+              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-10");
             }
             @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==FILE_REQUEST && fileCallback!=null){
@@ -122,7 +131,14 @@ jobs:
               }
               super.onActivityResult(requestCode,resultCode,data);
             }
-            @Override public void onBackPressed(){if(webView.canGoBack()) webView.goBack(); else super.onBackPressed();}
+            long lastBackPress=0;
+            @Override public void onBackPressed(){
+              if(webView.canGoBack()){ webView.goBack(); return; }
+              long now=System.currentTimeMillis();
+              if(now-lastBackPress < 1800){ super.onBackPressed(); return; }
+              lastBackPress=now;
+              android.widget.Toast.makeText(this,"Tekan sekali lagi untuk keluar",android.widget.Toast.LENGTH_SHORT).show();
+            }
             @Override protected void onDestroy(){webView.destroy(); super.onDestroy();}
           }
           EOF
