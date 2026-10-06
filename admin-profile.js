@@ -44,9 +44,27 @@
       const {data:{user},error:userError}=await sb.auth.getUser();
       if(userError||!user) throw userError||new Error("Sesi admin tidak ditemukan.");
       let avatarUrl=a;
-      if(file) avatarUrl=await uploadAvatar(file,user.id);
-      const r=await sb.auth.updateUser({data:{full_name:n,display_name:n,name:n,username:u,avatar_url:avatarUrl||null}});
-      if(r.error)throw r.error;
+      if(file){
+        try{
+          avatarUrl=await uploadAvatar(file,user.id);
+          e.textContent="✅ Foto berhasil di-upload. Menyimpan profil...";
+        }catch(uploadErr){
+          throw new Error("Upload foto gagal: "+(uploadErr?.message||String(uploadErr)));
+        }
+      }
+      let r;
+      try{
+        r=await sb.auth.updateUser({data:{full_name:n,display_name:n,name:n,username:u,avatar_url:avatarUrl||null}});
+      }catch(authErr){
+        throw new Error(file
+          ? "Foto berhasil di-upload, tetapi profil gagal disimpan: "+(authErr?.message||String(authErr))
+          : "Profil gagal disimpan: "+(authErr?.message||String(authErr)));
+      }
+      if(r.error){
+        throw new Error(file
+          ? "Foto berhasil di-upload, tetapi profil gagal disimpan: "+(r.error?.message||String(r.error))
+          : "Profil gagal disimpan: "+(r.error?.message||String(r.error)));
+      }
       await load();
       if($("#profileAvatarFile"))$("#profileAvatarFile").value="";
       $("#profileEditor").hidden=true;
