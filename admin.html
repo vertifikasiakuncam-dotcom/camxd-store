@@ -7,7 +7,7 @@
   <link rel="icon" href="camxd-admin-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="admin-manifest.webmanifest?v=20261006-3">
   <title>CAMXD Store — Admin</title>
-  <link rel="stylesheet" href="admin.css?v=20261006-23">
+  <link rel="stylesheet" href="admin.css?v=20261006-24">
 </head>
 <body>
   <main class="admin-shell">
@@ -114,8 +114,11 @@
           <div id="newOrderAlert" class="new-order-alert" hidden>
             🔔 <span id="newOrderCount">0</span> pesanan baru
           </div>
+          <button id="enableNotificationsBtn" class="btn notification-enable-btn" type="button">
+            🔔 Izinkan Notifikasi
+          </button>
           <button id="markOrdersReadBtn" class="btn notification-read-btn" type="button" hidden>
-            ✓ Tandai Dibaca
+            ✓ Tandai Semua Dibaca
           </button>
           <div id="adminConnectionStatus" class="admin-connection-status offline" title="Status koneksi admin">
   <span class="connection-dot"></span>
@@ -334,7 +337,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261006-28"></script>
+  <script src="admin.js?v=20261006-29"></script>
   <script src="admin-profile.js?v=20261006-4"></script>
 
 </body>
