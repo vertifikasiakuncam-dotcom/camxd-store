@@ -281,6 +281,11 @@
             </p>
           </div>
 
+          <div class="orders-toolbar">
+            <button type="button" id="selectAllOrdersBtn" class="btn">☑️ Pilih Semua Dibatalkan</button>
+            <button type="button" id="bulkDeleteOrdersBtn" class="btn danger" disabled>🗑️ Hapus Terpilih (0)</button>
+          </div>
+
           <select id="statusFilter">
             <option value="all">Semua Status</option>
             <option>Menunggu Pembayaran</option>
@@ -303,7 +308,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261006-19"></script>
+  <script src="admin.js?v=20261006-20"></script>
   <script src="admin-profile.js?v=20261006-4"></script>
 
 </body>
