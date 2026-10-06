@@ -26,6 +26,7 @@ async function loadProducts(){
     console.error("Gagal mengambil produk dari Supabase:",productError);
     products=FALLBACK_PRODUCTS;
     render();
+    renderFeaturedProducts();
     return;
   }
 
@@ -67,6 +68,38 @@ async function loadProducts(){
 }
 
 
+
+
+function renderFeaturedProducts(){
+ const box=$("#featuredProducts");
+ if(!box) return;
+ const list=products.filter(p=>p.plans&&p.plans.length).slice(0,3);
+ if(!list.length){box.innerHTML='<div class="featured-loading">Belum ada produk unggulan.</div>';return;}
+ box.innerHTML=list.map(p=>{
+   const price=p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan";
+   return `<article class="featured-card">
+     <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">
+     <div class="featured-card-body">
+       <span class="featured-card-badge">⭐ ${escapeHtml(p.badge||"UNGGULAN")}</span>
+       <h3>${escapeHtml(p.name)}</h3>
+       <p>${escapeHtml(p.desc||"Produk digital CAMXD Store")}</p>
+       <div class="featured-price">${price}</div>
+       <button type="button" class="featured-buy" data-featured-id="${escapeHtml(p.id)}">🛒 Beli Sekarang</button>
+     </div>
+   </article>`;
+ }).join("");
+ box.querySelectorAll("[data-featured-id]").forEach(btn=>btn.onclick=()=>{
+   const p=products.find(x=>x.id===btn.dataset.featuredId);
+   if(!p) return;
+   selectedProduct=p;
+   selectedPlan=p.plans[0];
+   const item={productId:p.id,plan:selectedPlan[0],price:selectedPlan[1],name:p.name,image:p.image};
+   const existing=cart.find(x=>x.productId===item.productId&&x.plan===item.plan);
+   if(existing) existing.qty++; else cart.push({...item,qty:1});
+   updateCart();
+   openCart();
+ });
+}
 
 const rupiah=n=>"Rp "+Number(n).toLocaleString("id-ID");
 const $=s=>document.querySelector(s);
