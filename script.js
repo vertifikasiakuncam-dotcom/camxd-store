@@ -99,6 +99,7 @@ function renderFeaturedProducts(){
    updateCart();
    openCart();
  });
+ if(window.refreshPremiumMotion) window.refreshPremiumMotion();
 }
 
 const rupiah=n=>"Rp "+Number(n).toLocaleString("id-ID");
@@ -124,6 +125,7 @@ function render(){
   </article>`).join("");
  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openDetail(b.dataset.id));
  const clear=$("#searchClear"); if(clear) clear.onclick=()=>{const input=$("#search");input.value="";render();input.focus();};
+ if(window.refreshPremiumMotion) window.refreshPremiumMotion();
 }
 
 function openDetail(id){
@@ -362,10 +364,14 @@ document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classL
 restoreCart(); updateCart(); loadProducts();
 
 
-/* Premium motion — viewport based and lightweight */
+/* Premium motion — viewport based, lightweight, and safe for async-rendered products */
 (function initPremiumMotion(){
   document.documentElement.classList.add("js-motion");
-  const targets=()=>{
+
+  let observer=null;
+  let motionIndex=0;
+
+  const getTargets=()=>{
     const nodes=[
       ...document.querySelectorAll(".section"),
       ...document.querySelectorAll(".product"),
@@ -374,23 +380,41 @@ restoreCart(); updateCart(); loadProducts();
     ];
     return [...new Set(nodes)];
   };
+
   const markVisible=el=>{
     el.classList.add("motion-ready");
     el.style.setProperty("--motion-delay",((Number(el.dataset.motionIndex)||0)*45)+"ms");
   };
-  const nodes=targets();
-  nodes.forEach((el,i)=>el.dataset.motionIndex=String(i%6));
-  if(!("IntersectionObserver" in window)){
-    nodes.forEach(markVisible);
-    return;
-  }
-  const observer=new IntersectionObserver(entries=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        markVisible(entry.target);
-        observer.unobserve(entry.target);
+
+  window.refreshPremiumMotion=()=>{
+    const nodes=getTargets();
+    nodes.forEach(el=>{
+      if(!el.dataset.motionIndex){
+        el.dataset.motionIndex=String(motionIndex%6);
+        motionIndex++;
       }
     });
-  },{rootMargin:"0px 0px -8% 0px",threshold:.08});
-  nodes.forEach(el=>observer.observe(el));
+
+    if(!("IntersectionObserver" in window)){
+      nodes.forEach(markVisible);
+      return;
+    }
+
+    if(!observer){
+      observer=new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            markVisible(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      },{rootMargin:"0px 0px -8% 0px",threshold:.08});
+    }
+
+    nodes.forEach(el=>{
+      if(!el.classList.contains("motion-ready")) observer.observe(el);
+    });
+  };
+
+  window.refreshPremiumMotion();
 })();
