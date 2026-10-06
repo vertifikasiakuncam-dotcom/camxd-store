@@ -1,3 +1,10 @@
+function normalizeRefreshButton(){
+  const btn=$("#refreshBtn");
+  if(!btn) return;
+  btn.innerHTML='<span class="refresh-icon" aria-hidden="true">↻</span> <span class="refresh-label">Refresh</span>';
+  btn.classList.remove("is-working");
+  btn.dataset.working="0";
+}
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (s) => document.querySelector(s);
 
@@ -1499,6 +1506,7 @@ $("#clearFiltersBtn")?.addEventListener("click",()=>{
 
 
 document.addEventListener("DOMContentLoaded",()=>{
+  normalizeRefreshButton();
   $("#selectAllOrdersBtn")?.addEventListener("click",()=>{
     const eligible=allOrders.filter(o=>!["Selesai"].includes(o.status)).map(o=>String(o.id));
     if(eligible.length && eligible.every(id=>selectedOrderIds.has(id))) eligible.forEach(id=>selectedOrderIds.delete(id));
