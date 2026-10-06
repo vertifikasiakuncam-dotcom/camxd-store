@@ -196,3 +196,33 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
   .bar{max-width:25px}
   .bar-wrap span{font-size:9px}
 }
+
+
+/* STAGE 2 — ORDER CARDS */
+.order-card{position:relative}
+.order-top{padding-bottom:2px}
+.order-id{font-size:19px;font-weight:900;letter-spacing:.2px}
+.order-customer{align-items:center;background:#0f0f0f;border:1px solid #252525;border-radius:14px;padding:10px 12px;margin:14px 0}
+.customer-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--yellow);color:#111;font-weight:900;font-size:16px;flex:0 0 38px}
+.customer-main{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.customer-main strong{color:#eee;font-size:14px}
+.customer-main span{color:#888;font-size:12px}
+.order-item-count{font-size:11px;color:#777;border:1px solid #333;border-radius:999px;padding:5px 8px;white-space:nowrap}
+.items{background:#090909;border-radius:12px;padding:8px 12px}
+.item-line{align-items:center}
+.delivery-details{margin-top:14px;border-top:1px solid #252525;padding-top:12px}
+.delivery-details summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 2px;color:#ddd;font-weight:900}
+.delivery-details summary::-webkit-details-marker{display:none}
+.delivery-details summary:after{content:"＋";color:var(--yellow);font-size:18px}
+.delivery-details[open] summary:after{content:"−"}
+.delivery-details summary small{color:#777;font-weight:700}
+.delivery-details .delivery-box{margin-top:4px;padding-top:4px;border-top:0}
+.order-bottom{border-top:1px solid #252525;padding-top:14px}
+@media(max-width:800px){
+ .order-customer{padding:9px}
+ .customer-avatar{width:34px;height:34px;flex-basis:34px;font-size:14px}
+ .order-item-count{font-size:10px;padding:4px 7px}
+ .item-line{padding:9px 0}
+ .order-bottom strong{font-size:22px}
+ .delivery-details summary{padding:11px 2px}
+}
