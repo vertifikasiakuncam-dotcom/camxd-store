@@ -635,3 +635,28 @@ html{scroll-padding-top:90px}
   header.topbar nav#navMenu{display:none!important}
   header.topbar nav#navMenu.open{display:flex!important}
 }
+
+
+/* V26 — Phone/tablet navigation hard switch */
+@media screen and (max-width:1100px){
+  header.topbar{
+    position:sticky;
+    z-index:50;
+  }
+  header.topbar button.menu-btn{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    order:3!important;
+  }
+  header.topbar nav#navMenu{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+  }
+  header.topbar nav#navMenu.open{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
