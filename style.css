@@ -546,3 +546,15 @@ html{scroll-padding-top:90px}
 @media(min-width:560px){
   .detail-actions{grid-template-columns:1fr 1fr}
 }
+
+
+/* V20 — Share button contrast */
+.detail-actions .btn.ghost{
+  color:#fff;
+  background:rgba(255,255,255,.055);
+  border-color:rgba(255,208,0,.7);
+}
+.detail-actions .btn.ghost:hover{
+  background:var(--yellow);
+  color:#111;
+}
