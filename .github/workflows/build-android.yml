@@ -57,10 +57,22 @@ jobs:
           set -e
           mkdir -p "$HOME/.bubblewrap"
 
-          # Let Bubblewrap write/validate its own config instead of relying
-          # on a manually-created config that older Bubblewrap versions may reject.
-          bubblewrap updateConfig --jdkPath "$JAVA_HOME_17_X64"
-          bubblewrap updateConfig --androidSdkPath "$ANDROID_HOME"
+          # Bubblewrap validates the SDK root itself. The hosted runner's
+          # cmdline-tools layout does not expose a top-level bin directory,
+          # so Configure Android SDK creates that compatibility link first.
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          EOF
+
+          echo "Bubblewrap config:"
+          cat "$HOME/.bubblewrap/config.json"
+          test -x "$JAVA_HOME/bin/java"
+          test -x "$ANDROID_HOME/bin/sdkmanager"
+          test -x "$ANDROID_HOME/build-tools/36.1.0/apksigner"
+
           bubblewrap doctor
 
       - name: Prepare TWA project
