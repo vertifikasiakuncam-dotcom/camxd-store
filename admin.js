@@ -500,9 +500,9 @@ Masa aktif: 30 hari"
         if(!order) return;
 
         const ok = confirm(
-          "Kirim pesanan melalui WhatsApp?\\n\\n" +
-          "ID: " + (order.order_id || "-") + "\\n" +
-          "Pelanggan: " + (order.customer_name || "-") + "\\n" +
+          "Kirim pesanan melalui WhatsApp?\n\n" +
+          "ID: " + (order.order_id || "-") + "\n" +
+          "Pelanggan: " + (order.customer_name || "-") + "\n" +
           "Status akan diubah menjadi Selesai."
         );
 
@@ -524,9 +524,9 @@ async function deleteOrder(id){
   }
 
   const ok=confirm(
-    "HAPUS PESANAN SECARA PERMANEN?\\n\\n"+
-    "ID: "+(order.order_id||"-")+"\\n"+
-    "Pelanggan: "+(order.customer_name||"-")+"\\n\\n"+
+    "HAPUS PESANAN SECARA PERMANEN?\n\n"+
+    "ID: "+(order.order_id||"-")+"\n"+
+    "Pelanggan: "+(order.customer_name||"-")+"\n\n"+
     "Data pesanan akan hilang dari database dan tidak bisa dikembalikan."
   );
   if(!ok) return;
