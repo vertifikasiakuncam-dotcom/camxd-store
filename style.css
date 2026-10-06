@@ -122,3 +122,22 @@ html{scroll-padding-top:90px}
   .floating-wa{right:14px;bottom:78px;padding:11px 13px}.floating-wa b{display:none}.floating-wa span{font-size:22px}
   .back-top{right:14px;bottom:130px}
 }
+
+
+.featured-store{padding-top:22px;padding-bottom:28px}
+.featured-head{margin-bottom:16px}
+.featured-head .text-link{color:var(--yellow);font-weight:800;font-size:13px;text-decoration:none}
+.featured-products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.featured-card{position:relative;display:grid;grid-template-columns:112px 1fr;gap:13px;align-items:center;padding:12px;border:1px solid #302b16;border-radius:18px;background:linear-gradient(145deg,rgba(24,24,24,.96),rgba(8,8,8,.96));overflow:hidden}
+.featured-card:before{content:"";position:absolute;inset:auto -30px -50px auto;width:110px;height:110px;border-radius:50%;background:rgba(255,208,0,.07);pointer-events:none}
+.featured-card img{width:112px;height:88px;object-fit:cover;border-radius:12px;border:1px solid #3d3615}
+.featured-card-body{min-width:0;position:relative;z-index:1}
+.featured-card-badge{display:inline-block;font-size:9px;font-weight:900;color:#111;background:var(--yellow);padding:4px 7px;border-radius:999px;margin-bottom:6px}
+.featured-card h3{font-size:15px;margin:0 0 4px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.featured-card p{font-size:11px;color:#888;margin:0 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.featured-price{font-size:16px;font-weight:900;color:var(--yellow);margin-bottom:9px}
+.featured-buy{border:1px solid rgba(255,208,0,.55);background:rgba(255,208,0,.09);color:#fff;border-radius:9px;padding:7px 10px;font-weight:800;font-size:11px;cursor:pointer}
+.featured-buy:hover{background:var(--yellow);color:#111}
+.featured-loading{padding:25px;text-align:center;color:#888;border:1px dashed #333;border-radius:16px}
+@media(max-width:900px){.featured-products{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.featured-products{grid-template-columns:1fr}.featured-card{grid-template-columns:100px 1fr}.featured-card img{width:100px;height:82px}}
