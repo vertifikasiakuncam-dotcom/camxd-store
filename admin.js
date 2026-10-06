@@ -717,9 +717,9 @@ async function updateStatus(id, status){
       ? "menyelesaikan"
       : "membatalkan";
     const ok = confirm(
-      "Konfirmasi perubahan status\\n\\n" +
-      "ID: " + (order.order_id || "-") + "\\n" +
-      "Pelanggan: " + (order.customer_name || "-") + "\\n\\n" +
+      "Konfirmasi perubahan status\n\n" +
+      "ID: " + (order.order_id || "-") + "\n" +
+      "Pelanggan: " + (order.customer_name || "-") + "\n\n" +
       "Yakin ingin " + action + " pesanan ini?"
     );
     if(!ok){
