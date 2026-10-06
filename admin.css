@@ -111,6 +111,7 @@ input:focus,select:focus{border-color:var(--yellow)}
 }
 
 
+.new-order-alert[hidden], #markOrdersReadBtn[hidden]{display:none !important}
 .new-order-alert{
   display:inline-flex;
   align-items:center;
