@@ -907,6 +907,18 @@ $("#statusFilter")
     renderOrders
   );
 
+// Pastikan kalender native Android/Chrome terbuka saat kolom tanggal disentuh.
+function openAdminDatePicker(input){
+  if(!input) return;
+  try{
+    if(typeof input.showPicker === "function") input.showPicker();
+  }catch{}
+}
+
+document.querySelectorAll('input[type="date"]').forEach(input => {
+  input.addEventListener("pointerdown", () => openAdminDatePicker(input));
+});
+
 sb.auth.onAuthStateChange(
   (_event, _session) => {
     // Session changes are handled
