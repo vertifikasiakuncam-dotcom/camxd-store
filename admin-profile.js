@@ -13,7 +13,7 @@
     else{av.textContent=n.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase()||"A";av.classList.remove("has-image");}
   }
   async function load(){
-    const {data:{user}}=await window.supabase.auth.getUser(); if(!user)return;
+    const {data:{user}}=await sb.auth.getUser(); if(!user)return;
     const m=user.user_metadata||{};
     if($("#profileNameInput"))$("#profileNameInput").value=m.full_name||m.display_name||m.name||"Admin CAMXD Store";
     if($("#profileUsernameInput"))$("#profileUsernameInput").value=m.username||m.user_name||"admin";
@@ -24,7 +24,7 @@
     const n=$("#profileNameInput").value.trim()||"Admin CAMXD Store",u=username($("#profileUsernameInput").value)||"admin",a=$("#profileAvatarInput").value.trim(),e=$("#profileFormError"),b=$("#saveProfileBtn");
     if(a){try{const x=new URL(a);if(!/^https?:$/.test(x.protocol))throw 0}catch{e.textContent="URL foto profil tidak valid.";return}}
     e.textContent="";b.disabled=true;b.textContent="⏳ Menyimpan...";
-    try{const r=await window.supabase.auth.updateUser({data:{full_name:n,display_name:n,name:n,username:u,avatar_url:a||null}});if(r.error)throw r.error;await load();$("#profileEditor").hidden=true;if(window.showAdminToast)window.showAdminToast("Profil tersimpan","Profil admin berhasil diperbarui.");}
+    try{const r=await sb.auth.updateUser({data:{full_name:n,display_name:n,name:n,username:u,avatar_url:a||null}});if(r.error)throw r.error;await load();$("#profileEditor").hidden=true;if(window.showAdminToast)window.showAdminToast("Profil tersimpan","Profil admin berhasil diperbarui.");}
     catch(x){e.textContent="Gagal menyimpan profil: "+(x?.message||String(x))}
     finally{b.disabled=false;b.textContent="💾 Simpan Profil"}
   }
