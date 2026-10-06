@@ -12,10 +12,16 @@
   "prefer_related_applications": false,
   "icons": [
     {
+      "src": "./camxd-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "./camxd-admin-icon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
