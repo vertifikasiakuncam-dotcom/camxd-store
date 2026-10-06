@@ -457,3 +457,17 @@ html{scroll-padding-top:90px}
   .payment-steps div{padding:8px 9px}
   .order-timeline:before{left:12%;right:12%;top:24px}
 }
+
+
+/* V14 — Product search polish */
+.search{position:relative}
+.search input{min-width:0}
+.search-clear{
+  flex:none;width:32px;height:32px;border:1px solid #444;border-radius:50%;
+  background:#111;color:#ddd;font-size:22px;line-height:1;cursor:pointer;
+}
+.search-clear:hover{border-color:var(--yellow);color:var(--yellow)}
+.empty{
+  border:1px dashed #444;border-radius:20px;background:rgba(10,10,10,.72);
+  padding:42px 20px;margin-top:16px;
+}
