@@ -377,3 +377,61 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
     flex-basis:40px;
   }
 }
+
+
+/* STAGE 2 — EDIT ADMIN PROFILE */
+.admin-profile-edit{
+  margin-top:8px;
+  font-size:12px;
+  padding:8px 12px;
+}
+.profile-editor{
+  margin-top:12px;
+  padding:18px;
+  border:1px solid rgba(255,208,0,.24);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(255,208,0,.055),rgba(10,10,10,.96));
+}
+.profile-editor-head{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:flex-start;
+}
+.profile-editor-head h3{margin:0 0 4px;font-size:20px}
+.profile-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:8px;
+}
+.profile-form-grid .full{grid-column:1/-1}
+.profile-preview-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:15px;
+  padding:11px;
+  border:1px solid #292929;
+  border-radius:14px;
+  background:#090909;
+}
+.profile-preview-row > div:last-child{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.profile-preview-row strong{font-size:13px;color:#eee}
+.profile-preview-row span{font-size:11px;color:#888}
+.profile-save-btn{
+  width:auto!important;
+  margin-top:14px!important;
+}
+@media(max-width:800px){
+  .profile-editor{padding:14px}
+  .profile-form-grid{grid-template-columns:1fr}
+  .profile-form-grid .full{grid-column:auto}
+  .profile-editor-head{align-items:center}
+  .admin-profile-edit{width:100%;text-align:center}
+  .profile-save-btn{width:100%!important}
+}
