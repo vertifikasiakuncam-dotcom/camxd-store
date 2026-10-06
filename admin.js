@@ -788,7 +788,104 @@ async function login(e){
   await showDashboard();
 }
 
-async function showDashboard(){
+async function normalizeUsername(value){
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "")
+    .slice(0,30);
+}
+
+function renderAdminProfileEditor(user, admin){
+  const meta = user?.user_metadata || {};
+  const name = meta.full_name || meta.display_name || meta.name || "Admin CAMXD Store";
+  const username = meta.username || meta.user_name || "admin";
+  const avatarUrl = meta.avatar_url || meta.picture || "";
+
+  $("#profileNameInput").value = name;
+  $("#profileUsernameInput").value = username;
+  $("#profileAvatarInput").value = avatarUrl;
+  updateProfileEditorPreview();
+}
+
+function updateProfileEditorPreview(){
+  const name = $("#profileNameInput")?.value.trim() || "Admin CAMXD Store";
+  const username = normalizeUsername($("#profileUsernameInput")?.value) || "admin";
+  const avatarUrl = $("#profileAvatarInput")?.value.trim() || "";
+  $("#profilePreviewName").textContent = name;
+  $("#profilePreviewUsername").textContent = username;
+
+  const avatar = $("#profileEditorAvatar");
+  if(!avatar) return;
+  if(avatarUrl){
+    avatar.innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="">';
+    avatar.classList.add("has-image");
+  }else{
+    const initials = name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() || "A";
+    avatar.textContent = initials;
+    avatar.classList.remove("has-image");
+  }
+}
+
+async function saveAdminProfile(){
+  const name = $("#profileNameInput").value.trim() || "Admin CAMXD Store";
+  const username = normalizeUsername($("#profileUsernameInput").value) || "admin";
+  const avatarUrl = $("#profileAvatarInput").value.trim();
+
+  if(avatarUrl){
+    try{
+      const u = new URL(avatarUrl);
+      if(!/^https?:$/.test(u.protocol)) throw new Error();
+    }catch{
+      $("#profileFormError").textContent = "URL foto profil tidak valid.";
+      return;
+    }
+  }
+
+  $("#profileFormError").textContent = "";
+  $("#saveProfileBtn").disabled = true;
+  $("#saveProfileBtn").textContent = "⏳ Menyimpan...";
+
+  const {data, error} = await sb.auth.updateUser({
+    data:{
+      full_name:name,
+      display_name:name,
+      name:name,
+      username,
+      avatar_url:avatarUrl || null
+    }
+  });
+
+  $("#saveProfileBtn").disabled = false;
+  $("#saveProfileBtn").textContent = "💾 Simpan Profil";
+
+  if(error){
+    $("#profileFormError").textContent = "Gagal menyimpan profil: " + error.message;
+    return;
+  }
+
+  const user = data?.user;
+  if(user){
+    const meta = user.user_metadata || {};
+    $("#adminName").textContent = meta.full_name || name;
+    $("#adminProfileEmail").textContent = user.email || "";
+    $("#adminEmail").textContent = user.email || "";
+    const avatar = $("#adminAvatar");
+    if(avatarUrl){
+      avatar.innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="">';
+      avatar.classList.add("has-image");
+    }else{
+      const initials = name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() || "A";
+      avatar.textContent = initials;
+      avatar.classList.remove("has-image");
+    }
+  }
+
+  $("#profileEditor").hidden = true;
+  showAdminToast("Profil tersimpan", "Profil admin berhasil diperbarui.");
+}
+
+function showDashboard(){
 
   const {
     data:{user}
@@ -867,6 +964,8 @@ async function showDashboard(){
     }
   }
 
+  renderAdminProfileEditor(user, admin);
+
   $("#loginView").hidden = true;
   $("#dashboardView").hidden = false;
 
@@ -906,6 +1005,21 @@ $("#statusFilter")
     "change",
     renderOrders
   );
+
+$("#editProfileBtn")?.addEventListener("click", ()=>{
+  $("#profileEditor").hidden = false;
+  updateProfileEditorPreview();
+  $("#profileEditor").scrollIntoView({behavior:"smooth", block:"center"});
+});
+
+$("#closeProfileEditorBtn")?.addEventListener("click", ()=>{
+  $("#profileEditor").hidden = true;
+});
+
+$("#profileNameInput")?.addEventListener("input", updateProfileEditorPreview);
+$("#profileUsernameInput")?.addEventListener("input", updateProfileEditorPreview);
+$("#profileAvatarInput")?.addEventListener("input", updateProfileEditorPreview);
+$("#saveProfileBtn")?.addEventListener("click", saveAdminProfile);
 
 sb.auth.onAuthStateChange(
   (_event, _session) => {
