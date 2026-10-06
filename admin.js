@@ -771,7 +771,7 @@ async function login(e){
   const password =
     $("#password").value;
 
-  const submit = e.submitter || document.querySelector("#loginForm button[type="submit"]");
+  const submit = e.submitter || document.querySelector('#loginForm button[type="submit"]');
   if(submit){
     submit.disabled = true;
     submit.dataset.originalText = submit.textContent;
