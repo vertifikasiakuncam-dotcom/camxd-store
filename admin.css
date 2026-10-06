@@ -465,3 +465,14 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
 .notification-read-btn:hover{
   background:rgba(118,224,139,.22)!important;
 }
+
+
+.admin-connection-status{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:9px 11px;border:1px solid #333;border-radius:12px;background:#111;color:#aaa;font-size:12px;font-weight:900;white-space:nowrap}
+.connection-dot{width:9px;height:9px;border-radius:50%;background:#777;box-shadow:0 0 0 transparent}
+.admin-connection-status.online{border-color:rgba(118,224,139,.45);background:rgba(118,224,139,.08);color:#76e08b}
+.admin-connection-status.online .connection-dot{background:#76e08b;box-shadow:0 0 10px rgba(118,224,139,.7)}
+.admin-connection-status.offline{border-color:rgba(255,123,123,.45);background:rgba(255,123,123,.08);color:#ff7b7b}
+.admin-connection-status.offline .connection-dot{background:#ff7b7b;box-shadow:0 0 10px rgba(255,123,123,.6)}
+.admin-connection-status.polling .connection-dot{animation:connectionPulse 1.5s ease-in-out infinite}
+@keyframes connectionPulse{50%{transform:scale(1.35);opacity:.65}}
+@media(max-width:800px){.admin-connection-status{width:100%;justify-content:center;min-height:40px}}
