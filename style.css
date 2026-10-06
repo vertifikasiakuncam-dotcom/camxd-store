@@ -548,3 +548,48 @@ html{scroll-padding-top:90px}
  .info-card{padding:18px}
  .info-card h2{font-size:26px}
 }
+
+
+/* V17 — Lightweight premium motion system */
+@keyframes camxdReveal{
+  from{opacity:0;transform:translate3d(0,18px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes camxdHero{
+  from{opacity:0;transform:translate3d(0,24px,0) scale(.985)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+@keyframes camxdGlow{
+  0%,100%{opacity:.45;transform:scale(1)}
+  50%{opacity:.75;transform:scale(1.04)}
+}
+.js-motion .hero-card{animation:camxdHero .7s cubic-bezier(.22,.8,.25,1) both}
+.js-motion .store-announcement{animation:camxdReveal .45s ease both}
+.js-motion .section.motion-ready{
+  animation:camxdReveal .65s cubic-bezier(.22,.8,.25,1) both;
+}
+.js-motion .hero-card:after{
+  animation:camxdGlow 7s ease-in-out infinite;
+  transform-origin:center;
+}
+.js-motion .product.motion-ready,
+.js-motion .featured-card.motion-ready,
+.js-motion .trust-card.motion-ready{
+  animation:camxdReveal .55s cubic-bezier(.22,.8,.25,1) both;
+  animation-delay:var(--motion-delay,0ms);
+}
+@media(max-width:760px){
+  .js-motion .hero-card{animation-duration:.55s}
+  .js-motion .section.motion-ready{animation-duration:.5s}
+  .js-motion .product.motion-ready,
+  .js-motion .featured-card.motion-ready,
+  .js-motion .trust-card.motion-ready{animation-duration:.42s}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+  }
+}
