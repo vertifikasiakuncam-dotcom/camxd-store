@@ -1,6 +1,22 @@
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (s) => document.querySelector(s);
 
+function showAdminToast(title, message){
+  let toast = document.getElementById("adminToast");
+  if(!toast){
+    toast = document.createElement("div");
+    toast.id = "adminToast";
+    toast.className = "admin-toast";
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML =
+    '<strong>' + escapeHtml(title) + '</strong>' +
+    '<span>' + escapeHtml(message) + '</span>';
+  toast.classList.add("show");
+  clearTimeout(showAdminToast.timer);
+  showAdminToast.timer = setTimeout(() => toast.classList.remove("show"), 4500);
+}
+
 const STATUSES = [
   "Menunggu Pembayaran",
   "Menunggu Verifikasi",
@@ -99,11 +115,37 @@ async function loadOrders(){
     nextOrders.forEach(o => seenOrderIds.add(String(o.id)));
     firstOrderLoad = false;
   }else{
-    nextOrders.forEach(o => {
-      if(!previousIds.has(String(o.id))){
-        unreadOrderIds.add(String(o.id));
+    const newlyArrived = nextOrders.filter(o => !previousIds.has(String(o.id)));
+    newlyArrived.forEach(o => unreadOrderIds.add(String(o.id)));
+
+    if(newlyArrived.length){
+      const pendingNew = newlyArrived.filter(o =>
+        o.status === "Menunggu Pembayaran" ||
+        o.status === "Menunggu Verifikasi"
+      );
+      if(pendingNew.length){
+        showAdminToast(
+          "🔔 Pesanan baru masuk",
+          pendingNew.length === 1
+            ? (pendingNew[0].order_id + " • " + (pendingNew[0].customer_name || "Pelanggan"))
+            : pendingNew.length + " pesanan baru perlu diperiksa"
+        );
+
+        if("vibrate" in navigator){
+          try{ navigator.vibrate([120,60,120]); }catch{}
+        }
+
+        if("Notification" in window && Notification.permission === "granted"){
+          try{
+            new Notification("CAMXD Store — Pesanan Baru", {
+              body: pendingNew.length === 1
+                ? pendingNew[0].order_id + " • " + (pendingNew[0].customer_name || "Pelanggan")
+                : pendingNew.length + " pesanan baru perlu diperiksa"
+            });
+          }catch{}
+        }
       }
-    });
+    }
   }
 
   allOrders = nextOrders;
@@ -666,6 +708,25 @@ async function saveDelivery(id, sendAfter){
 }
 
 async function updateStatus(id, status){
+  const order = allOrders.find(o => Number(o.id) === Number(id));
+  if(!order) return;
+
+  const important = status === "Selesai" || status === "Dibatalkan";
+  if(important && order.status !== status){
+    const action = status === "Selesai"
+      ? "menyelesaikan"
+      : "membatalkan";
+    const ok = confirm(
+      "Konfirmasi perubahan status\\n\\n" +
+      "ID: " + (order.order_id || "-") + "\\n" +
+      "Pelanggan: " + (order.customer_name || "-") + "\\n\\n" +
+      "Yakin ingin " + action + " pesanan ini?"
+    );
+    if(!ok){
+      renderOrders();
+      return;
+    }
+  }
 
   const {error} =
     await sb
