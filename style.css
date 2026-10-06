@@ -603,3 +603,27 @@ html{scroll-padding-top:90px}
   .recent-card{border-radius:18px;padding:9px}
   .recent-card img{width:112px;height:72px}
 }
+
+
+/* V24 — Compact mobile header */
+@media(max-width:900px){
+  .topbar{height:76px;padding:9px 12px;gap:6px}
+  .brand{font-size:20px;gap:7px;min-width:0}
+  .brand img{width:48px;height:48px}
+  .brand span{white-space:nowrap}
+  .cart-btn{margin-left:auto;margin-right:2px;padding:8px 10px;font-size:13px}
+  .menu-btn{display:block;order:3;font-size:28px;padding:4px 5px;line-height:1}
+  .topbar nav{
+    display:none;position:absolute;left:10px;right:10px;top:70px;
+    background:#0b0b0b;border:1px solid rgba(255,208,0,.3);border-radius:16px;
+    padding:7px;flex-direction:column;gap:0;box-shadow:0 15px 45px #000;
+  }
+  .topbar nav.open{display:flex}
+  .topbar nav a{padding:11px 13px;font-size:14px}
+}
+@media(max-width:420px){
+  .topbar{padding-left:9px;padding-right:9px}
+  .brand{font-size:18px}
+  .brand img{width:44px;height:44px}
+  .cart-btn{padding:7px 9px}
+}
