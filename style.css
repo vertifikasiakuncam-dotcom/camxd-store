@@ -539,3 +539,10 @@ html{scroll-padding-top:90px}
   .product,.featured-card,.trust-card,.deal-banner,.order-check-card,.info-card{box-shadow:0 10px 28px rgba(0,0,0,.28);}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}
+
+
+/* V19 — Product sharing */
+.detail-actions{display:grid;gap:9px}
+@media(min-width:560px){
+  .detail-actions{grid-template-columns:1fr 1fr}
+}
