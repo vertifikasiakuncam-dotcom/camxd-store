@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080808">
   <link rel="manifest" href="admin-manifest.webmanifest">
   <title>CAMXD Store — Admin</title>
-  <link rel="stylesheet" href="admin.css?v=20261006-19">
+  <link rel="stylesheet" href="admin.css?v=20261006-20">
 </head>
 <body>
   <main class="admin-shell">
@@ -87,9 +87,10 @@
                 <input id="profileUsernameInput" type="text" maxlength="30" placeholder="Username">
               </div>
               <div class="full">
-                <label for="profileAvatarInput">URL Foto Profil</label>
-                <input id="profileAvatarInput" type="url" placeholder="https://...">
-                <small class="form-help">Gunakan URL gambar publik. Kosongkan jika ingin memakai inisial.</small>
+                <label for="profileAvatarFile">Foto Profil</label>
+                <input id="profileAvatarFile" type="file" accept="image/jpeg,image/png,image/webp">
+                <small class="form-help">Pilih foto langsung dari HP. Maksimal 5 MB. JPG, PNG, atau WebP.</small>
+                <input id="profileAvatarInput" type="hidden">
               </div>
             </div>
 
@@ -303,7 +304,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="admin.js?v=20261006-19"></script>
-  <script src="admin-profile.js?v=20261006-1"></script>
+  <script src="admin-profile.js?v=20261006-2"></script>
   <script src="admin-pwa.js?v=20261006-6"></script>
 
 </body>
