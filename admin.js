@@ -717,99 +717,136 @@ function getDeliveryValue(id){
     : "";
 }
 
+function setOrderActionBusy(id, busy, mode="save"){
+  const selectors = [
+    `.save-detail[data-id="${id}"]`,
+    `.send-wa[data-id="${id}"]`,
+    `.delete-order[data-id="${id}"]`
+  ];
+  selectors.forEach(sel=>{
+    const btn=document.querySelector(sel);
+    if(!btn) return;
+    if(busy){
+      if(btn.dataset.originalText===undefined) btn.dataset.originalText=btn.textContent;
+      btn.disabled=true;
+      btn.classList.add("is-busy");
+      btn.textContent = mode==="send" ? "⏳ Mengirim..." : mode==="delete" ? "⏳ Menghapus..." : "⏳ Menyimpan...";
+    }else{
+      btn.disabled=false;
+      btn.classList.remove("is-busy");
+      if(btn.dataset.originalText!==undefined){
+        btn.textContent=btn.dataset.originalText;
+        delete btn.dataset.originalText;
+      }
+    }
+  });
+}
+
 async function saveDelivery(id, sendAfter){
-
-  const details =
-    getDeliveryValue(id);
-
-  const order =
-    allOrders.find(
-      o => Number(o.id) === Number(id)
-    );
-
+  const details = getDeliveryValue(id);
+  const order = allOrders.find(o => Number(o.id) === Number(id));
   if(!order) return;
 
-  // Detail akun bersifat opsional saat mengirim.
-  // Jika belum diisi, pesan WhatsApp tetap memakai format CAMXD
-  // dengan tanda "-" pada bagian detail akun.
-  if(details){
-    const {error: detailError} =
-      await sb
-        .from("orders")
-        .update({
-          delivery_details: details,
-          delivered_at: new Date().toISOString()
-        })
-        .eq("id", id);
+  const busyMode = sendAfter ? "send" : "save";
+  const guard = document.querySelector(`.save-detail[data-id="${id}"]`)?.dataset.busy === "1" ||
+                document.querySelector(`.send-wa[data-id="${id}"]`)?.dataset.busy === "1";
+  if(guard) return;
+  document.querySelectorAll(`.save-detail[data-id="${id}"], .send-wa[data-id="${id}"]`).forEach(btn=>btn.dataset.busy="1");
+  setOrderActionBusy(id,true,busyMode);
 
-    if(detailError){
-      alert(
-        "Gagal menyimpan detail: " +
-        detailError.message
-      );
-      return;
+  try{
+    if(details){
+      const {error: detailError} = await sb.from("orders").update({
+        delivery_details: details,
+        delivered_at: new Date().toISOString()
+      }).eq("id", id);
+
+      if(detailError){
+        alert("Gagal menyimpan detail: " + detailError.message);
+        return;
+      }
     }
-  }
 
-  // Jika tombol "Simpan & Kirim WhatsApp" ditekan,
-  // otomatis ubah status menjadi Selesai
-  if(sendAfter){
+    if(sendAfter){
+      const {error: statusError} = await sb.from("orders").update({
+        status: "Selesai"
+      }).eq("id", id);
 
-    const {error: statusError} =
-      await sb
-        .from("orders")
-        .update({
-          status: "Selesai"
-        })
-        .eq("id", id);
+      if(statusError){
+        alert("Detail sudah tersimpan, tetapi status gagal diubah: " + statusError.message);
+        return;
+      }
 
-    if(statusError){
+      order.delivery_details = details;
+      order.delivered_at = new Date().toISOString();
+      order.status = "Selesai";
 
-      alert(
-        "Detail sudah tersimpan, tetapi status gagal diubah: " +
-        statusError.message
-      );
+      const url = buildWhatsAppUrl(order, details);
+      if(url === "#"){
+        alert("Detail sudah disimpan dan status menjadi Selesai, tetapi nomor WhatsApp pelanggan tidak valid.");
+        await loadOrders();
+        return;
+      }
 
+      await loadOrders();
+      window.location.href = url;
       return;
     }
 
     order.delivery_details = details;
     order.delivered_at = new Date().toISOString();
-    order.status = "Selesai";
+    alert("Detail produk berhasil disimpan.");
+    renderOrders();
+  }finally{
+    document.querySelectorAll(`.save-detail[data-id="${id}"], .send-wa[data-id="${id}"]`).forEach(btn=>delete btn.dataset.busy);
+    setOrderActionBusy(id,false);
+  }
+}
 
-    const url =
-      buildWhatsAppUrl(
-        order,
-        details
-      );
+async function deleteOrder(id){
+  const order=allOrders.find(o=>Number(o.id)===Number(id));
+  if(!order) return;
 
-    if(url === "#"){
+  const btn=document.querySelector(`.delete-order[data-id="${id}"]`);
+  if(btn?.dataset.busy==="1") return;
 
-      alert(
-        "Detail sudah disimpan dan status menjadi Selesai, tetapi nomor WhatsApp pelanggan tidak valid."
-      );
-
-      await loadOrders();
-      return;
-    }
-
-    // Refresh data sebelum membuka WhatsApp
-    await loadOrders();
-
-    // Buka WhatsApp
-    window.location.href = url;
-
+  if(order.status!=="Dibatalkan"){
+    alert("Untuk keamanan, hanya pesanan dengan status Dibatalkan yang bisa dihapus. Ubah status pesanan menjadi Dibatalkan terlebih dahulu.");
     return;
   }
 
-  order.delivery_details = details;
-  order.delivered_at = new Date().toISOString();
-
-  alert(
-    "Detail produk berhasil disimpan."
+  const ok=confirm(
+    "HAPUS PESANAN SECARA PERMANEN?\n\n"+
+    "ID: "+(order.order_id||"-")+"\n"+
+    "Pelanggan: "+(order.customer_name||"-")+"\n\n"+
+    "Data pesanan akan hilang dari database dan tidak bisa dikembalikan."
   );
+  if(!ok) return;
 
-  renderOrders();
+  if(btn) btn.dataset.busy="1";
+  setOrderActionBusy(id,true,"delete");
+
+  try{
+    const {data: deleted, error}=await sb.rpc("delete_order_admin", {p_order_id: id});
+    if(error){
+      alert("Gagal menghapus pesanan: " + error.message);
+      return;
+    }
+
+    if(deleted !== true){
+      alert("Pesanan tidak dihapus. Pastikan statusnya Dibatalkan dan akun ini adalah admin.");
+      return;
+    }
+
+    allOrders=allOrders.filter(o=>Number(o.id)!==Number(id));
+    unreadOrderIds.delete(String(id));
+    alert("Pesanan "+(order.order_id||"")+" berhasil dihapus.");
+    updateStats();
+    renderOrders();
+  }finally{
+    if(btn) delete btn.dataset.busy;
+    setOrderActionBusy(id,false);
+  }
 }
 
 async function updateStatus(id, status){
