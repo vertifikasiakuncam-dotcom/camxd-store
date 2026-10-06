@@ -438,3 +438,30 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
 }
 
 .orders-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}.orders-toolbar .btn{min-height:42px}.order-select{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:-2px 0 10px;border:1px solid #292929;border-radius:10px;background:#0b0b0b;color:#aaa;font-size:12px}.order-select input{width:18px;height:18px;accent-color:#ffd000}.order-select:has(input:not(:disabled)){color:#fff}.order-select input:disabled{opacity:.35}
+
+
+/* STATUS TOMBOL ADMIN */
+.refresh-btn{
+  transition:all .2s ease;
+}
+.refresh-btn.is-working{
+  background:rgba(255,208,0,.18)!important;
+  border-color:rgba(255,208,0,.7)!important;
+  color:#ffd000!important;
+  box-shadow:0 0 16px rgba(255,208,0,.18);
+}
+.refresh-btn.is-working .refresh-icon{
+  display:inline-block;
+  animation:adminSpin .8s linear infinite;
+}
+@keyframes adminSpin{to{transform:rotate(360deg)}}
+
+.notification-read-btn{
+  border-color:rgba(118,224,139,.65)!important;
+  background:rgba(118,224,139,.13)!important;
+  color:#76e08b!important;
+  box-shadow:0 0 14px rgba(118,224,139,.10);
+}
+.notification-read-btn:hover{
+  background:rgba(118,224,139,.22)!important;
+}
