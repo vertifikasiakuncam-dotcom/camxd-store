@@ -142,8 +142,7 @@ function render(){
    </div>
   </article>`).join("");
  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openDetail(b.dataset.id));
- const clear=$("#searchClear"); if(clear) clear.onclick=()=>{const input=$("#search");input.value="";render();input.focus();};
- if(window.refreshPremiumMotion) window.refreshPremiumMotion();
+ if(clear) clear.onclick=()=>{const input=$("#search");input.value="";render();input.focus();};
 }
 
 function openDetail(id){
