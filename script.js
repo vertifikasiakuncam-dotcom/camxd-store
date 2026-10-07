@@ -543,6 +543,16 @@ async function applyVoucher(){const input=$("#cartVoucher"),button=$("#applyVouc
 function clearVoucher(){appliedVoucher=null;const input=$("#cartVoucher"),msg=$("#voucherMessage");if(input)input.value="";if(msg){msg.textContent="";msg.classList.remove("success");}renderVoucherSummary();updateCart();}
 
 async function checkoutCart(){
+ if(pendingOrder){
+  closeCart();
+  $("#paymentOrderId").textContent=pendingOrder.orderId;
+  $("#paymentTotal").textContent=pendingOrder.total;
+  $("#paymentModal").hidden=false;
+  $("#paymentModal").scrollTop=0;
+  document.body.style.overflow="hidden";
+  startPaymentStatusWatch();
+  return;
+ }
  if(!cart.length)return;
  const name=$("#cartName").value.trim(), wa=$("#cartWa").value.trim();
  if(!name||!wa){alert("Silakan isi nama lengkap dan nomor WhatsApp terlebih dahulu.");return;}
@@ -865,7 +875,7 @@ $("#paymentProofFile")?.addEventListener("change",e=>{
  }
 });
 $("#orderCheckForm").addEventListener("submit",checkOrder);
-$("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
+$("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal"&&!pendingOrder)closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
 initStoreWebMusic();
