@@ -622,7 +622,7 @@ $("#paymentProofFile")?.addEventListener("change",e=>{
  }
  if(box){
    box.hidden=false;
-   box.innerHTML='<span class="proof-selected-icon">✓</span><span><strong>Upload bukti pembayaran</strong><small>'+escapeHtml(file.name)+'</small></span>';
+   box.innerHTML='<span class="proof-selected-icon">✓</span><span><strong>Upload berhasil</strong><small>'+escapeHtml(file.name)+'</small></span>';
  }
 });
 $("#orderCheckForm").addEventListener("submit",checkOrder);
