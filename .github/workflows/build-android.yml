@@ -57,6 +57,7 @@ jobs:
           mkdir -p store-android/app/src/main/res/drawable-nodpi
 
           cp camxd-logo.png store-android/app/src/main/res/drawable-nodpi/camxd_logo.png
+          cp camxd-background.png store-android/app/src/main/res/drawable-nodpi/camxd_background.png
 
           cat > store-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
@@ -165,8 +166,8 @@ jobs:
           
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
-              getWindow().setStatusBarColor(Color.rgb(35,14,2));
-              getWindow().setNavigationBarColor(Color.rgb(18,7,1));
+              getWindow().setStatusBarColor(Color.TRANSPARENT);
+              getWindow().setNavigationBarColor(Color.TRANSPARENT);
               showIntro();
             }
           
@@ -177,15 +178,16 @@ jobs:
             private final class StaticIntroView extends View {
               private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
               private final Paint textPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+              private final Bitmap background;
               private final Bitmap logo;
               private final long startTime=System.currentTimeMillis();
               private final long duration=4800L;
           
               StaticIntroView(){
                 super(MainActivity.this);
+                background=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background);
                 logo=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_logo);
                 textPaint.setTypeface(android.graphics.Typeface.create("sans",android.graphics.Typeface.BOLD));
-                setBackgroundColor(Color.rgb(35,12,2));
                 postInvalidateOnAnimation();
               }
           
@@ -193,72 +195,50 @@ jobs:
                 super.onDraw(c);
                 final float w=getWidth(), h=getHeight();
           
-                // Static premium gold/brown background. No cloud or logo animation.
-                p.setStyle(Paint.Style.FILL);
-                p.setShader(new LinearGradient(0,0,0,h,
-                    Color.rgb(48,18,2),Color.rgb(156,58,3),Shader.TileMode.CLAMP));
-                c.drawRect(0,0,w,h,p);
-                p.setShader(null);
+                // Use the actual CAMXD golden-cloud artwork as the static background.
+                p.setAlpha(255);
+                c.drawBitmap(background,null,new RectF(0,0,w,h),p);
           
-                // Static soft golden glow behind the logo.
-                p.setColor(Color.argb(55,255,188,35));
-                c.drawCircle(w/2f,h*0.43f,w*0.42f,p);
-                p.setColor(Color.argb(30,255,225,120));
-                c.drawCircle(w/2f,h*0.43f,w*0.30f,p);
-          
-                // Static subtle sun rays.
-                p.setStrokeWidth(3f);
-                p.setColor(Color.argb(65,255,196,45));
-                float cx=w/2f, cy=h*0.43f;
-                for(int i=-6;i<=6;i++){
-                  float tx=cx+i*w*0.14f;
-                  c.drawLine(cx,cy,tx,cy-h*0.24f,p);
-                }
-          
-                // Logo stays completely still and fully contained.
-                float maxW=w*0.78f;
-                float maxH=h*0.40f;
+                // Keep the CAMXD logo still and fully visible.
+                float maxW=w*0.70f;
+                float maxH=h*0.36f;
                 float scale=Math.min(maxW/logo.getWidth(),maxH/logo.getHeight());
                 float lw=logo.getWidth()*scale;
                 float lh=logo.getHeight()*scale;
                 float logoLeft=(w-lw)/2f;
-                float logoTop=h*0.18f;
-                p.setAlpha(255);
+                float logoTop=h*0.17f;
                 c.drawBitmap(logo,null,new RectF(logoLeft,logoTop,logoLeft+lw,logoTop+lh),p);
           
-                drawTextCentered(c,"DIGITAL STORE • CEPAT • AMAN",logoTop+lh+42f,16f,Color.WHITE);
-                drawTextCentered(c,"CAMXD STORE",logoTop+lh+88f,30f,Color.rgb(255,218,72));
+                drawTextCentered(c,"DIGITAL STORE • CEPAT • AMAN",logoTop+lh+42f,15f,Color.WHITE);
+                drawTextCentered(c,"CAMXD STORE",logoTop+lh+84f,29f,Color.rgb(255,218,72));
           
-                // Only the loading fill moves.
+                // Only this fill is animated.
                 float t=Math.min(1f,(System.currentTimeMillis()-startTime)/(float)duration);
-                float barW=Math.min(w*0.72f,560f);
-                float barH=22f;
+                float barW=Math.min(w*0.70f,560f);
+                float barH=20f;
                 float barX=(w-barW)/2f;
-                float barY=logoTop+lh+122f;
+                float barY=logoTop+lh+116f;
           
                 p.setStyle(Paint.Style.FILL);
-                p.setColor(Color.argb(220,30,12,2));
+                p.setColor(Color.argb(235,20,8,1));
                 c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH/2f,barH/2f,p);
           
                 p.setStyle(Paint.Style.STROKE);
                 p.setStrokeWidth(3f);
-                p.setColor(Color.rgb(255,190,25));
+                p.setColor(Color.rgb(255,191,25));
                 c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH/2f,barH/2f,p);
           
                 p.setStyle(Paint.Style.FILL);
                 p.setShader(new LinearGradient(barX,0,barX+barW,0,
-                    Color.rgb(255,170,0),Color.rgb(255,244,150),Shader.TileMode.CLAMP));
+                    Color.rgb(255,170,0),Color.rgb(255,245,155),Shader.TileMode.CLAMP));
                 c.drawRoundRect(new RectF(barX+3,barY+3,
-                    barX+3+(barW-6)*t,barY+barH-3),9,9,p);
+                    barX+3+(barW-6)*t,barY+barH-3),8,8,p);
                 p.setShader(null);
           
-                drawTextCentered(c,"MEMUAT CAMXD STORE",barY+48f,12f,Color.rgb(255,226,112));
+                drawTextCentered(c,"MEMUAT CAMXD STORE",barY+45f,11f,Color.rgb(255,226,112));
           
-                if(t<1f){
-                  postInvalidateOnAnimation();
-                }else{
-                  postDelayed(() -> setupWebView(),180);
-                }
+                if(t<1f) postInvalidateOnAnimation();
+                else postDelayed(() -> setupWebView(),180);
               }
           
               private void drawTextCentered(Canvas c,String s,float y,float size,int color){
@@ -272,7 +252,6 @@ jobs:
             private void setupWebView(){
               webView=new WebView(this);
               setContentView(webView);
-          
               WebSettings s=webView.getSettings();
               s.setJavaScriptEnabled(true);
               s.setDomStorageEnabled(true);
@@ -303,7 +282,6 @@ jobs:
                   return handleUrl(view,url);
                 }
               });
-          
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final");
             }
           
