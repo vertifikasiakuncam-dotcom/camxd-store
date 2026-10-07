@@ -242,9 +242,11 @@ jobs:
                 paint.setStyle(Paint.Style.FILL);
                 paint.setShadowLayer(28f,0,0,Color.argb(80,255,170,0));
                 float sway=(float)Math.sin(elapsed*0.75f)*w*0.035f;
-                drawGoldCloud(canvas,w*0.035f+sway,h*0.24f,0.82f);
-                drawGoldCloud(canvas,w*0.66f-sway,h*0.53f,0.76f);
-                drawGoldCloud(canvas,w*0.22f+sway*0.65f,h*0.72f,0.58f);
+                drawGoldCloud(canvas,-40f+sway,h*0.16f,1.45f);
+                drawGoldCloud(canvas,w*0.58f-sway,h*0.42f,1.25f);
+                drawGoldCloud(canvas,-55f+sway*0.65f,h*0.70f,1.05f);
+                drawGoldCloud(canvas,w*0.70f+sway*0.4f,h*0.76f,0.92f);
+                drawGoldCloud(canvas,w*0.28f-sway*0.5f,h*0.90f,1.15f);
                 paint.clearShadowLayer();
 
                 // 1) Gold flare is born from a single point.
@@ -360,8 +362,8 @@ jobs:
               logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
               logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
               logo.setAlpha(0f);
-              logo.setScaleX(0.30f);
-              logo.setScaleY(0.30f);
+              logo.setScaleX(0.22f);
+              logo.setScaleY(0.22f);
 
               TextView title=new TextView(this);
               title.setText("CAMXD STORE");
@@ -378,13 +380,13 @@ jobs:
               tagline.setGravity(Gravity.CENTER);
               tagline.setAlpha(0f);
 
-              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(280,280);
+              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(390,390);
               content.addView(logo,lpLogo);
               LinearLayout.LayoutParams lpTitle=new LinearLayout.LayoutParams(-1,-2);
-              lpTitle.topMargin=8;
+              lpTitle.topMargin=0;
               content.addView(title,lpTitle);
               LinearLayout.LayoutParams lpTag=new LinearLayout.LayoutParams(-1,-2);
-              lpTag.topMargin=7;
+              lpTag.topMargin=5;
               content.addView(tagline,lpTag);
 
               TextView loadingText=new TextView(this);
@@ -395,7 +397,7 @@ jobs:
               loadingText.setGravity(Gravity.CENTER);
               loadingText.setAlpha(0f);
               LinearLayout.LayoutParams lpLoadingText=new LinearLayout.LayoutParams(-1,-2);
-              lpLoadingText.topMargin=24;
+              lpLoadingText.topMargin=18;
               content.addView(loadingText,lpLoadingText);
 
               ProgressBar loadingBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
@@ -421,7 +423,7 @@ jobs:
 
               // Reveal sequence: flare -> ring -> particles -> logo -> title -> tagline.
               logo.animate().alpha(1f).scaleX(1.08f).scaleY(1.08f)
-                .setStartDelay(820).setDuration(650)
+                .setStartDelay(760).setDuration(820)
                 .withEndAction(() -> logo.animate().scaleX(1f).scaleY(1f).setDuration(180).start())
                 .setInterpolator(new AccelerateDecelerateInterpolator()).start();
               title.animate().alpha(1f)
