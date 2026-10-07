@@ -139,6 +139,7 @@ try{
 
 let products=[];
 let activeSort="default";
+let productSalesStats={};
 
 const FALLBACK_PRODUCTS=[
  {id:"ktv",name:"KTV Premium",desc:"Akses KTV Premium",category:"premium",image:"ktv-premium.jpg",badge:"BEST SELLER",plans:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]],detail:"Akses KTV Premium dengan pilihan durasi fleksibel. Setelah pembayaran diverifikasi, pesanan diproses oleh admin."},
@@ -205,6 +206,7 @@ async function loadProducts(){
       renderFeaturedProducts();
       renderSavedProducts();
       renderRecentProducts();
+      loadProductFeatureMeta();
     }
   }catch(error){
     console.warn("Katalog Supabase gagal dimuat, memakai katalog lokal:",error);
@@ -213,6 +215,55 @@ async function loadProducts(){
 }
 
 
+async function loadProductFeatureMeta(){
+  if(!sb||!products.length)return;
+  try{
+    const [metaResult,salesResult]=await Promise.all([
+      sb.from("products").select("product_key,stock_quantity,voucher_code,transaction_proof_url"),
+      sb.rpc("get_product_sales_stats")
+    ]);
+    if(!metaResult.error){
+      const metaByKey={};
+      (metaResult.data||[]).forEach(row=>{metaByKey[String(row.product_key)]=row;});
+      products.forEach(p=>{
+        const meta=metaByKey[String(p.id)];
+        if(meta){
+          p.stock_quantity=meta.stock_quantity==null?null:Number(meta.stock_quantity);
+          p.voucher_code=String(meta.voucher_code||"").trim();
+          p.transaction_proof_url=String(meta.transaction_proof_url||"").trim();
+        }
+      });
+    }
+    if(!salesResult.error){
+      productSalesStats={};
+      (salesResult.data||[]).forEach(row=>{productSalesStats[String(row.product_key)]=Number(row.sold_count||0);});
+      products.forEach(p=>{p.sold_count=Number(productSalesStats[String(p.id)]||0);});
+    }
+    render();
+    renderFeaturedProducts();
+  }catch(error){
+    console.warn("Fitur stok/voucher/bukti produk belum tersedia:",error);
+  }
+}
+
+function productStockLabel(p){
+  if(p.stock_quantity==null)return "Stok belum diatur";
+  const n=Math.max(0,Number(p.stock_quantity)||0);
+  return n===0?"Stok habis":"Stok "+n;
+}
+
+function productVoucherHtml(p){
+  const code=String(p.voucher_code||"").trim();
+  return code ? '<span class="product-feature voucher">🎟️ Voucher: <b>'+escapeHtml(code)+'</b></span>' : "";
+}
+
+function productMetaHtml(p){
+  return '<div class="product-features">'
+    + '<span class="product-feature sold">🛍️ Terjual '+Number(p.sold_count||0)+'</span>'
+    + '<span class="product-feature stock">📦 '+escapeHtml(productStockLabel(p))+'</span>'
+    + productVoucherHtml(p)
+    + '</div>';
+}
 function escapeHtml(value){
   return String(value ?? "").replace(/[&<>"']/g,ch=>({
     "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
@@ -275,6 +326,7 @@ function render(){
    <div class="product-body">
     <h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc)}</p>
     <div class="price-row"><div><small>Mulai dari</small><div class="price">${p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan"}</div></div><button class="choose" data-id="${escapeHtml(p.id)}">Lihat Detail →</button></div>
+    ${productMetaHtml(p)}
    </div>
   </article>`).join("");
  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openDetail(b.dataset.id));
@@ -309,6 +361,16 @@ function openDetail(id){
  $("#detailImage").src=selectedProduct.image; $("#detailImage").alt=selectedProduct.name;
  $("#detailBadge").textContent=selectedProduct.badge; $("#detailTitle").textContent=selectedProduct.name; $("#detailDesc").textContent=selectedProduct.detail;
  updateFavoriteButton();
+ const detailMeta=$("#detailProductMeta");
+ if(detailMeta) detailMeta.innerHTML=productMetaHtml(selectedProduct);
+ const proof=$("#detailTransactionProof");
+ if(proof){
+   const proofUrl=String(selectedProduct.transaction_proof_url||"").trim();
+   proof.hidden=!proofUrl;
+   proof.innerHTML=proofUrl
+     ? '<div class="detail-proof-head"><span>🧾 Bukti Transaksi</span><a href="'+escapeHtml(proofUrl)+'" target="_blank" rel="noopener">Buka</a></div><img src="'+escapeHtml(proofUrl)+'" alt="Bukti transaksi '+escapeHtml(selectedProduct.name)+'" loading="lazy">'
+     : "";
+ }
  $("#detailPlans").innerHTML=selectedProduct.plans.map((p,i)=>`<button class="plan ${i===0?"selected":""}" data-i="${i}"><span>${p[0]}</span><strong>${p[1]?rupiah(p[1]):"Sesuai kebutuhan"}</strong></button>`).join("");
  document.querySelectorAll("#detailPlans .plan").forEach(b=>b.onclick=()=>{selectedPlan=selectedProduct.plans[Number(b.dataset.i)];document.querySelectorAll("#detailPlans .plan").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");});
  $("#detailModal").hidden=false; document.body.style.overflow="hidden";
