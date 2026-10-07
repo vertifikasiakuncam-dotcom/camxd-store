@@ -542,6 +542,19 @@ function renderVoucherSummary(){const box=$("#cartVoucherSummary");if(!box)retur
 async function applyVoucher(){const input=$("#cartVoucher"),button=$("#applyVoucherBtn"),msg=$("#voucherMessage");if(!input||!sb)return;const code=input.value.trim().toUpperCase();if(!code){appliedVoucher=null;renderVoucherSummary();if(msg)msg.textContent="Masukkan kode voucher.";return;}const product=voucherProductForCode(code);if(!product){if(msg)msg.textContent="Voucher tidak ditemukan atau tidak berlaku untuk produk di keranjang.";return;}if(!cart.some(x=>x.productId===product.id)){if(msg)msg.textContent="Voucher ini hanya berlaku untuk produk: "+product.name+".";return;}if(button){button.disabled=true;button.textContent="Memeriksa…";}try{const {data,error}=await sb.rpc("check_product_voucher",{p_product_key:product.id,p_code:code});if(error)throw error;const row=Array.isArray(data)?data[0]:data;if(!row?.valid)throw new Error(row?.message||"Voucher tidak valid.");appliedVoucher={code,productKey:product.id,discountType:row.discount_type,discountValue:Number(row.discount_value||0),message:row.message||"Voucher berhasil digunakan."};if(msg){msg.textContent="✓ Voucher berhasil digunakan.";msg.classList.add("success");}renderVoucherSummary();updateCart();}catch(error){appliedVoucher=null;renderVoucherSummary();if(msg){msg.classList.remove("success");msg.textContent=error?.message||"Voucher tidak dapat digunakan."}}finally{if(button){button.disabled=false;button.textContent="Gunakan Voucher";}}}
 function clearVoucher(){appliedVoucher=null;const input=$("#cartVoucher"),msg=$("#voucherMessage");if(input)input.value="";if(msg){msg.textContent="";msg.classList.remove("success");}renderVoucherSummary();updateCart();}
 
+function savePendingOrder(){try{if(pendingOrder)localStorage.setItem("camxd_pending_order_v1",JSON.stringify(pendingOrder));else localStorage.removeItem("camxd_pending_order_v1");}catch(e){}}
+function restorePendingOrder(){
+ try{
+  const raw=localStorage.getItem("camxd_pending_order_v1");
+  if(!raw)return;
+  const saved=JSON.parse(raw);
+  if(saved&&saved.orderId&&saved.wa){
+   pendingOrder=saved;
+   startPaymentStatusWatch();
+  }
+ }catch(e){try{localStorage.removeItem("camxd_pending_order_v1");}catch(_e){}}
+}
+
 async function checkoutCart(){
  if(pendingOrder){
   closeCart();
@@ -573,7 +586,7 @@ async function checkoutCart(){
   const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Koneksi ke server terlalu lama. Silakan cek internet iPhone lalu coba lagi.")),12000));
   const {error}=await Promise.race([insertPromise,timeoutPromise]);
   if(error)throw error;
-  pendingOrder={orderId,name,wa,lines,total,voucherCode:appliedVoucher?.code||"",discountAmount};appliedVoucher=null;
+  pendingOrder={orderId,name,wa,lines,total,voucherCode:appliedVoucher?.code||"",discountAmount};savePendingOrder();appliedVoucher=null;
   closeCart();
   $("#paymentOrderId").textContent=orderId;
   $("#paymentTotal").textContent=total;
@@ -881,6 +894,7 @@ document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classL
 initStoreWebMusic();
 syncMusicButton();
 restoreCart();
+restorePendingOrder();
 updateCart();
 render();
 renderFeaturedProducts();
