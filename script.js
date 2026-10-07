@@ -543,16 +543,42 @@ async function applyVoucher(){const input=$("#cartVoucher"),button=$("#applyVouc
 function clearVoucher(){appliedVoucher=null;const input=$("#cartVoucher"),msg=$("#voucherMessage");if(input)input.value="";if(msg){msg.textContent="";msg.classList.remove("success");}renderVoucherSummary();updateCart();}
 
 function savePendingOrder(){try{if(pendingOrder)localStorage.setItem("camxd_pending_order_v1",JSON.stringify(pendingOrder));else localStorage.removeItem("camxd_pending_order_v1");}catch(e){}}
-function restorePendingOrder(){
+async function restorePendingOrder(){
  try{
   const raw=localStorage.getItem("camxd_pending_order_v1");
   if(!raw)return;
   const saved=JSON.parse(raw);
-  if(saved&&saved.orderId&&saved.wa){
-   pendingOrder=saved;
-   startPaymentStatusWatch();
+  if(!saved||!saved.orderId||!saved.wa)return;
+
+  const {data,error}=await sb.rpc("check_order",{
+    p_order_id:saved.orderId,
+    p_customer_wa:saved.wa
+  });
+
+  if(error||!data){
+    pendingOrder=null;
+    localStorage.removeItem("camxd_pending_order_v1");
+    return;
   }
- }catch(e){try{localStorage.removeItem("camxd_pending_order_v1");}catch(_e){}}
+
+  const status=String(data.status||"");
+  if(status.includes("Selesai")||status.includes("Dibatalkan")){
+    pendingOrder=null;
+    localStorage.removeItem("camxd_pending_order_v1");
+    if(status.includes("Selesai")){
+      cart=[];
+      appliedVoucher=null;
+      saveCart();
+      updateCart();
+    }
+    return;
+  }
+
+  pendingOrder=saved;
+  startPaymentStatusWatch();
+ }catch(e){
+  console.warn("Pemulihan pesanan tertunda:",e);
+ }
 }
 
 async function checkoutCart(){
