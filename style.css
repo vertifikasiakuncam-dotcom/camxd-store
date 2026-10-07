@@ -747,3 +747,9 @@ html{scroll-padding-top:90px}
 #sortProducts{appearance:none;-webkit-appearance:none;min-width:145px;padding:9px 30px 9px 11px;border:1px solid rgba(255,208,0,.28);border-radius:10px;background:#0b0b0b;color:#eee;font:inherit;font-size:11px;outline:none}
 #sortProducts:focus{border-color:var(--yellow);box-shadow:0 0 0 2px rgba(255,208,0,.08)}
 @media(max-width:760px){.catalog-tools{justify-content:space-between;margin-top:9px}.catalog-tools-label{font-size:10px}#sortProducts{min-width:150px;padding:8px 27px 8px 10px}}
+
+
+/* V30 — Catalog shopping tip */
+.catalog-mini-note{display:flex;align-items:center;gap:10px;margin:12px 0 10px;padding:10px 12px;border:1px solid rgba(255,208,0,.16);border-radius:13px;background:linear-gradient(90deg,rgba(255,208,0,.055),rgba(255,255,255,.018));color:#bbb}
+.catalog-mini-note>span{font-size:19px;flex:none}.catalog-mini-note strong{display:block;color:#eee;font-size:11px;margin-bottom:2px}.catalog-mini-note small{display:block;color:#777;font-size:10px;line-height:1.35}
+@media(max-width:760px){.catalog-mini-note{margin:9px 0;padding:9px 10px}.catalog-mini-note>span{font-size:17px}.catalog-mini-note small{font-size:9px}}
