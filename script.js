@@ -621,6 +621,21 @@ window.addEventListener("scroll",()=>{
 backTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 
 $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart;
+$("#musicBtn")?.addEventListener("click",()=>{
+  const btn=$("#musicBtn");
+  const muted=btn.dataset.muted==="1";
+  if(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function"){
+    const next=!muted;
+    window.CAMXDMusic.setMuted(next);
+    btn.dataset.muted=next?"1":"0";
+    btn.textContent=next?"🔇":"🔊";
+    btn.setAttribute("aria-label",next?"Nyalakan musik":"Matikan musik");
+    btn.title=next?"Nyalakan musik":"Matikan musik";
+  }else{
+    btn.dataset.muted=muted?"0":"1";
+    btn.textContent=muted?"🔊":"🔇";
+  }
+});
 $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#copyOrderId").onclick=copyOrderId;
 $("#paymentProofFile")?.addEventListener("change",e=>{
  const file=e.target.files?.[0],box=$("#paymentProofPreview"),err=$("#paymentProofError");
