@@ -610,14 +610,20 @@ $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#
 $("#paymentProofFile")?.addEventListener("change",e=>{
  const file=e.target.files?.[0],box=$("#paymentProofPreview"),err=$("#paymentProofError");
  if(err) err.textContent="";
- if(!file){if(box){box.hidden=true;box.innerHTML="";}return;}
+ if(!file){
+   if(box){box.hidden=true;box.innerHTML="";}
+   return;
+ }
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024){
    if(err) err.textContent="File harus JPG/PNG/WebP dan maksimal 5 MB.";
    e.target.value="";
    if(box){box.hidden=true;box.innerHTML="";}
    return;
  }
- if(box){const url=URL.createObjectURL(file);box.hidden=false;box.innerHTML='<img src="'+url+'" alt="Preview bukti pembayaran">';}
+ if(box){
+   box.hidden=false;
+   box.innerHTML='<span class="proof-selected-icon">✓</span><span><strong>Bukti pembayaran dipilih</strong><small>'+escapeHtml(file.name)+'</small></span>';
+ }
 });
 $("#orderCheckForm").addEventListener("submit",checkOrder);
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
