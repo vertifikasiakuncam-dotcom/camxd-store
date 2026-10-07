@@ -362,8 +362,8 @@ jobs:
               logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
               logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
               logo.setAlpha(0f);
-              logo.setScaleX(0.22f);
-              logo.setScaleY(0.22f);
+              logo.setScaleX(0.12f);
+              logo.setScaleY(0.12f);
 
               TextView title=new TextView(this);
               title.setText("CAMXD STORE");
@@ -380,7 +380,7 @@ jobs:
               tagline.setGravity(Gravity.CENTER);
               tagline.setAlpha(0f);
 
-              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(390,390);
+              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(330,330);
               content.addView(logo,lpLogo);
               LinearLayout.LayoutParams lpTitle=new LinearLayout.LayoutParams(-1,-2);
               lpTitle.topMargin=0;
@@ -422,8 +422,8 @@ jobs:
               });
 
               // Reveal sequence: flare -> ring -> particles -> logo -> title -> tagline.
-              logo.animate().alpha(1f).scaleX(1.08f).scaleY(1.08f)
-                .setStartDelay(760).setDuration(820)
+              logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setStartDelay(760).setDuration(900)
                 .withEndAction(() -> logo.animate().scaleX(1f).scaleY(1f).setDuration(180).start())
                 .setInterpolator(new AccelerateDecelerateInterpolator()).start();
               title.animate().alpha(1f)
