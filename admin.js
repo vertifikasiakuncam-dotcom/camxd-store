@@ -1192,6 +1192,8 @@ let editingProductId = null;
 let selectedProductFile = null;
 let selectedProductProofFile = null;
 
+function toLocalInput(v){if(!v)return "";const d=new Date(v);if(Number.isNaN(d.getTime()))return "";const pad=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());}
+
 function resetProductForm(){
   editingProductId = null;
   $("#productDbId").value = "";
@@ -1206,6 +1208,7 @@ function resetProductForm(){
   $("#productImagePreview").innerHTML = "<span>Belum ada preview</span>";
   $("#productStock").value = "";
   $("#productVoucher").value = "";
+  $("#productVoucherType").value = "percent";$("#productVoucherValue").value = "";$("#productVoucherLimit").value = "";$("#productVoucherFrom").value = "";$("#productVoucherUntil").value = "";$("#productVoucherActive").checked = true;
   $("#productProofUrl").value = "";
   $("#productProofFile").value = "";
   selectedProductProofFile = null;
@@ -1303,7 +1306,7 @@ function renderProductsAdmin(){
             <span>Mulai: <b>${firstPrice ? rupiah(firstPrice) : "Sesuai kebutuhan"}</b></span>
             <span>🛍️ Terjual: <b>${Number(p.sold_count||0)}</b></span>
             <span>📦 Stok: <b>${p.stock_quantity==null ? "Belum diatur" : Math.max(0,Number(p.stock_quantity)||0)}</b></span>
-            <span>🎟️ Voucher: <b>${escapeHtml(p.voucher_code||"-")}</b></span>
+            <span>🎟️ Voucher: <b>${escapeHtml(p.voucher_code||"-")}</b>${p.voucher_code ? " ("+escapeHtml(p.voucher_discount_type==="fixed" ? "Rp "+Number(p.voucher_discount_value||0).toLocaleString("id-ID")+"/item" : Number(p.voucher_discount_value||0)+"%")+")" : ""}</span>
             <span>🧾 Bukti: <b>${p.transaction_proof_url ? "Tersedia" : "Belum ada"}</b></span>
           </div>
           <div class="admin-product-actions">
@@ -1339,6 +1342,7 @@ function editProduct(id){
   $("#productDetail").value = p.detail || "";
   $("#productStock").value = p.stock_quantity==null ? "" : p.stock_quantity;
   $("#productVoucher").value = p.voucher_code || "";
+  $("#productVoucherType").value = p.voucher_discount_type || "percent";$("#productVoucherValue").value = p.voucher_discount_value==null ? "" : p.voucher_discount_value;$("#productVoucherLimit").value = p.voucher_usage_limit==null ? "" : p.voucher_usage_limit;$("#productVoucherFrom").value = toLocalInput(p.voucher_valid_from);$("#productVoucherUntil").value = toLocalInput(p.voucher_valid_until);$("#productVoucherActive").checked = p.voucher_active!==false;
   $("#productProofUrl").value = p.transaction_proof_url || "";
   $("#productProofFile").value = "";
   selectedProductProofFile = null;
@@ -1436,7 +1440,7 @@ async function saveProduct(){
   const detail = $("#productDetail").value.trim();
   const stockRaw = $("#productStock").value.trim();
   const stock_quantity = stockRaw === "" ? null : Math.max(0, Number(stockRaw)||0);
-  const voucher_code = $("#productVoucher").value.trim();
+  const voucher_code = $("#productVoucher").value.trim().toUpperCase();const voucher_discount_type = $("#productVoucherType").value === "fixed" ? "fixed" : "percent";const voucher_discount_value = Math.max(0,Number($("#productVoucherValue").value||0));const voucher_usage_limit_raw = $("#productVoucherLimit").value.trim();const voucher_usage_limit = voucher_usage_limit_raw === "" ? null : Math.max(1,Math.floor(Number(voucher_usage_limit_raw)||1));const voucher_valid_from = $("#productVoucherFrom").value ? new Date($("#productVoucherFrom").value).toISOString() : null;const voucher_valid_until = $("#productVoucherUntil").value ? new Date($("#productVoucherUntil").value).toISOString() : null;const voucher_active = $("#productVoucherActive").checked;
   let transaction_proof_url = $("#productProofUrl").value.trim();
   const sort_order = Number($("#productSort").value || 0);
   const is_active = $("#productActive").checked;
@@ -1481,7 +1485,7 @@ async function saveProduct(){
       badge,
       detail,
       stock_quantity,
-      voucher_code: voucher_code || null,
+      voucher_code: voucher_code || null,voucher_discount_type: voucher_code ? voucher_discount_type : "percent",voucher_discount_value: voucher_code ? voucher_discount_value : 0,voucher_valid_from,voucher_valid_until,voucher_usage_limit,voucher_active: voucher_code ? voucher_active : false,
       transaction_proof_url: transaction_proof_url || null,
       is_active,
       sort_order
