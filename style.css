@@ -1353,3 +1353,65 @@ body:before{
     line-height:1!important;
   }
 }
+/* V39 — Product inventory, sales, voucher and transaction proof */
+.product-features{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:9px;
+}
+.product-feature{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:4px 7px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:999px;
+  background:rgba(255,255,255,.035);
+  color:#aaa;
+  font-size:9px;
+  line-height:1.2;
+  font-weight:800;
+}
+.product-feature.sold{color:#bdbdbd}
+.product-feature.stock{color:#d5d5d5}
+.product-feature.voucher{
+  color:var(--yellow);
+  border-color:rgba(255,208,0,.28);
+  background:rgba(255,208,0,.055);
+}
+.product-feature.voucher b{color:#fff;margin-left:2px}
+.detail-product-meta{
+  margin-top:13px;
+}
+.detail-transaction-proof{
+  margin-top:14px;
+  padding:12px;
+  border:1px solid rgba(255,208,0,.22);
+  border-radius:15px;
+  background:rgba(255,208,0,.035);
+}
+.detail-transaction-proof[hidden]{display:none}
+.detail-proof-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:9px;
+}
+.detail-proof-head span{color:#eee;font-size:12px;font-weight:900}
+.detail-proof-head a{color:var(--yellow);font-size:11px;font-weight:900}
+.detail-transaction-proof img{
+  display:block;
+  width:100%;
+  max-height:260px;
+  object-fit:contain;
+  border-radius:10px;
+  background:#050505;
+}
+@media(max-width:760px){
+  .product-features{gap:4px;margin-top:8px}
+  .product-feature{font-size:8px;padding:4px 6px;min-height:24px}
+  .detail-product-meta .product-feature{font-size:10px}
+  .detail-transaction-proof{padding:10px}
+}
