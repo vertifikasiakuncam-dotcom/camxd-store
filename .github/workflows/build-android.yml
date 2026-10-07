@@ -92,7 +92,7 @@ jobs:
               <item name="android:statusBarColor">#080808</item>
               <item name="android:navigationBarColor">#050505</item>
               <item name="android:windowLightStatusBar">false</item>
-              <item name="android:windowBackground">#080808</item>
+              <item name="android:windowBackground">#211400</item>
             </style>
           </resources>
           EOF
@@ -106,7 +106,7 @@ jobs:
               <item name="android:navigationBarColor">#050505</item>
               <item name="android:windowLightStatusBar">false</item>
               <item name="android:windowBackground">#080808</item>
-              <item name="android:windowSplashScreenBackground">#080808</item>
+              <item name="android:windowSplashScreenBackground">#211400</item>
               <item name="android:windowSplashScreenAnimatedIcon">@drawable/camxd_logo</item>
               <item name="android:windowSplashScreenAnimationDuration">500</item>
             </style>
@@ -239,8 +239,8 @@ jobs:
                 // Full-screen cinematic gold-cloud atmosphere.
                 paint.setStyle(Paint.Style.FILL);
                 paint.setShader(new LinearGradient(0,0,0,h,
-                  new int[]{Color.rgb(8,5,1),Color.rgb(34,18,2),Color.rgb(14,8,1)},
-                  new float[]{0f,0.52f,1f},Shader.TileMode.CLAMP));
+                  new int[]{Color.rgb(62,34,3),Color.rgb(92,48,3),Color.rgb(48,25,2)},
+                  new float[]{0f,0.50f,1f},Shader.TileMode.CLAMP));
                 canvas.drawRect(0,0,w,h,paint);
                 paint.setShader(null);
 
@@ -379,7 +379,7 @@ jobs:
 
             private void showIntro() {
               FrameLayout splash=new FrameLayout(this);
-              splash.setBackgroundColor(Color.BLACK);
+              splash.setBackgroundColor(Color.rgb(62,34,3));
               splash.addView(new GoldIntroView(this),new FrameLayout.LayoutParams(-1,-1));
 
               LinearLayout content=new LinearLayout(this);
@@ -390,6 +390,7 @@ jobs:
               ImageView logo=new ImageView(this);
               logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
               logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+               logo.setPadding(14,14,14,14);
               logo.setAlpha(0f);
               logo.setScaleX(0.12f);
               logo.setScaleY(0.12f);
