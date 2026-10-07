@@ -627,6 +627,15 @@ function showPaymentStatus(status){
    proofButton.textContent="✓ Pembayaran Lunas";
   }
   stopPaymentStatusWatch();
+  if(s.includes("selesai")){
+   cart=[];
+   appliedVoucher=null;
+   saveCart();
+   updateCart();
+   closeCart();
+   closePayment();
+   pendingOrder=null;
+  }
  }else if(verified){
   reported.hidden=false;
   reported.classList.remove("paid");
