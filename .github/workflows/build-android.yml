@@ -137,7 +137,7 @@ jobs:
 
           cat > store-android/app/src/main/java/com/camxd/store/MainActivity.java <<'EOF'
           package com.camxd.store;
-          
+
           import android.app.Activity;
           import android.os.Bundle;
           import android.net.Uri;
@@ -151,6 +151,7 @@ jobs:
           import android.graphics.LinearGradient;
           import android.graphics.Shader;
           import android.view.View;
+          import android.view.Window;
           import android.webkit.ValueCallback;
           import android.webkit.WebChromeClient;
           import android.webkit.WebResourceRequest;
@@ -158,97 +159,104 @@ jobs:
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
           import android.widget.Toast;
-          
+
           public class MainActivity extends Activity {
             private WebView webView;
             private ValueCallback<Uri[]> pendingFileCallback;
             private long lastBackPress=0;
-          
+
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
-              getWindow().setStatusBarColor(Color.TRANSPARENT);
-              getWindow().setNavigationBarColor(Color.TRANSPARENT);
+              Window window=getWindow();
+              window.setStatusBarColor(Color.TRANSPARENT);
+              window.setNavigationBarColor(Color.TRANSPARENT);
+              window.getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+              );
               showIntro();
             }
-          
+
             private void showIntro(){
               setContentView(new StaticIntroView());
             }
-          
+
             private final class StaticIntroView extends View {
               private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
-              private final Paint textPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
               private final Bitmap background;
-              private final Bitmap logo;
               private final long startTime=System.currentTimeMillis();
               private final long duration=4800L;
-          
+
               StaticIntroView(){
                 super(MainActivity.this);
                 background=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background);
-                logo=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_logo);
-                textPaint.setTypeface(android.graphics.Typeface.create("sans",android.graphics.Typeface.BOLD));
                 postInvalidateOnAnimation();
               }
-          
+
               @Override protected void onDraw(Canvas c){
                 super.onDraw(c);
                 final float w=getWidth(), h=getHeight();
-          
-                // Use the actual CAMXD golden-cloud artwork as the static background.
+
+                // The supplied CAMXD golden-cloud artwork is the entire static splash.
                 p.setAlpha(255);
                 c.drawBitmap(background,null,new RectF(0,0,w,h),p);
-          
-                // Keep the CAMXD logo still and fully visible.
-                float maxW=w*0.70f;
-                float maxH=h*0.36f;
-                float scale=Math.min(maxW/logo.getWidth(),maxH/logo.getHeight());
-                float lw=logo.getWidth()*scale;
-                float lh=logo.getHeight()*scale;
-                float logoLeft=(w-lw)/2f;
-                float logoTop=h*0.17f;
-                c.drawBitmap(logo,null,new RectF(logoLeft,logoTop,logoLeft+lw,logoTop+lh),p);
-          
-                drawTextCentered(c,"DIGITAL STORE • CEPAT • AMAN",logoTop+lh+42f,15f,Color.WHITE);
-                drawTextCentered(c,"CAMXD STORE",logoTop+lh+84f,29f,Color.rgb(255,218,72));
-          
-                // Only this fill is animated.
-                float t=Math.min(1f,(System.currentTimeMillis()-startTime)/(float)duration);
-                float barW=Math.min(w*0.70f,560f);
-                float barH=20f;
-                float barX=(w-barW)/2f;
-                float barY=logoTop+lh+116f;
-          
+
+                // The artwork already contains the logo, CAMXD STORE text and bar frame.
+                // Do not redraw or animate any of those elements. Only the bar fill moves.
+                float barX=w*0.155f;
+                float barW=w*0.690f;
+                float barY=h*0.6125f;
+                float barH=h*0.043f;
+
+                // Hide the pre-rendered fill inside the artwork so the real progress starts empty.
                 p.setStyle(Paint.Style.FILL);
-                p.setColor(Color.argb(235,20,8,1));
-                c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH/2f,barH/2f,p);
-          
-                p.setStyle(Paint.Style.STROKE);
-                p.setStrokeWidth(3f);
-                p.setColor(Color.rgb(255,191,25));
-                c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH/2f,barH/2f,p);
-          
-                p.setStyle(Paint.Style.FILL);
-                p.setShader(new LinearGradient(barX,0,barX+barW,0,
-                    Color.rgb(255,170,0),Color.rgb(255,245,155),Shader.TileMode.CLAMP));
-                c.drawRoundRect(new RectF(barX+3,barY+3,
-                    barX+3+(barW-6)*t,barY+barH-3),8,8,p);
                 p.setShader(null);
-          
-                drawTextCentered(c,"MEMUAT CAMXD STORE",barY+45f,11f,Color.rgb(255,226,112));
-          
-                if(t<1f) postInvalidateOnAnimation();
-                else postDelayed(() -> setupWebView(),180);
-              }
-          
-              private void drawTextCentered(Canvas c,String s,float y,float size,int color){
-                textPaint.setTextSize(size);
-                textPaint.setTextAlign(Paint.Align.CENTER);
-                textPaint.setColor(color);
-                c.drawText(s,getWidth()/2f,y,textPaint);
+                p.setColor(Color.rgb(32,16,5));
+                c.drawRoundRect(
+                  new RectF(barX+8f,barY+8f,barX+barW-8f,barY+barH-8f),
+                  barH*0.42f,barH*0.42f,p
+                );
+
+                // Restore a clean animated gold border over the original bar area.
+                p.setStyle(Paint.Style.STROKE);
+                p.setStrokeWidth(Math.max(3f,w*0.004f));
+                p.setColor(Color.rgb(255,205,60));
+                c.drawRoundRect(
+                  new RectF(barX,barY,barX+barW,barY+barH),
+                  barH*0.48f,barH*0.48f,p
+                );
+
+                float t=Math.min(1f,(System.currentTimeMillis()-startTime)/(float)duration);
+                float innerX=barX+10f;
+                float innerY=barY+10f;
+                float innerW=Math.max(0f,(barW-20f)*t);
+                float innerH=Math.max(2f,barH-20f);
+
+                if(innerW>0f){
+                  p.setStyle(Paint.Style.FILL);
+                  p.setShader(new LinearGradient(
+                    innerX,0,innerX+Math.max(1f,barW-20f),0,
+                    Color.rgb(255,166,0),
+                    Color.rgb(255,244,135),
+                    Shader.TileMode.CLAMP
+                  ));
+                  c.drawRoundRect(
+                    new RectF(innerX,innerY,innerX+innerW,innerY+innerH),
+                    innerH*0.45f,innerH*0.45f,p
+                  );
+                  p.setShader(null);
+                }
+
+                if(t<1f){
+                  postInvalidateOnAnimation();
+                }else{
+                  postDelayed(() -> setupWebView(),180);
+                }
               }
             }
-          
+
             private void setupWebView(){
               webView=new WebView(this);
               setContentView(webView);
@@ -260,7 +268,7 @@ jobs:
               s.setBuiltInZoomControls(false);
               s.setDisplayZoomControls(false);
               s.setMediaPlaybackRequiresUserGesture(false);
-          
+
               webView.setWebChromeClient(new WebChromeClient(){
                 @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params){
                   pendingFileCallback=callback;
@@ -273,7 +281,7 @@ jobs:
                   return true;
                 }
               });
-          
+
               webView.setWebViewClient(new WebViewClient(){
                 @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){
                   return handleUrl(view,request.getUrl().toString());
@@ -284,7 +292,7 @@ jobs:
               });
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final");
             }
-          
+
             private boolean handleUrl(WebView view,String url){
               if(url.startsWith("https://wa.me/")||url.startsWith("whatsapp://")){
                 try{ startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url))); }
@@ -307,7 +315,7 @@ jobs:
               catch(Exception e){ Toast.makeText(this,"Aplikasi untuk membuka link tidak ditemukan",Toast.LENGTH_SHORT).show(); }
               return true;
             }
-          
+
             @Override public void onBackPressed(){
               if(webView!=null&&webView.canGoBack()){ webView.goBack(); return; }
               long now=System.currentTimeMillis();
@@ -315,7 +323,7 @@ jobs:
               lastBackPress=now;
               Toast.makeText(this,"Tekan sekali lagi untuk keluar",Toast.LENGTH_SHORT).show();
             }
-          
+
             @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==1001&&pendingFileCallback!=null){
                 Uri[] results=null;
@@ -325,7 +333,7 @@ jobs:
               }
               super.onActivityResult(requestCode,resultCode,data);
             }
-          
+
             @Override protected void onDestroy(){
               if(pendingFileCallback!=null){ pendingFileCallback.onReceiveValue(null); pendingFileCallback=null; }
               if(webView!=null){ webView.destroy(); webView=null; }
