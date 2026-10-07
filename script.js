@@ -502,7 +502,7 @@ async function sendProof(){
    showPaymentStatus("Menunggu Verifikasi");
    if(proofButton) proofButton.textContent="✓ Bukti Terkirim";
    const msg="🛍️ CAMXD STORE\n🆔 ID Pesanan: "+o.orderId+"\n💰 Total: "+o.total+"\n✅ Pembayaran sudah dilakukan. Bukti pembayaran sudah diupload ke CAMXD Store.\nMohon dicek dan diproses.";
-   window.open("https://wa.me/"+STORE_WA+"?text="+encodeURIComponent(msg),"_blank");
+   window.location.href="https://wa.me/"+STORE_WA+"?text="+encodeURIComponent(msg);
  }catch(error){
    if(errorBox) errorBox.textContent="Gagal mengirim bukti: "+(error?.message||"Silakan coba lagi.");
    if(proofButton){proofButton.disabled=false;proofButton.textContent="Saya Sudah Bayar — Kirim Bukti →";}
