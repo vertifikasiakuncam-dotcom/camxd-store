@@ -610,3 +610,7 @@ body{background:radial-gradient(circle at 12% -10%,rgba(255,208,0,.12),transpare
     min-width:0;
   }
 }
+
+
+/* VOUCHER ADMIN */
+#productVoucherType,#productVoucherValue,#productVoucherLimit,#productVoucherFrom,#productVoucherUntil{min-height:44px}
