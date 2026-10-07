@@ -1315,3 +1315,41 @@ body:before{
   header.topbar .header-controls .cart-btn{padding:8px 10px!important}
   header.topbar .header-controls .menu-btn{display:block!important;padding:4px 5px!important}
 }
+
+/* Final mobile header alignment: never wrap the control group. */
+@media screen and (max-width:1200px){
+  header.topbar{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    width:100%!important;
+    overflow:visible!important;
+  }
+  header.topbar .header-controls{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    white-space:nowrap!important;
+    height:44px!important;
+    position:static!important;
+  }
+  header.topbar .header-controls .music-btn,
+  header.topbar .header-controls .cart-btn,
+  header.topbar .header-controls .menu-btn{
+    position:static!important;
+    float:none!important;
+    transform:none!important;
+    align-self:center!important;
+    margin-top:0!important;
+    margin-bottom:0!important;
+    vertical-align:middle!important;
+  }
+  header.topbar .header-controls .menu-btn{
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    line-height:1!important;
+  }
+}
