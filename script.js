@@ -1,4 +1,58 @@
 const STORE_WA="6282133942994";
+let storeWebMusic=null;
+let storeWebMusicStarted=false;
+let storeWebMusicMuted=localStorage.getItem("camxdMusicMuted")==="1";
+
+function initStoreWebMusic(){
+  if(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function") return;
+  try{
+    storeWebMusic=new Audio("camxd-store-music.mp3?v=20261007-1");
+    storeWebMusic.loop=true;
+    storeWebMusic.preload="auto";
+    storeWebMusic.volume=0.25;
+    storeWebMusic.muted=storeWebMusicMuted;
+    const start=()=>{
+      if(!storeWebMusic||storeWebMusicStarted||storeWebMusicMuted) return;
+      const p=storeWebMusic.play();
+      if(p&&typeof p.catch==="function") p.catch(()=>{});
+      storeWebMusicStarted=true;
+    };
+    const playFromGesture=()=>{
+      if(storeWebMusicMuted) return;
+      start();
+      window.removeEventListener("pointerdown",playFromGesture);
+      window.removeEventListener("keydown",playFromGesture);
+      window.removeEventListener("touchstart",playFromGesture);
+    };
+    const autoplay=storeWebMusic.play();
+    if(autoplay&&typeof autoplay.then==="function"){
+      autoplay.then(()=>{storeWebMusicStarted=true;}).catch(()=>{});
+    }
+    window.addEventListener("pointerdown",playFromGesture,{once:true,passive:true});
+    window.addEventListener("keydown",playFromGesture,{once:true});
+    window.addEventListener("touchstart",playFromGesture,{once:true,passive:true});
+  }catch(error){
+    console.warn("Musik website tidak tersedia:",error);
+  }
+}
+
+function setStoreWebMusicMuted(muted){
+  storeWebMusicMuted=!!muted;
+  localStorage.setItem("camxdMusicMuted",storeWebMusicMuted?"1":"0");
+  if(storeWebMusic){
+    storeWebMusic.muted=storeWebMusicMuted;
+    storeWebMusic.volume=storeWebMusicMuted?0:0.25;
+    if(!storeWebMusicMuted){
+      const p=storeWebMusic.play();
+      if(p&&typeof p.catch==="function") p.catch(()=>{});
+      storeWebMusicStarted=true;
+    }
+  }
+}
+
+function hasNativeStoreMusic(){
+  return !!(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function");
+}
 let sb=null;
 try{
   if(window.supabase && typeof SUPABASE_URL!=="undefined" && typeof SUPABASE_PUBLISHABLE_KEY!=="undefined"){
@@ -624,17 +678,16 @@ $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackd
 $("#musicBtn")?.addEventListener("click",()=>{
   const btn=$("#musicBtn");
   const muted=btn.dataset.muted==="1";
-  if(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function"){
-    const next=!muted;
+  const next=!muted;
+  if(hasNativeStoreMusic()){
     window.CAMXDMusic.setMuted(next);
-    btn.dataset.muted=next?"1":"0";
-    btn.textContent=next?"🔇":"🔊";
-    btn.setAttribute("aria-label",next?"Nyalakan musik":"Matikan musik");
-    btn.title=next?"Nyalakan musik":"Matikan musik";
   }else{
-    btn.dataset.muted=muted?"0":"1";
-    btn.textContent=muted?"🔊":"🔇";
+    setStoreWebMusicMuted(next);
   }
+  btn.dataset.muted=next?"1":"0";
+  btn.textContent=next?"🔇":"🔊";
+  btn.setAttribute("aria-label",next?"Nyalakan musik":"Matikan musik");
+  btn.title=next?"Nyalakan musik":"Matikan musik";
 });
 $("#closePayment").onclick=closePayment; $("#sendProof").onclick=sendProof; $("#copyOrderId").onclick=copyOrderId;
 $("#paymentProofFile")?.addEventListener("change",e=>{
@@ -659,7 +712,7 @@ $("#orderCheckForm").addEventListener("submit",checkOrder);
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
-restoreCart();
+initStoreWebMusic();\nrestoreCart();
 updateCart();
 render();
 renderFeaturedProducts();
