@@ -9,6 +9,7 @@ try{
 }
 
 let products=[];
+let activeSort="default";
 
 const FALLBACK_PRODUCTS=[
  {id:"ktv",name:"KTV Premium",desc:"Akses KTV Premium",category:"premium",image:"ktv-premium.jpg",badge:"BEST SELLER",plans:[["1 Bulan",65000],["3 Bulan",95000],["6 Bulan",150000],["1 Tahun",200000]],detail:"Akses KTV Premium dengan pilihan durasi fleksibel. Setelah pembayaran diverifikasi, pesanan diproses oleh admin."},
@@ -128,7 +129,12 @@ function restoreCart(){try{const raw=localStorage.getItem("camxd_cart_v1");const
 
 function render(){
  const q=$("#search").value.trim().toLowerCase();
- const list=products.filter(p=>(activeFilter==="all"||p.category===activeFilter)&&(!q||(`${p.name} ${p.desc}`).toLowerCase().includes(q)));
+ let list=products.filter(p=>(activeFilter==="all"||p.category===activeFilter)&&(!q||(`${p.name} ${p.desc}`).toLowerCase().includes(q)));
+ const priceOf=p=>Number(p?.plans?.[0]?.[1]||0);
+ if(activeSort==="low") list.sort((a,b)=>priceOf(a)-priceOf(b));
+ else if(activeSort==="high") list.sort((a,b)=>priceOf(b)-priceOf(a));
+ else if(activeSort==="az") list.sort((a,b)=>String(a.name).localeCompare(String(b.name),"id"));
+ else if(activeSort==="za") list.sort((a,b)=>String(b.name).localeCompare(String(a.name),"id"));
  $("#productCount").textContent=q ? `${list.length} hasil` : `${list.length} produk`;
  $("#empty").hidden=list.length>0;
  $("#products").innerHTML=list.map(p=>`
@@ -522,6 +528,7 @@ async function copyOrderId(){
 
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();});
 $("#search").addEventListener("input",render);
+$("#sortProducts")?.addEventListener("change",e=>{activeSort=e.target.value;render();});
 $("#closeDetail").onclick=closeDetail; $("#detailModal").addEventListener("click",e=>{if(e.target.id==="detailModal")closeDetail();});
 $("#addToCart").onclick=addToCart;
 $("#shareProduct")?.addEventListener("click",shareProduct);
