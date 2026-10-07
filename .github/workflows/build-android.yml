@@ -57,7 +57,7 @@ jobs:
           mkdir -p store-android/app/src/main/res/drawable-nodpi
 
           cp camxd-logo.png store-android/app/src/main/res/drawable-nodpi/camxd_logo.png
-          cp camxd-background.png store-android/app/src/main/res/drawable-nodpi/camxd_background.png
+          cp camxd-background.jpg store-android/app/src/main/res/drawable-nodpi/camxd_background.jpg
 
           cat > store-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
