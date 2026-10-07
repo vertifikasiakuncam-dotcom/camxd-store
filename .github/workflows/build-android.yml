@@ -235,7 +235,7 @@ jobs:
                 // Do not redraw or animate any of those elements. Only the bar fill moves.
                 float barX=w*0.155f;
                 float barW=w*0.690f;
-                float barY=h*0.6125f;
+                float barY=h*0.742f;
                 float barH=h*0.043f;
 
                 // Hide the pre-rendered fill inside the artwork so the real progress starts empty.
