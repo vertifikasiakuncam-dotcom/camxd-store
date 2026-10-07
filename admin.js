@@ -551,7 +551,7 @@ function renderOrders(){
           <span>📎 Belum ada bukti pembayaran</span>
         </div>`}
 
-        <details class="delivery-details" ${o.delivery_details ? "open" : ""}>
+        <details class="delivery-details" ${!o.delivery_details ? "open" : ""}>
           <summary>
             <span>\u{1F510} Detail Produk / Akun</span>
             <small>${o.delivery_details ? "Tersimpan" : "Belum diisi"}</small>
