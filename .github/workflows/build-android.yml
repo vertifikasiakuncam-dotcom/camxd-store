@@ -161,6 +161,7 @@ jobs:
           import android.view.View;
           import android.view.Window;
           import android.webkit.ValueCallback;
+          import android.webkit.JavascriptInterface;
           import android.webkit.WebChromeClient;
           import android.webkit.WebResourceRequest;
           import android.webkit.WebSettings;
@@ -173,6 +174,7 @@ jobs:
             private ValueCallback<Uri[]> pendingFileCallback;
             private long lastBackPress=0;
             private MediaPlayer mainMusic;
+            private boolean musicMuted=false;
 
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
@@ -331,6 +333,15 @@ jobs:
               s.setDisplayZoomControls(false);
               s.setMediaPlaybackRequiresUserGesture(false);
 
+              webView.addJavascriptInterface(new Object(){
+                @JavascriptInterface public void setMuted(boolean muted){
+                  musicMuted=muted;
+                  if(mainMusic!=null){
+                    try{ mainMusic.setVolume(muted?0f:0.25f,muted?0f:0.25f); }catch(Exception ignored){}
+                  }
+                }
+              },"CAMXDMusic");
+
               webView.setWebChromeClient(new WebChromeClient(){
                 @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params){
                   pendingFileCallback=callback;
@@ -363,13 +374,14 @@ jobs:
                 if(!mainMusic.isPlaying()){
                   try{ mainMusic.start(); }catch(Exception ignored){}
                 }
+                try{ mainMusic.setVolume(musicMuted?0f:0.25f,musicMuted?0f:0.25f); }catch(Exception ignored){}
                 return;
               }
               try{
                 mainMusic=MediaPlayer.create(this,R.raw.camxd_store_music);
                 if(mainMusic!=null){
                   mainMusic.setLooping(true);
-                  mainMusic.setVolume(0.25f,0.25f);
+                  mainMusic.setVolume(musicMuted?0f:0.25f,musicMuted?0f:0.25f);
                   mainMusic.start();
                 }
               }catch(Exception ignored){}
@@ -427,6 +439,9 @@ jobs:
               super.onResume();
               if(mainMusic!=null&&!mainMusic.isPlaying()){
                 try{ mainMusic.start(); }catch(Exception ignored){}
+              }
+              if(mainMusic!=null){
+                try{ mainMusic.setVolume(musicMuted?0f:0.25f,musicMuted?0f:0.25f); }catch(Exception ignored){}
               }
             }
 
