@@ -675,7 +675,10 @@ function showPaymentStatus(status){
    proofButton.disabled=true;
    proofButton.textContent="✓ Pembayaran Lunas";
   }
-  stopPaymentStatusWatch();
+  // Tetap polling setelah pembayaran lunas.
+  // Status baru akan berubah menjadi Selesai setelah admin mengirim detail.
+  // Polling tidak boleh dihentikan di tahap Lunas agar checkout bisa
+  // otomatis tertutup, keranjang dikosongkan, dan status tersinkron.
   if(s.includes("selesai")){
    cart=[];
    appliedVoucher=null;
