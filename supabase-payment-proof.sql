@@ -20,4 +20,7 @@ drop policy if exists "CAMXD payment proof admin read" on storage.objects;
 create policy "CAMXD payment proof admin read"
 on storage.objects for select
 to authenticated
-using (bucket_id = 'payment-proofs');
+using (
+  bucket_id = 'payment-proofs'
+  and public.is_admin()
+);
