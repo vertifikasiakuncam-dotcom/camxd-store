@@ -1285,3 +1285,11 @@ body:before{
   .cart-btn{margin-left:0}
   .menu-btn{margin-left:0}
 }
+
+/* Final header order — speaker immediately left of cart. */
+@media screen and (max-width:1200px){
+  header.topbar .brand{order:1!important;flex:0 1 auto!important}
+  header.topbar .music-btn{order:4!important;margin-left:auto!important;margin-right:0!important;flex:0 0 38px!important}
+  header.topbar .cart-btn{order:5!important;margin-left:0!important;margin-right:0!important;flex:0 0 auto!important}
+  header.topbar .menu-btn{order:6!important;margin-left:0!important;flex:0 0 auto!important}
+}
