@@ -192,9 +192,36 @@ jobs:
 
               StaticIntroView(){
                 super(MainActivity.this);
-                background=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background);
+                background=sharpenBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background));
                 postInvalidateOnAnimation();
               }
+
+              private Bitmap sharpenBitmap(Bitmap src){
+                if(src==null) return null;
+                int w=src.getWidth(), h=src.getHeight();
+                Bitmap out=Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
+                int[] in=new int[w*h];
+                int[] px=new int[w*h];
+                src.getPixels(in,0,w,0,0,w,h);
+                System.arraycopy(in,0,px,0,in.length);
+                for(int y=1;y<h-1;y++){
+                  int row=y*w;
+                  for(int x=1;x<w-1;x++){
+                    int i=row+x;
+                    int c0=in[i], l=in[i-1], r=in[i+1], u=in[i-w], d=in[i+w];
+                    int a=Color.alpha(c0);
+                    int rr=clamp(Color.red(c0)*3-Color.red(l)-Color.red(r)-Color.red(u)-Color.red(d));
+                    int gg=clamp(Color.green(c0)*3-Color.green(l)-Color.green(r)-Color.green(u)-Color.green(d));
+                    int bb=clamp(Color.blue(c0)*3-Color.blue(l)-Color.blue(r)-Color.blue(u)-Color.blue(d));
+                    px[i]=Color.argb(a,rr,gg,bb);
+                  }
+                }
+                out.setPixels(px,0,w,0,0,w,h);
+                src.recycle();
+                return out;
+              }
+
+              private int clamp(int v){ return v<0?0:(v>255?255:v); }
 
               @Override protected void onDraw(Canvas c){
                 super.onDraw(c);
