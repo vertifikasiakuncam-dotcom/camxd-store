@@ -271,7 +271,7 @@ jobs:
                 p.setTextSize(Math.max(18f,w*0.035f));
                 p.setColor(Color.rgb(255,226,70));
                 p.setShadowLayer(12f,0f,0f,Color.rgb(255,150,0));
-                c.drawText("MEMUAT CAMXD STORE",w,barY-p.getTextSize()*0.85f,p);
+                c.drawText("MEMUAT CAMXD STORE",w/2f,barY-p.getTextSize()*0.85f,p);
                 p.clearShadowLayer();
 
                 p.setStyle(Paint.Style.FILL);
