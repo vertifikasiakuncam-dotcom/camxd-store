@@ -455,67 +455,38 @@ function closePayment(){
  document.body.style.overflow="";
 }
 
-async function sendProof(){
- if(!pendingOrder)return;
-
- const o=pendingOrder;
- const lines=String(o.lines||"").split(/\r?\n/).filter(Boolean);
-
- // Tandai sebagai pembayaran yang dilaporkan; admin tetap wajib memverifikasi bukti QRIS.
- try{
-  const {error}=await sb.from("orders").update({status:"Menunggu Verifikasi"}).eq("order_id",o.orderId);
-  if(error) console.warn("Status pembayaran belum dapat diperbarui:",error);
- }catch(error){
-  console.warn("Update status pembayaran:",error);
- }
-
- const reported=$("#paymentReported");
- const proofButton=$("#sendProof");
- if(reported){
-  reported.hidden=false;
-  reported.classList.remove("paid");
- }
- if(proofButton){
-  proofButton.disabled=true;
-  proofButton.textContent="✓ Pembayaran Dilaporkan";
- }
- showPaymentStatus("Menunggu Verifikasi");
-
- const msg=[
-  "🛍️ *CAMXD STORE*",
-  "━━━━━━━━━━━━━━━━━━━━",
-  "🧾 *KONFIRMASI PEMBAYARAN*",
-  "",
-  "🆔 *ID Pesanan*",
-  o.orderId,
-  "",
-  "📦 *Detail Pesanan*",
-  ...lines,
-  "",
-  "💰 *Total Pembayaran*",
-  o.total,
-  "",
-  "👤 *Data Pemesan*",
-  "Nama: "+o.name,
-  "WhatsApp: "+o.wa,
-  "",
-  "💳 *Metode Pembayaran*",
-  "QRIS CAMXD Store",
-  "",
-  "✅ Saya sudah melakukan pembayaran.",
-  "📎 Bukti pembayaran saya lampirkan di chat ini.",
-  "",
-  "Mohon dicek dan diproses.",
-  "Terima kasih 🙏",
-  "━━━━━━━━━━━━━━━━━━━━"
- ].join("\n");
-
- window.open(
-  `https://wa.me/${STORE_WA}?text=${encodeURIComponent(msg)}`,
-  "_blank"
- );
+async function uploadPaymentProof(file, orderId){
+ if(!file) throw new Error("Pilih screenshot bukti pembayaran terlebih dahulu.");
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("Format bukti harus JPG, PNG, atau WebP.");
+ if(file.size>5*1024*1024) throw new Error("Ukuran bukti maksimal 5 MB.");
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+ const path=orderId+"/"+Date.now()+"-"+crypto.randomUUID()+"."+ext;
+ const {error:uploadError}=await sb.storage.from("payment-proofs").upload(path,file,{contentType:file.type,upsert:false});
+ if(uploadError) throw uploadError;
+ const {error:updateError}=await sb.from("orders").update({payment_proof_path:path,payment_proof_uploaded_at:new Date().toISOString(),status:"Menunggu Verifikasi"}).eq("order_id",orderId);
+ if(updateError){try{await sb.storage.from("payment-proofs").remove([path]);}catch{} throw updateError;}
+ return path;
 }
 
+async function sendProof(){
+ if(!pendingOrder)return;
+ const o=pendingOrder;
+ const file=$("#paymentProofFile")?.files?.[0];
+ const proofButton=$("#sendProof");
+ const errorBox=$("#paymentProofError");
+ if(errorBox) errorBox.textContent="";
+ if(proofButton){proofButton.disabled=true;proofButton.textContent="⏳ Mengunggah bukti…";}
+ try{
+   await uploadPaymentProof(file,o.orderId);
+   showPaymentStatus("Menunggu Verifikasi");
+   if(proofButton) proofButton.textContent="✓ Bukti Terkirim";
+   const msg="🛍️ CAMXD STORE\n🆔 ID Pesanan: "+o.orderId+"\n💰 Total: "+o.total+"\n✅ Pembayaran sudah dilakukan. Bukti pembayaran sudah diupload ke CAMXD Store.\nMohon dicek dan diproses.";
+   window.open("https://wa.me/"+STORE_WA+"?text="+encodeURIComponent(msg),"_blank");
+ }catch(error){
+   if(errorBox) errorBox.textContent="Gagal mengirim bukti: "+(error?.message||"Silakan coba lagi.");
+   if(proofButton){proofButton.disabled=false;proofButton.textContent="Saya Sudah Bayar — Kirim Bukti →";}
+ }
+}
 function normalizeWa(value){
  return String(value||"").replace(/\\D/g,"");
 }
