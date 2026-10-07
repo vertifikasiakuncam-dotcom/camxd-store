@@ -739,3 +739,11 @@ html{scroll-padding-top:90px}
 .related-card strong{display:block;color:var(--yellow);font-size:11px;margin-bottom:6px}
 .related-card .choose{width:100%;padding:6px 5px;font-size:10px;border-radius:8px}
 @media(max-width:520px){.related-products{gap:7px}.related-card img{height:62px}.related-card-body{padding:6px}.related-card h4{font-size:11px}.related-card strong{font-size:10px}.related-card .choose{font-size:9px}}
+
+
+/* V29 — Product sorting controls */
+.catalog-tools{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:10px 0 0}
+.catalog-tools-label{font-size:11px;color:#888}
+#sortProducts{appearance:none;-webkit-appearance:none;min-width:145px;padding:9px 30px 9px 11px;border:1px solid rgba(255,208,0,.28);border-radius:10px;background:#0b0b0b;color:#eee;font:inherit;font-size:11px;outline:none}
+#sortProducts:focus{border-color:var(--yellow);box-shadow:0 0 0 2px rgba(255,208,0,.08)}
+@media(max-width:760px){.catalog-tools{justify-content:space-between;margin-top:9px}.catalog-tools-label{font-size:10px}#sortProducts{min-width:150px;padding:8px 27px 8px 10px}}
