@@ -11,6 +11,7 @@ on:
       - "manifest.webmanifest"
       - ".github/workflows/build-android.yml"
       - "camxd-background.png"
+      - "camxd-store-music.mp3"
 
 permissions:
   contents: write
@@ -56,9 +57,11 @@ jobs:
           mkdir -p store-android/app/src/main/res/values
           mkdir -p store-android/app/src/main/res/values-v31
           mkdir -p store-android/app/src/main/res/drawable-nodpi
+          mkdir -p store-android/app/src/main/res/raw
 
           cp camxd-logo.png store-android/app/src/main/res/drawable-nodpi/camxd_logo.png
           cp camxd-background.png store-android/app/src/main/res/drawable-nodpi/camxd_background.png
+          cp camxd-store-music.mp3 store-android/app/src/main/res/raw/camxd_store_music.mp3
 
           cat > store-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
@@ -154,6 +157,7 @@ jobs:
           import android.media.AudioFormat;
           import android.media.AudioManager;
           import android.media.AudioTrack;
+          import android.media.MediaPlayer;
           import android.view.View;
           import android.view.Window;
           import android.webkit.ValueCallback;
@@ -168,6 +172,7 @@ jobs:
             private WebView webView;
             private ValueCallback<Uri[]> pendingFileCallback;
             private long lastBackPress=0;
+            private MediaPlayer mainMusic;
 
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
@@ -340,6 +345,9 @@ jobs:
               });
 
               webView.setWebViewClient(new WebViewClient(){
+                @Override public void onPageFinished(WebView view,String url){
+                  startMainMusic();
+                }
                 @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){
                   return handleUrl(view,request.getUrl().toString());
                 }
@@ -348,6 +356,23 @@ jobs:
                 }
               });
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final");
+            }
+
+            private void startMainMusic(){
+              if(mainMusic!=null){
+                if(!mainMusic.isPlaying()){
+                  try{ mainMusic.start(); }catch(Exception ignored){}
+                }
+                return;
+              }
+              try{
+                mainMusic=MediaPlayer.create(this,R.raw.camxd_store_music);
+                if(mainMusic!=null){
+                  mainMusic.setLooping(true);
+                  mainMusic.setVolume(0.25f,0.25f);
+                  mainMusic.start();
+                }
+              }catch(Exception ignored){}
             }
 
             private boolean handleUrl(WebView view,String url){
@@ -391,7 +416,26 @@ jobs:
               super.onActivityResult(requestCode,resultCode,data);
             }
 
+            @Override protected void onPause(){
+              super.onPause();
+              if(mainMusic!=null&&mainMusic.isPlaying()){
+                try{ mainMusic.pause(); }catch(Exception ignored){}
+              }
+            }
+
+            @Override protected void onResume(){
+              super.onResume();
+              if(mainMusic!=null&&!mainMusic.isPlaying()){
+                try{ mainMusic.start(); }catch(Exception ignored){}
+              }
+            }
+
             @Override protected void onDestroy(){
+              if(mainMusic!=null){
+                try{ mainMusic.stop(); }catch(Exception ignored){}
+                try{ mainMusic.release(); }catch(Exception ignored){}
+                mainMusic=null;
+              }
               if(pendingFileCallback!=null){ pendingFileCallback.onReceiveValue(null); pendingFileCallback=null; }
               if(webView!=null){ webView.destroy(); webView=null; }
               super.onDestroy();
