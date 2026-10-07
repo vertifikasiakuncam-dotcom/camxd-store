@@ -1,36 +1,38 @@
 const STORE_WA="6282133942994";
 let storeWebMusic=null;
 let storeWebMusicStarted=false;
-let storeWebMusicMuted=localStorage.getItem("camxdMusicMuted")==="1";
+let storeWebMusicMuted=false;
 
 function initStoreWebMusic(){
-  if(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function") return;
   try{
-    storeWebMusic=new Audio("camxd-store-music.mp3?v=20261007-1");
+    try{storeWebMusicMuted=localStorage.getItem("camxdMusicMuted")==="1";}catch(e){storeWebMusicMuted=false;}
+    if(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function") return;
+    storeWebMusic=new Audio("camxd-store-music.mp3?v=20261007-2");
     storeWebMusic.loop=true;
     storeWebMusic.preload="auto";
-    storeWebMusic.volume=0.25;
+    storeWebMusic.volume=storeWebMusicMuted?0:0.25;
     storeWebMusic.muted=storeWebMusicMuted;
+
     const start=()=>{
-      if(!storeWebMusic||storeWebMusicStarted||storeWebMusicMuted) return;
-      const p=storeWebMusic.play();
-      if(p&&typeof p.catch==="function") p.catch(()=>{});
-      storeWebMusicStarted=true;
+      if(!storeWebMusic||storeWebMusicStarted||storeWebMusicMuted)return;
+      try{
+        const p=storeWebMusic.play();
+        if(p&&typeof p.then==="function")p.then(()=>{storeWebMusicStarted=true;}).catch(()=>{});
+        else storeWebMusicStarted=true;
+      }catch(e){}
     };
-    const playFromGesture=()=>{
-      if(storeWebMusicMuted) return;
+
+    if(!storeWebMusicMuted)start();
+
+    const unlock=()=>{
       start();
-      window.removeEventListener("pointerdown",playFromGesture);
-      window.removeEventListener("keydown",playFromGesture);
-      window.removeEventListener("touchstart",playFromGesture);
+      window.removeEventListener("pointerdown",unlock);
+      window.removeEventListener("touchstart",unlock);
+      window.removeEventListener("keydown",unlock);
     };
-    const autoplay=storeWebMusic.play();
-    if(autoplay&&typeof autoplay.then==="function"){
-      autoplay.then(()=>{storeWebMusicStarted=true;}).catch(()=>{});
-    }
-    window.addEventListener("pointerdown",playFromGesture,{once:true,passive:true});
-    window.addEventListener("keydown",playFromGesture,{once:true});
-    window.addEventListener("touchstart",playFromGesture,{once:true,passive:true});
+    window.addEventListener("pointerdown",unlock,{passive:true});
+    window.addEventListener("touchstart",unlock,{passive:true});
+    window.addEventListener("keydown",unlock);
   }catch(error){
     console.warn("Musik website tidak tersedia:",error);
   }
@@ -38,16 +40,17 @@ function initStoreWebMusic(){
 
 function setStoreWebMusicMuted(muted){
   storeWebMusicMuted=!!muted;
-  localStorage.setItem("camxdMusicMuted",storeWebMusicMuted?"1":"0");
-  if(storeWebMusic){
+  try{localStorage.setItem("camxdMusicMuted",storeWebMusicMuted?"1":"0");}catch(e){}
+  if(!storeWebMusic)return;
+  try{
     storeWebMusic.muted=storeWebMusicMuted;
     storeWebMusic.volume=storeWebMusicMuted?0:0.25;
     if(!storeWebMusicMuted){
       const p=storeWebMusic.play();
-      if(p&&typeof p.catch==="function") p.catch(()=>{});
+      if(p&&typeof p.catch==="function")p.catch(()=>{});
       storeWebMusicStarted=true;
     }
-  }
+  }catch(e){}
 }
 
 function hasNativeStoreMusic(){
