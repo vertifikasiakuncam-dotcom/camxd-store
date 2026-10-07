@@ -89,10 +89,10 @@ jobs:
             <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
               <item name="android:fontFamily">sans</item>
               <item name="android:colorAccent">#ffd000</item>
-              <item name="android:statusBarColor">#211400</item>
-              <item name="android:navigationBarColor">#211400</item>
+              <item name="android:statusBarColor">#050505</item>
+              <item name="android:navigationBarColor">#050505</item>
               <item name="android:windowLightStatusBar">false</item>
-              <item name="android:windowBackground">#211400</item>
+              <item name="android:windowBackground">#ffffff</item>
             </style>
           </resources>
           EOF
@@ -106,9 +106,8 @@ jobs:
               <item name="android:navigationBarColor">#050505</item>
               <item name="android:windowLightStatusBar">false</item>
               <item name="android:windowBackground">#211400</item>
-              <item name="android:windowSplashScreenBackground">#211400</item>
-              <item name="android:windowSplashScreenAnimatedIcon">@drawable/camxd_logo</item>
-              <item name="android:windowSplashScreenAnimationDuration">500</item>
+              <item name="android:windowSplashScreenBackground">#ffffff</item>
+              <item name="android:windowSplashScreenAnimationDuration">0</item>
             </style>
           </resources>
           EOF
@@ -140,293 +139,30 @@ jobs:
 
           import android.app.Activity;
           import android.os.Bundle;
-          import android.os.Handler;
-          import android.graphics.Canvas;
-          import android.graphics.Color;
-          import android.graphics.Paint;
-          import android.graphics.Path;
-          import android.graphics.RectF;
-          import android.graphics.LinearGradient;
-          import android.graphics.RadialGradient;
-          import android.graphics.Shader;
-          import android.content.res.ColorStateList;
-          import android.animation.ObjectAnimator;
-          import android.graphics.Typeface;
-          import android.media.AudioFormat;
-          import android.media.AudioManager;
-          import android.media.AudioTrack;
-          import android.view.Gravity;
-          import android.view.View;
-          import android.view.animation.AccelerateDecelerateInterpolator;
+          import android.net.Uri;
+          import android.content.Intent;
+          import android.webkit.ValueCallback;
+          import android.webkit.WebChromeClient;
           import android.webkit.WebResourceRequest;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
-          import android.webkit.WebChromeClient;
-          import android.webkit.ValueCallback;
-          import android.content.Intent;
-          import android.net.Uri;
-          import android.widget.FrameLayout;
-          import android.widget.ImageView;
-          import android.widget.LinearLayout;
-          import android.widget.ProgressBar;
-          import android.widget.TextView;
           import android.widget.Toast;
-
-          import java.util.Random;
 
           public class MainActivity extends Activity {
             private WebView webView;
-            private long lastBackPress=0;
             private ValueCallback<Uri[]> pendingFileCallback;
-            private AudioTrack introAudio;
-
-            private static class GoldIntroView extends View {
-              private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
-              private final Random rnd=new Random(2026);
-              private final float[] stars=new float[46];
-              private final long start=System.currentTimeMillis();
-
-              GoldIntroView(android.content.Context c){
-                super(c);
-                setLayerType(View.LAYER_TYPE_SOFTWARE,null);
-                for(int i=0;i<stars.length;i++) stars[i]=1.2f+rnd.nextFloat()*3.4f;
-              }
-
-              private float clamp(float v){return Math.max(0f,Math.min(1f,v));}
-              private float ease(float v){v=clamp(v);return v*v*(3f-2f*v);}
-
-              private void cloud(Canvas c,float x,float y,float s,float alpha){
-                p.setStyle(Paint.Style.FILL);
-                p.setShader(new RadialGradient(x+105*s,y,125*s,
-                  new int[]{Color.argb((int)alpha,255,190,30),Color.argb((int)(alpha*.38f),255,145,0),Color.TRANSPARENT},
-                  new float[]{0f,.55f,1f},Shader.TileMode.CLAMP));
-                c.drawOval(new RectF(x,y-72*s,x+235*s,y+70*s),p);
-                p.setShader(null);
-                p.setColor(Color.argb((int)(alpha*.55f),255,175,10));
-                c.drawCircle(x+48*s,y,52*s,p);
-                c.drawCircle(x+108*s,y-28*s,76*s,p);
-                c.drawCircle(x+174*s,y+4*s,54*s,p);
-              }
-
-              @Override protected void onDraw(Canvas c){
-                float w=getWidth(),h=getHeight(),t=(System.currentTimeMillis()-start)/1000f;
-                float cx=w/2f,cy=h*.38f;
-
-                // Gold atmosphere — no black background.
-                p.setStyle(Paint.Style.FILL);
-                p.setShader(new LinearGradient(0,0,0,h,
-                  new int[]{Color.rgb(112,60,4),Color.rgb(83,42,2),Color.rgb(48,23,1)},
-                  new float[]{0f,.48f,1f},Shader.TileMode.CLAMP));
-                c.drawRect(0,0,w,h,p); p.setShader(null);
-
-                // Soft cloud banks around the screen.
-                float drift=(float)Math.sin(t*.35f)*18f;
-                cloud(c,-115+drift,h*.08f,1.65f,145);
-                cloud(c,w-115-drift,h*.08f,1.65f,145);
-                cloud(c,-135-drift,h*.31f,1.35f,120);
-                cloud(c,w-105+drift,h*.31f,1.35f,120);
-                cloud(c,-145+drift,h*.73f,1.55f,135);
-                cloud(c,w-125-drift,h*.73f,1.55f,135);
-                cloud(c,-110,h*.93f,1.25f,110);
-                cloud(c,w-105,h*.93f,1.25f,110);
-
-                // Central warm glow.
-                p.setShader(new RadialGradient(cx,cy,Math.min(w,h)*.43f,
-                  new int[]{Color.argb(95,255,196,45),Color.argb(28,255,135,0),Color.TRANSPARENT},
-                  new float[]{0f,.55f,1f},Shader.TileMode.CLAMP));
-                c.drawCircle(cx,cy,Math.min(w,h)*.43f,p); p.setShader(null);
-
-                // Ring reveal.
-                float ring=ease((t-.35f)/1.05f);
-                float r=Math.min(w,h)*.205f;
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(5f);
-                p.setColor(Color.rgb(255,195,15)); p.setShadowLayer(22f,0,0,Color.rgb(255,165,0));
-                c.drawArc(new RectF(cx-r,cy-r,cx+r,cy+r),-90f,360f*ring,false,p);
-                p.clearShadowLayer();
-
-                // Orbit particles.
-                float part=ease((t-.8f)/1.1f);
-                p.setStyle(Paint.Style.FILL);
-                for(int i=0;i<stars.length;i++){
-                  double a=i*.73+t*(.75+(i%4)*.08);
-                  float or=Math.min(w,h)*(.16f+(i%7)*.014f);
-                  float x=cx+(float)Math.cos(a)*or;
-                  float y=cy+(float)Math.sin(a)*or;
-                  float tw=.45f+.55f*(float)Math.abs(Math.sin(a*1.7));
-                  p.setColor(Color.argb((int)(180*part*tw),255,205,45));
-                  c.drawCircle(x,y,stars[i]*part,p);
-                }
-
-                // Small loading spinner under the logo.
-                if(t>1.7f){
-                  p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(3f);
-                  p.setColor(Color.rgb(255,205,40)); p.setShadowLayer(10f,0,0,Color.rgb(255,165,0));
-                  float q=(t-1.7f)*150f;
-                  c.drawArc(new RectF(cx-18,cy+Math.min(w,h)*.225f,cx+18,cy+Math.min(w,h)*.225f+36),q,105,false,p);
-                  p.clearShadowLayer();
-                  p.setStyle(Paint.Style.FILL);
-                  for(int i=0;i<3;i++){
-                    float pulse=.5f+.5f*(float)Math.sin((t*4f)-i);
-                    p.setColor(Color.argb((int)(190*pulse),255,205,40));
-                    c.drawCircle(cx+(i-1)*12,cy+Math.min(w,h)*.225f+49,2.5f*pulse,p);
-                  }
-                }
-                if(t<5.15f) postInvalidateDelayed(16);
-              }
-            }
-            private static class NewLogoView extends View {
-              private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
-              private final long start=System.currentTimeMillis();
-
-              NewLogoView(android.content.Context c){super(c);setLayerType(View.LAYER_TYPE_SOFTWARE,null);}
-
-              @Override protected void onDraw(Canvas c){
-                float w=getWidth(),h=getHeight(),cx=w/2f,cy=h*.48f;
-                float s=Math.min(w,h)/360f;
-                float pulse=.92f+.08f*(float)Math.sin((System.currentTimeMillis()-start)/180f);
-                p.setStyle(Paint.Style.FILL);
-                p.setShader(new RadialGradient(cx,cy,145*s,
-                  new int[]{Color.argb(170,255,205,55),Color.argb(70,255,165,0),Color.TRANSPARENT},
-                  new float[]{0f,.55f,1f},Shader.TileMode.CLAMP));
-                c.drawCircle(cx,cy,145*s,p); p.setShader(null);
-
-                // Crown
-                Path crown=new Path();
-                crown.moveTo(cx-82*s,cy-62*s); crown.lineTo(cx-48*s,cy-28*s);
-                crown.lineTo(cx-18*s,cy-82*s); crown.lineTo(cx,cy-35*s);
-                crown.lineTo(cx+24*s,cy-82*s); crown.lineTo(cx+49*s,cy-28*s);
-                crown.lineTo(cx+83*s,cy-62*s); crown.lineTo(cx+67*s,cy-2*s);
-                crown.lineTo(cx-67*s,cy-2*s); crown.close();
-                p.setStyle(Paint.Style.FILL); p.setColor(Color.rgb(255,193,7));
-                p.setShadowLayer(18*s,0,0,Color.rgb(255,150,0)); c.drawPath(crown,p); p.clearShadowLayer();
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(4*s); p.setColor(Color.WHITE); c.drawPath(crown,p);
-
-                // CAMXD+ wordmark
-                p.setStyle(Paint.Style.FILL); p.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD));
-                p.setTextAlign(Paint.Align.CENTER); p.setTextSize(68*s);
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(12*s); p.setColor(Color.BLACK);
-                c.drawText("CAMXD+",cx,cy+32*s,p);
-                p.setStyle(Paint.Style.FILL); p.setColor(Color.WHITE); c.drawText("CAMXD",cx-9*s,cy+32*s,p);
-                p.setColor(Color.rgb(255,193,7)); c.drawText("+",cx+112*s,cy+32*s,p);
-
-                // Drone body beneath wordmark
-                p.setColor(Color.rgb(255,193,7)); c.drawRoundRect(new RectF(cx-38*s,cy+42*s,cx+38*s,cy+82*s),12*s,12*s,p);
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(6*s); p.setColor(Color.DKGRAY);
-                c.drawCircle(cx,cy+64*s,15*s,p);
-                p.setStyle(Paint.Style.FILL); p.setColor(Color.BLACK); c.drawCircle(cx,cy+64*s,9*s,p);
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(5*s); p.setColor(Color.rgb(220,220,220));
-                c.drawLine(cx-38*s,cy+48*s,cx-78*s,cy+32*s,p); c.drawLine(cx+38*s,cy+48*s,cx+78*s,cy+32*s,p);
-                c.drawLine(cx-38*s,cy+76*s,cx-78*s,cy+92*s,p); c.drawLine(cx+38*s,cy+76*s,cx+78*s,cy+92*s,p);
-
-                // Sparkles
-                p.setStyle(Paint.Style.FILL); p.setColor(Color.argb((int)(210*pulse),255,230,120));
-                for(int i=0;i<6;i++){double a=i*Math.PI/3+(System.currentTimeMillis()-start)/1200.0; float rr=118*s;
-                  c.drawCircle(cx+(float)Math.cos(a)*rr,cy+(float)Math.sin(a)*rr,3*s,p);}
-                postInvalidateDelayed(16);
-              }
-            }
-
+            private long lastBackPress=0;
 
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
-              showIntro();
+              setupWebView();
             }
 
-            private void showIntro(){
-              FrameLayout root=new FrameLayout(this);
-              root.setBackgroundColor(Color.rgb(83,42,2));
-              root.addView(new GoldIntroView(this),new FrameLayout.LayoutParams(-1,-1));
-
-              NewLogoView logo=new NewLogoView(this);
-              logo.setAlpha(0f);
-              logo.setScaleX(.45f); logo.setScaleY(.45f);
-              FrameLayout.LayoutParams logoLp=new FrameLayout.LayoutParams(340,340,Gravity.CENTER);
-              logoLp.topMargin=-155;
-              root.addView(logo,logoLp);
-
-              TextView title=new TextView(this);
-              title.setText("CAMXD STORE");
-              title.setTextColor(Color.rgb(255,210,0));
-              title.setTextSize(28);
-              title.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-              title.setGravity(Gravity.CENTER);
-              title.setAlpha(0f);
-              FrameLayout.LayoutParams titleLp=new FrameLayout.LayoutParams(-1,50,Gravity.CENTER_HORIZONTAL);
-              titleLp.topMargin=120;
-              root.addView(title,titleLp);
-
-              TextView tag=new TextView(this);
-              tag.setText("DIGITAL STORE  •  CEPAT  •  AMAN");
-              tag.setTextColor(Color.WHITE); tag.setTextSize(12); tag.setGravity(Gravity.CENTER); tag.setAlpha(0f);
-              FrameLayout.LayoutParams tagLp=new FrameLayout.LayoutParams(-1,40,Gravity.CENTER_HORIZONTAL);
-              tagLp.topMargin=168;
-              root.addView(tag,tagLp);
-
-              TextView load=new TextView(this);
-              load.setText("MEMUAT CAMXD STORE");
-              load.setTextColor(Color.rgb(255,210,55)); load.setTextSize(11); load.setGravity(Gravity.CENTER); load.setAlpha(0f);
-              FrameLayout.LayoutParams loadLp=new FrameLayout.LayoutParams(-1,38,Gravity.CENTER_HORIZONTAL);
-              loadLp.topMargin=208;
-              root.addView(load,loadLp);
-
-              ProgressBar bar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
-              bar.setMax(100); bar.setProgress(0); bar.setIndeterminate(false);
-              bar.setProgressTintList(ColorStateList.valueOf(Color.rgb(255,195,10))); bar.setAlpha(0f);
-              FrameLayout.LayoutParams barLp=new FrameLayout.LayoutParams(180,7,Gravity.CENTER_HORIZONTAL);
-              barLp.topMargin=248;
-              root.addView(bar,barLp);
-
-              setContentView(root);
-
-              logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
-                .setStartDelay(650).setDuration(950)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .withEndAction(() -> {
-                  ObjectAnimator blink=ObjectAnimator.ofFloat(logo,"alpha",1f,.55f,1f,.72f,1f);
-                  blink.setDuration(900); blink.setRepeatCount(2); blink.start();
-                }).start();
-
-              title.animate().alpha(1f).setStartDelay(1350).setDuration(500).start();
-              tag.animate().alpha(1f).setStartDelay(1650).setDuration(450).start();
-              load.animate().alpha(1f).setStartDelay(2050).setDuration(350).start();
-              bar.animate().alpha(1f).setStartDelay(2050).setDuration(350).start();
-
-              ObjectAnimator prog=ObjectAnimator.ofInt(bar,"progress",0,100);
-              prog.setStartDelay(2100); prog.setDuration(3000); prog.start();
-
-              title.postDelayed(() -> {
-                title.setShadowLayer(18f,0,0,Color.rgb(255,175,0));
-                title.postDelayed(() -> title.setShadowLayer(0,0,0,Color.TRANSPARENT),380);
-              },2200);
-
-              playIntroSound();
-              new Handler().postDelayed(() -> setupWebView(),5600);
-            }
-
-            private void playIntroSound(){
-              final int sr=44100,total=sr*2;
-              final short[] samples=new short[total];
-              double[] tones={330,494,659,988};
-              int[] starts={0,420,780,1120},lens={360,360,420,700};
-              for(int k=0;k<tones.length;k++){
-                int from=starts[k]*sr/1000,len=lens[k]*sr/1000;
-                for(int j=0;j<len&&from+j<samples.length;j++){
-                  double x=(double)j/len,env=Math.sin(Math.PI*Math.min(1.0,x))*Math.pow(1.0-x,.55);
-                  int idx=from+j,v=(int)(Math.sin(2*Math.PI*tones[k]*j/sr)*env*10500);
-                  samples[idx]=(short)Math.max(Short.MIN_VALUE,Math.min(Short.MAX_VALUE,samples[idx]+v));
-                }
-              }
-              byte[] pcm=new byte[samples.length*2];
-              for(int i=0;i<samples.length;i++){pcm[i*2]=(byte)(samples[i]&255);pcm[i*2+1]=(byte)((samples[i]>>8)&255);}
-              introAudio=new AudioTrack(AudioManager.STREAM_MUSIC,sr,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,pcm.length,AudioTrack.MODE_STATIC);
-              introAudio.write(pcm,0,pcm.length); introAudio.setStereoVolume(.55f,.55f); introAudio.play();
-            }
-
-            private void setupWebView() {
-              if(introAudio!=null){ try{introAudio.stop();introAudio.release();}catch(Exception ignored){} introAudio=null; }
+            private void setupWebView(){
               webView=new WebView(this);
               setContentView(webView);
+
               WebSettings s=webView.getSettings();
               s.setJavaScriptEnabled(true);
               s.setDomStorageEnabled(true);
@@ -439,46 +175,63 @@ jobs:
               webView.setWebChromeClient(new WebChromeClient(){
                 @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params){
                   pendingFileCallback=callback;
-                  try{startActivityForResult(params.createIntent(),1001);}
-                  catch(Exception e){pendingFileCallback=null;callback.onReceiveValue(null);Toast.makeText(MainActivity.this,"Tidak dapat membuka pemilih file",Toast.LENGTH_SHORT).show();}
+                  try{ startActivityForResult(params.createIntent(),1001); }
+                  catch(Exception e){
+                    pendingFileCallback=null;
+                    callback.onReceiveValue(null);
+                    Toast.makeText(MainActivity.this,"Tidak dapat membuka pemilih file",Toast.LENGTH_SHORT).show();
+                  }
                   return true;
                 }
               });
 
               webView.setWebViewClient(new WebViewClient(){
                 @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){
-                  String url=request.getUrl().toString();
-                  if(url.startsWith("https://wa.me/")||url.startsWith("whatsapp://")){
-                    try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));}
-                    catch(Exception e){Toast.makeText(MainActivity.this,"WhatsApp tidak ditemukan",Toast.LENGTH_SHORT).show();}
-                    return true;
-                  }
-                  if(url.endsWith(".apk")||url.contains("/downloads/")){
-                    try{Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse(url));i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);startActivity(i);}
-                    catch(Exception e){Toast.makeText(MainActivity.this,"Tidak dapat membuka file APK",Toast.LENGTH_SHORT).show();}
-                    return true;
-                  }
-                  if(url.startsWith("http://")||url.startsWith("https://")){view.loadUrl(url);return true;}
-                  try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));}
-                  catch(Exception e){Toast.makeText(MainActivity.this,"Aplikasi untuk membuka link tidak ditemukan",Toast.LENGTH_SHORT).show();}
-                  return true;
+                  return handleUrl(view,request.getUrl().toString());
+                }
+                @Override public boolean shouldOverrideUrlLoading(WebView view,String url){
+                  return handleUrl(view,url);
                 }
               });
+
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final");
             }
 
+            private boolean handleUrl(WebView view,String url){
+              if(url.startsWith("https://wa.me/")||url.startsWith("whatsapp://")){
+                try{ startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url))); }
+                catch(Exception e){ Toast.makeText(this,"WhatsApp tidak ditemukan",Toast.LENGTH_SHORT).show(); }
+                return true;
+              }
+              if(url.endsWith(".apk")||url.contains("/downloads/")){
+                try{
+                  Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+                  i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                  startActivity(i);
+                }catch(Exception e){ Toast.makeText(this,"Tidak dapat membuka file APK",Toast.LENGTH_SHORT).show(); }
+                return true;
+              }
+              if(url.startsWith("http://")||url.startsWith("https://")){
+                view.loadUrl(url);
+                return true;
+              }
+              try{ startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url))); }
+              catch(Exception e){ Toast.makeText(this,"Aplikasi untuk membuka link tidak ditemukan",Toast.LENGTH_SHORT).show(); }
+              return true;
+            }
+
             @Override public void onBackPressed(){
-              if(webView!=null&&webView.canGoBack()){webView.goBack();return;}
+              if(webView!=null&&webView.canGoBack()){ webView.goBack(); return; }
               long now=System.currentTimeMillis();
-              if(now-lastBackPress<1800){super.onBackPressed();return;}
+              if(now-lastBackPress<1800){ super.onBackPressed(); return; }
               lastBackPress=now;
               Toast.makeText(this,"Tekan sekali lagi untuk keluar",Toast.LENGTH_SHORT).show();
             }
 
-            @Override public void onActivityResult(int requestCode,int resultCode,Intent data){
+            @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==1001&&pendingFileCallback!=null){
                 Uri[] results=null;
-                if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)results=new Uri[]{data.getData()};
+                if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null) results=new Uri[]{data.getData()};
                 pendingFileCallback.onReceiveValue(results);
                 pendingFileCallback=null;
               }
@@ -486,13 +239,12 @@ jobs:
             }
 
             @Override protected void onDestroy(){
-              if(pendingFileCallback!=null){pendingFileCallback.onReceiveValue(null);pendingFileCallback=null;}
-              if(introAudio!=null){try{introAudio.stop();introAudio.release();}catch(Exception ignored){}introAudio=null;}
-              if(webView!=null)webView.destroy();
+              if(pendingFileCallback!=null){ pendingFileCallback.onReceiveValue(null); pendingFileCallback=null; }
+              if(webView!=null){ webView.destroy(); webView=null; }
               super.onDestroy();
             }
           }
-          EOF
+          EOFF
 
       - name: Build and sign
         working-directory: store-android
