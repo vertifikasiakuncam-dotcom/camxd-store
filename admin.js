@@ -939,6 +939,20 @@ async function updateStatus(id, status){
     select.classList.add("is-updating");
   }
 
+  // Pengaman alur: pesanan tidak boleh diproses sebelum pembayaran diverifikasi.
+  if(status === "Sedang Diproses" && !["Sudah Dibayar","Sedang Diproses","Selesai"].includes(order.status)){
+    alert("Pesanan belum bisa diproses. Verifikasi pembayaran dan ubah status menjadi Sudah Dibayar terlebih dahulu.");
+    renderOrders();
+    return;
+  }
+
+  // Pengaman alur: status Selesai harus memiliki detail yang akan diterima pelanggan.
+  if(status === "Selesai" && !String(order.delivery_details || "").trim()){
+    alert("Pesanan belum bisa diselesaikan. Isi dan simpan Detail Produk / Akun / Kode terlebih dahulu, lalu ubah status menjadi Selesai.");
+    renderOrders();
+    return;
+  }
+
   const important = status === "Selesai" || status === "Dibatalkan";
   if(important && order.status !== status){
     const action = status === "Selesai"
