@@ -338,14 +338,12 @@ jobs:
               root.setBackgroundColor(Color.rgb(83,42,2));
               root.addView(new GoldIntroView(this),new FrameLayout.LayoutParams(-1,-1));
 
-              LinearLayout content=new LinearLayout(this);
-              content.setOrientation(LinearLayout.VERTICAL);
-              content.setGravity(Gravity.CENTER_HORIZONTAL);
-              content.setPadding(24,0,24,0);
-
               NewLogoView logo=new NewLogoView(this);
               logo.setAlpha(0f);
-              logo.setScaleX(.35f); logo.setScaleY(.35f);
+              logo.setScaleX(.45f); logo.setScaleY(.45f);
+              FrameLayout.LayoutParams logoLp=new FrameLayout.LayoutParams(340,340,Gravity.CENTER);
+              logoLp.topMargin=-155;
+              root.addView(logo,logoLp);
 
               TextView title=new TextView(this);
               title.setText("CAMXD STORE");
@@ -354,37 +352,35 @@ jobs:
               title.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
               title.setGravity(Gravity.CENTER);
               title.setAlpha(0f);
+              FrameLayout.LayoutParams titleLp=new FrameLayout.LayoutParams(-1,50,Gravity.CENTER_HORIZONTAL);
+              titleLp.topMargin=120;
+              root.addView(title,titleLp);
 
               TextView tag=new TextView(this);
               tag.setText("DIGITAL STORE  •  CEPAT  •  AMAN");
               tag.setTextColor(Color.WHITE); tag.setTextSize(12); tag.setGravity(Gravity.CENTER); tag.setAlpha(0f);
+              FrameLayout.LayoutParams tagLp=new FrameLayout.LayoutParams(-1,40,Gravity.CENTER_HORIZONTAL);
+              tagLp.topMargin=168;
+              root.addView(tag,tagLp);
 
               TextView load=new TextView(this);
               load.setText("MEMUAT CAMXD STORE");
               load.setTextColor(Color.rgb(255,210,55)); load.setTextSize(11); load.setGravity(Gravity.CENTER); load.setAlpha(0f);
+              FrameLayout.LayoutParams loadLp=new FrameLayout.LayoutParams(-1,38,Gravity.CENTER_HORIZONTAL);
+              loadLp.topMargin=208;
+              root.addView(load,loadLp);
 
               ProgressBar bar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
               bar.setMax(100); bar.setProgress(0); bar.setIndeterminate(false);
               bar.setProgressTintList(ColorStateList.valueOf(Color.rgb(255,195,10))); bar.setAlpha(0f);
+              FrameLayout.LayoutParams barLp=new FrameLayout.LayoutParams(180,7,Gravity.CENTER_HORIZONTAL);
+              barLp.topMargin=248;
+              root.addView(bar,barLp);
 
-              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(340,340);
-              lpLogo.bottomMargin=0; content.addView(logo,lpLogo);
-              content.addView(title,new LinearLayout.LayoutParams(-1,-2));
-              LinearLayout.LayoutParams lpTag=new LinearLayout.LayoutParams(-1,-2); lpTag.topMargin=5; content.addView(tag,lpTag);
-              LinearLayout.LayoutParams lpLoad=new LinearLayout.LayoutParams(-1,-2); lpLoad.topMargin=20; content.addView(load,lpLoad);
-              LinearLayout.LayoutParams lpBar=new LinearLayout.LayoutParams(180,7); lpBar.topMargin=8; content.addView(bar,lpBar);
-
-              FrameLayout.LayoutParams cp=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
-              cp.gravity=Gravity.CENTER; root.addView(content,cp);
               setContentView(root);
 
-              root.post(() -> {
-                float ringY=root.getHeight()*.38f;
-                float logoY=content.getY()+logo.getY()+logo.getHeight()/2f;
-                logo.setTranslationY(ringY-logoY);
-              });
-
-              logo.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(650).setDuration(950)
+              logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setStartDelay(650).setDuration(950)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 .withEndAction(() -> {
                   ObjectAnimator blink=ObjectAnimator.ofFloat(logo,"alpha",1f,.55f,1f,.72f,1f);
