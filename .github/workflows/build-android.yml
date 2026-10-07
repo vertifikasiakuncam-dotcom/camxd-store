@@ -186,6 +186,13 @@ jobs:
                 for(int i=0;i<ps.length;i++) ps[i]=1.2f+random.nextFloat()*3.8f;
               }
 
+              private void drawCloud(Canvas canvas,float x,float y,float scale){
+                canvas.drawOval(new RectF(x,y,x+170f*scale,y+38f*scale),paint);
+                canvas.drawCircle(x+48f*scale,y,30f*scale,paint);
+                canvas.drawCircle(x+92f*scale,y-12f*scale,42f*scale,paint);
+                canvas.drawCircle(x+132f*scale,y+2f*scale,27f*scale,paint);
+              }
+
               private float clamp(float x){ return Math.max(0f,Math.min(1f,x)); }
               private float ease(float x){
                 x=clamp(x);
@@ -197,6 +204,17 @@ jobs:
                 float elapsed=(System.currentTimeMillis()-startedAt)/1000f;
                 float cx=w/2f, cy=h*0.405f;
                 canvas.drawColor(Color.rgb(2,2,2));
+
+                // Soft drifting clouds for the premium sky atmosphere.
+                float cloudPhase=clamp((elapsed-0.05f)/2.5f);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.argb(34,255,255,255));
+                paint.setShadowLayer(22f,0,0,Color.argb(35,255,210,90));
+                float drift=(elapsed*42f)% (w+260f);
+                drawCloud(canvas,-170f+drift,h*0.25f,1.0f);
+                drawCloud(canvas,w+120f-drift*0.72f,h*0.57f,0.72f);
+                drawCloud(canvas,-260f+((drift*0.48f)%(w+420f)),h*0.72f,0.55f);
+                paint.clearShadowLayer();
 
                 // 1) Gold flare is born from a single point.
                 float flare=ease(clamp(elapsed/0.42f));
