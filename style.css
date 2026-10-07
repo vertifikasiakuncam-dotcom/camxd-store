@@ -851,3 +851,35 @@ body:before{
     border-color:rgba(255,208,0,.25);
   }
 }
+
+/* V33 — Mobile featured layout + announcement readability */
+@media screen and (max-width:620px){
+  .featured-products{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  .featured-card{
+    grid-template-columns:86px 1fr;
+    gap:9px;
+    padding:10px;
+  }
+  .featured-card img{
+    width:86px;
+    height:76px;
+  }
+  .featured-card h3{font-size:15px}
+  .featured-card p{font-size:11px}
+  .featured-price{font-size:16px}
+  .featured-buy{font-size:10px;padding:7px 8px}
+  .featured-card:last-child{
+    grid-column:1 / -1;
+    max-width:calc(50% - 5px);
+    width:100%;
+    justify-self:start;
+  }
+  .store-announcement{font-size:10px}
+  .announcement-link{font-size:10px}
+}
+@media screen and (max-width:420px){
+  .featured-card:last-child{max-width:calc(50% - 4px)}
+}
