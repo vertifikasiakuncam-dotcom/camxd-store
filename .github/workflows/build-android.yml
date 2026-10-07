@@ -192,7 +192,7 @@ jobs:
 
               StaticIntroView(){
                 super(MainActivity.this);
-                background=sharpenBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background));
+                background=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background);
                 postInvalidateOnAnimation();
               }
 
