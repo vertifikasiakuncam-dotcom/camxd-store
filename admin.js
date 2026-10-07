@@ -1189,6 +1189,8 @@ startOrderPolling();
 
 let allProducts = [];
 let editingProductId = null;
+let selectedProductFile = null;
+let selectedProductProofFile = null;
 
 function resetProductForm(){
   editingProductId = null;
@@ -1202,6 +1204,12 @@ function resetProductForm(){
   $("#productImageFile").value = "";
   selectedProductFile = null;
   $("#productImagePreview").innerHTML = "<span>Belum ada preview</span>";
+  $("#productStock").value = "";
+  $("#productVoucher").value = "";
+  $("#productProofUrl").value = "";
+  $("#productProofFile").value = "";
+  selectedProductProofFile = null;
+  $("#productProofPreview").innerHTML = "<span>Belum ada bukti transaksi</span>";
   $("#productDetail").value = "";
   $("#productSort").value = "10";
   $("#productActive").checked = true;
@@ -1282,6 +1290,10 @@ function renderProductsAdmin(){
             <span>Kunci: <b>${escapeHtml(p.product_key)}</b></span>
             <span>${activePlans.length} paket aktif</span>
             <span>Mulai: <b>${firstPrice ? rupiah(firstPrice) : "Sesuai kebutuhan"}</b></span>
+            <span>🛍️ Terjual: <b>${Number(p.sold_count||0)}</b></span>
+            <span>📦 Stok: <b>${p.stock_quantity==null ? "Belum diatur" : Math.max(0,Number(p.stock_quantity)||0)}</b></span>
+            <span>🎟️ Voucher: <b>${escapeHtml(p.voucher_code||"-")}</b></span>
+            <span>🧾 Bukti: <b>${p.transaction_proof_url ? "Tersedia" : "Belum ada"}</b></span>
           </div>
           <div class="admin-product-actions">
             <button class="btn edit-product" data-id="${p.id}">✏️ Edit</button>
@@ -1314,6 +1326,12 @@ function editProduct(id){
   $("#productImageFile").value = "";
   renderProductImagePreview(p.image_url || "");
   $("#productDetail").value = p.detail || "";
+  $("#productStock").value = p.stock_quantity==null ? "" : p.stock_quantity;
+  $("#productVoucher").value = p.voucher_code || "";
+  $("#productProofUrl").value = p.transaction_proof_url || "";
+  $("#productProofFile").value = "";
+  selectedProductProofFile = null;
+  renderProductProofPreview(p.transaction_proof_url || "");
   $("#productSort").value = p.sort_order ?? 0;
   $("#productActive").checked = !!p.is_active;
   $("#editorHeading").textContent = "Edit Produk";
@@ -1373,6 +1391,27 @@ async function uploadProductImage(file, productKey){
   return data.publicUrl;
 }
 
+async function uploadProductProof(file, productKey){
+  if(!file) return null;
+  const allowed=["image/jpeg","image/png","image/webp","image/gif"];
+  if(!allowed.includes(file.type)) throw new Error("Format bukti transaksi harus JPG, PNG, WEBP, atau GIF.");
+  if(file.size>5*1024*1024) throw new Error("Ukuran bukti transaksi maksimal 5 MB.");
+  const safeKey=productKey.replace(/[^a-z0-9_-]/g,"-");
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+  const path="product-proofs/"+safeKey+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;
+  const {error}=await sb.storage.from("product-images").upload(path,file,{cacheControl:"31536000",upsert:false,contentType:file.type});
+  if(error)throw error;
+  const {data}=sb.storage.from("product-images").getPublicUrl(path);
+  if(!data?.publicUrl)throw new Error("URL bukti transaksi tidak berhasil dibuat.");
+  return data.publicUrl;
+}
+
+function renderProductProofPreview(url){
+  const box=$("#productProofPreview");
+  if(!box)return;
+  if(!url){box.innerHTML="<span>Belum ada bukti transaksi</span>";return;}
+  box.innerHTML='<img src="'+escapeHtml(url)+'" alt="Preview bukti transaksi">';
+}
 async function saveProduct(){
   const err = $("#productFormError");
   err.textContent = "";
@@ -1384,6 +1423,10 @@ async function saveProduct(){
   const description = $("#productDescription").value.trim();
   let image_url = $("#productImage").value.trim();
   const detail = $("#productDetail").value.trim();
+  const stockRaw = $("#productStock").value.trim();
+  const stock_quantity = stockRaw === "" ? null : Math.max(0, Number(stockRaw)||0);
+  const voucher_code = $("#productVoucher").value.trim();
+  let transaction_proof_url = $("#productProofUrl").value.trim();
   const sort_order = Number($("#productSort").value || 0);
   const is_active = $("#productActive").checked;
 
@@ -1410,8 +1453,12 @@ async function saveProduct(){
     let productId = editingProductId;
 
     if(selectedProductFile){
-      err.textContent = "Mengupload gambar...";
+      err.textContent = "Mengupload gambar produk...";
       image_url = await uploadProductImage(selectedProductFile, productKey);
+    }
+    if(selectedProductProofFile){
+      err.textContent = "Mengupload bukti transaksi...";
+      transaction_proof_url = await uploadProductProof(selectedProductProofFile, productKey);
     }
 
     const payload = {
@@ -1422,6 +1469,9 @@ async function saveProduct(){
       image_url,
       badge,
       detail,
+      stock_quantity,
+      voucher_code: voucher_code || null,
+      transaction_proof_url: transaction_proof_url || null,
       is_active,
       sort_order
     };
@@ -1538,6 +1588,29 @@ $("#productImageFile").addEventListener("change",(e)=>{
 $("#productImage").addEventListener("input",()=>{
   if(!selectedProductFile){
     renderProductImagePreview($("#productImage").value.trim());
+  }
+});
+
+$("#productProofFile").addEventListener("change",(e)=>{
+  const file=e.target.files?.[0]||null;
+  selectedProductProofFile=file;
+  if(!file){
+    renderProductProofPreview($("#productProofUrl").value.trim());
+    return;
+  }
+  if(file.size>5*1024*1024){
+    alert("Ukuran bukti transaksi maksimal 5 MB.");
+    e.target.value="";
+    selectedProductProofFile=null;
+    return;
+  }
+  const url=URL.createObjectURL(file);
+  $("#productProofPreview").innerHTML='<img src="'+url+'" alt="Preview bukti transaksi baru">';
+});
+
+$("#productProofUrl").addEventListener("input",()=>{
+  if(!selectedProductProofFile){
+    renderProductProofPreview($("#productProofUrl").value.trim());
   }
 });
 
