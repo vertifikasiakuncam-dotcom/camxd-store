@@ -1272,3 +1272,16 @@ body:before{
   white-space:nowrap;
   max-width:230px;
 }
+
+
+/* Header music/cart controls — keep them together on the right. */
+.music-btn{order:3;margin-left:auto;margin-right:6px;flex:0 0 44px}
+.cart-btn{order:4;flex:0 0 auto}
+.menu-btn{order:5;flex:0 0 auto}
+@media(max-width:760px){
+  .topbar{gap:8px}
+  .brand{min-width:0}
+  .music-btn{margin-left:auto;margin-right:0}
+  .cart-btn{margin-left:0}
+  .menu-btn{margin-left:0}
+}
