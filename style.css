@@ -807,3 +807,47 @@ html{scroll-padding-top:90px}
   .product p{font-size:12px}
   .benefits span{font-size:13px}
 }
+
+
+/* V32 — Readability & contrast refinement */
+body:before{
+  background:linear-gradient(rgba(0,0,0,.84),rgba(0,0,0,.94)),url("camxd-background.png") center/cover no-repeat;
+}
+.section{
+  text-shadow:0 1px 2px rgba(0,0,0,.8);
+}
+.section h2,.section-head p,.lead,.product h3,.product p,
+.featured-card h3,.featured-card p,.deal-copy h2,.deal-copy p{
+  text-shadow:0 1px 3px #000;
+}
+@media screen and (max-width:760px){
+  .section{
+    margin-left:8px;margin-right:8px;
+    border-radius:20px;
+  }
+  .section:not(.hero):not(.deals-section):not(.featured-store){
+    background:rgba(5,5,5,.30);
+  }
+  .product,
+  .featured-card,
+  .deal-banner{
+    background:linear-gradient(145deg,rgba(12,12,12,.985),rgba(4,4,4,.985));
+  }
+  .product p,.featured-card p{
+    color:#d0d0d0;
+  }
+  .product h3,.featured-card h3{
+    color:#fff;
+  }
+  .product-image,.featured-card img{
+    background:#030303;
+  }
+  .benefits span{
+    background:rgba(5,5,5,.88);
+    color:#eee;
+  }
+  .catalog-mini-note{
+    background:rgba(12,12,12,.94);
+    border-color:rgba(255,208,0,.25);
+  }
+}
