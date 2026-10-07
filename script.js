@@ -384,6 +384,12 @@ async function checkoutCart(){
    proofButton.disabled=false;
    proofButton.textContent="Saya Sudah Bayar — Kirim Bukti →";
   }
+  const proofFile=$("#paymentProofFile");
+  const proofPreview=$("#paymentProofPreview");
+  const proofError=$("#paymentProofError");
+  if(proofFile) proofFile.value="";
+  if(proofPreview){proofPreview.hidden=true;proofPreview.innerHTML="";}
+  if(proofError) proofError.textContent="";
   startPaymentStatusWatch();
  }catch(error){
   console.error("Checkout CAMXD:",error);
