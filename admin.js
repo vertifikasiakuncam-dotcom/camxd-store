@@ -359,6 +359,7 @@ function buildWhatsAppUrl(order, details){
 
   const number = wa.startsWith("62") ? wa : ("62" + wa.replace(/^0/,""));
   const items = Array.isArray(order.items) ? order.items : [];
+  const deliveryText = String(details || "").trim() || "Email: -\nPassword: -\nKode: -\nMasa aktif: -";
   const itemText = items.map((x,i) =>
     "   " + (i+1) + ". " + (x.name || "Produk") + " — " + (x.plan || "Paket") + " ×" + Number(x.qty || 1)
   ).join("\n");
@@ -381,7 +382,7 @@ function buildWhatsAppUrl(order, details){
     "   " + (order.total_label || rupiah(order.total)),
     "",
     "\u{1F510} DETAIL PRODUK / AKUN",
-    details || "Email: -\nPassword: -\nKode: -\nMasa aktif: -",
+    deliveryText,
     "",
     "==================",
     "\u{1F4CC} Mohon simpan informasi akun/kode ini dengan baik.",
@@ -735,11 +736,6 @@ Masa aktif: 30 hari"
           return;
         }
 
-        if(!String(getDeliveryValue(Number(el.dataset.id)) || "").trim()){
-          alert("Detail Produk / Akun / Kode masih kosong. Isi detail terlebih dahulu sebelum mengirim pesanan.");
-          return;
-        }
-
         const ok = confirm(
           "Kirim pesanan melalui WhatsApp?\n\n" +
           "ID: " + (order.order_id || "-") + "\n" +
@@ -829,8 +825,9 @@ function setOrderActionBusy(id, busy, mode="save"){
 }
 
 async function saveDelivery(id, sendAfter){
-  const details = getDeliveryValue(id);
+  let details = getDeliveryValue(id);
   const order = allOrders.find(o => Number(o.id) === Number(id));
+  const defaultDeliveryDetails = "Email: -\nPassword: -\nKode: -\nMasa aktif: -";
   if(!order) return;
 
   const busyMode = sendAfter ? "send" : "save";
@@ -854,6 +851,7 @@ async function saveDelivery(id, sendAfter){
     }
 
     if(sendAfter){
+      if(!details) details = defaultDeliveryDetails;
       const {error: statusError} = await sb.from("orders").update({
         status: "Selesai"
       }).eq("id", id);
