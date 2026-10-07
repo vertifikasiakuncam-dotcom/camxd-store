@@ -342,11 +342,7 @@ jobs:
               content.setGravity(Gravity.CENTER_HORIZONTAL);
               content.setPadding(24,0,24,0);
 
-              ImageView logo=new ImageView(this);
-              logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
-              logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-              logo.setAdjustViewBounds(true);
-              logo.setPadding(8,8,8,8);
+              NewLogoView logo=new NewLogoView(this);
               logo.setAlpha(0f);
               logo.setScaleX(.35f); logo.setScaleY(.35f);
 
@@ -370,7 +366,7 @@ jobs:
               bar.setMax(100); bar.setProgress(0); bar.setIndeterminate(false);
               bar.setProgressTintList(ColorStateList.valueOf(Color.rgb(255,195,10))); bar.setAlpha(0f);
 
-              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(300,300);
+              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(340,340);
               lpLogo.bottomMargin=0; content.addView(logo,lpLogo);
               content.addView(title,new LinearLayout.LayoutParams(-1,-2));
               LinearLayout.LayoutParams lpTag=new LinearLayout.LayoutParams(-1,-2); lpTag.topMargin=5; content.addView(tag,lpTag);
