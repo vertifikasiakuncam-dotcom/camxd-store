@@ -344,19 +344,10 @@
   <div class="cart-head"><div><span class="eyebrow">KERANJANG</span><h2>Pesanan Kamu</h2></div><button class="close-cart" id="closeCart">×</button></div>
   <div id="cartItems" class="cart-items"></div>
   <div class="cart-checkout">
-    <div class="cart-total"><span>Total</span><strong id="cartTotal">Rp 0</strong></div>
+    <div class="cart-total"><span>Subtotal</span><strong id="cartSubtotal">Rp 0</strong></div>
+    <div class="cart-total cart-discount-row"><span>Diskon Voucher</span><strong id="cartDiscount">Rp 0</strong></div>
+    <div class="cart-total cart-grand-total"><span>Total</span><strong id="cartTotal">Rp 0</strong></div>
+    <div class="cart-voucher-box"><label for="cartVoucher">🎟️ Punya kode voucher?</label><div class="cart-voucher-row"><input id="cartVoucher" class="input" maxlength="40" placeholder="Masukkan kode voucher"><button type="button" class="btn" id="applyVoucherBtn">Gunakan Voucher</button></div><small id="voucherMessage" class="form-help"></small><div id="cartVoucherSummary" class="cart-voucher-summary" hidden></div></div>
     <input id="cartName" class="input" placeholder="Nama lengkap">
     <input id="cartWa" class="input" placeholder="Nomor WhatsApp">
-    <div class="payment-box"><strong>💳 Bayar via GoPay / QRIS</strong><p>Setelah checkout, bayar sesuai total lalu upload bukti pembayaran langsung di website.</p></div>
-    <button type="button" class="btn primary wide" id="checkoutCart" onclick="checkoutCart(); return false;">Lanjut ke Pembayaran QRIS →</button>
-  </div>
-</aside>
 
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
-  <script src="script.js?v=20261007-29"></script>
-  <script src="pwa.js?v=20261007-4"></script>
-</body>
-</html>
-<!-- CAMXD APK build trigger 2026-10-07 -->
