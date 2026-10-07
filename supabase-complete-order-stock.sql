@@ -21,7 +21,7 @@ as $$
 declare
   o public.orders%rowtype;
   item jsonb;
-  product_key text;
+  v_product_key text;
   qty integer;
   p public.products%rowtype;
   stock_updates jsonb := '[]'::jsonb;
@@ -69,7 +69,7 @@ begin
           end
         )
     loop
-      product_key := lower(trim(coalesce(item->>'product_id', '')));
+      v_product_key := lower(trim(coalesce(item->>'product_id', '')));
       qty := greatest(coalesce((item->>'qty')::integer, 1), 1);
 
       if product_key = '' then
@@ -79,7 +79,7 @@ begin
       select *
         into p
         from public.products
-       where public.products.product_key = product_key
+       where public.products.product_key = v_product_key
        for update;
 
       if not found then
@@ -91,7 +91,7 @@ begin
       if p.stock_quantity is not null then
         if p.stock_quantity < qty then
           raise exception 'Stok % tidak cukup. Tersedia: %, diminta: %.',
-            coalesce(p.name, product_key), p.stock_quantity, qty;
+            coalesce(p.name, v_product_key), p.stock_quantity, qty;
         end if;
 
         update public.products
