@@ -432,7 +432,7 @@ jobs:
               loadingBar.animate().alpha(1f).setStartDelay(1900).setDuration(350).start();
               ObjectAnimator progress=ObjectAnimator.ofInt(loadingBar,"progress",0,100);
               progress.setStartDelay(1950);
-              progress.setDuration(1900);
+              progress.setDuration(3000);
               progress.start();
 
               // Gold shimmer across the title.
@@ -443,7 +443,7 @@ jobs:
 
               playIntroSound();
 
-              new Handler().postDelayed(() -> setupWebView(),4200);
+              new Handler().postDelayed(() -> setupWebView(),5600);
             }
 
               private void playIntroSound() {
