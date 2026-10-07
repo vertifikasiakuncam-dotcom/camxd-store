@@ -136,6 +136,8 @@ function render(){
  else if(activeSort==="az") list.sort((a,b)=>String(a.name).localeCompare(String(b.name),"id"));
  else if(activeSort==="za") list.sort((a,b)=>String(b.name).localeCompare(String(a.name),"id"));
  $("#productCount").textContent=q ? `${list.length} hasil` : `${list.length} produk`;
+ const miniNote=$("#catalogMiniNote");
+ if(miniNote) miniNote.hidden=list.length===0;
  $("#empty").hidden=list.length>0;
  $("#products").innerHTML=list.map(p=>`
   <article class="product">
