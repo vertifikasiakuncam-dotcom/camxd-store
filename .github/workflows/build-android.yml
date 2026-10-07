@@ -140,6 +140,12 @@ jobs:
 
           import android.app.Activity;
           import android.os.Bundle;
+          import android.os.Handler;
+          import android.graphics.Color;
+          import android.graphics.Typeface;
+          import android.view.Gravity;
+          import android.view.View;
+          import android.view.animation.AccelerateDecelerateInterpolator;
           import android.webkit.WebResourceRequest;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
@@ -148,16 +154,75 @@ jobs:
           import android.webkit.ValueCallback;
           import android.content.Intent;
           import android.net.Uri;
+          import android.widget.ImageView;
+          import android.widget.LinearLayout;
+          import android.widget.TextView;
           import android.widget.Toast;
 
           public class MainActivity extends Activity {
             private WebView webView;
             private long lastBackPress = 0;
             private ValueCallback<Uri[]> pendingFileCallback;
+            private boolean introFinished = false;
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
               super.onCreate(savedInstanceState);
+              showIntro();
+            }
+
+            private void showIntro() {
+              final LinearLayout splash = new LinearLayout(this);
+              splash.setOrientation(LinearLayout.VERTICAL);
+              splash.setGravity(Gravity.CENTER);
+              splash.setBackgroundColor(Color.rgb(5,5,5));
+              splash.setPadding(32,32,32,32);
+
+              final ImageView logo = new ImageView(this);
+              logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
+              logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+              logo.setAlpha(0f);
+              logo.setScaleX(0.72f);
+              logo.setScaleY(0.72f);
+
+              TextView title = new TextView(this);
+              title.setText("CAMXD STORE");
+              title.setTextColor(Color.rgb(255,208,0));
+              title.setTextSize(26);
+              title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+              title.setGravity(Gravity.CENTER);
+              title.setAlpha(0f);
+
+              TextView tagline = new TextView(this);
+              tagline.setText("DIGITAL STORE  •  CEPAT  •  AMAN");
+              tagline.setTextColor(Color.WHITE);
+              tagline.setTextSize(12);
+              tagline.setGravity(Gravity.CENTER);
+              tagline.setAlpha(0f);
+
+              LinearLayout.LayoutParams lpLogo = new LinearLayout.LayoutParams(280,280);
+              lpLogo.gravity = Gravity.CENTER;
+              splash.addView(logo, lpLogo);
+              LinearLayout.LayoutParams lpTitle = new LinearLayout.LayoutParams(-1,-2);
+              lpTitle.topMargin = 12;
+              splash.addView(title, lpTitle);
+              LinearLayout.LayoutParams lpTag = new LinearLayout.LayoutParams(-1,-2);
+              lpTag.topMargin = 8;
+              splash.addView(tagline, lpTag);
+
+              setContentView(splash);
+
+              logo.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(750).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+              title.animate().alpha(1f).setStartDelay(420).setDuration(550).start();
+              tagline.animate().alpha(1f).setStartDelay(720).setDuration(500).start();
+
+              new Handler().postDelayed(() -> {
+                introFinished = true;
+                setupWebView();
+              }, 1700);
+            }
+
+            private void setupWebView() {
               webView = new WebView(this);
               setContentView(webView);
 
@@ -231,23 +296,21 @@ jobs:
 
             @Override
             public void onBackPressed() {
-              if (webView.canGoBack()) {
+              if (webView != null && webView.canGoBack()) {
                 webView.goBack();
                 return;
               }
-
               long now = System.currentTimeMillis();
               if (now - lastBackPress < 1800) {
                 super.onBackPressed();
                 return;
               }
-
               lastBackPress = now;
               Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+            public void onActivityResult(int requestCode, int resultCode, Intent data) {
               if (requestCode == 1001 && pendingFileCallback != null) {
                 Uri[] results = null;
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -261,6 +324,10 @@ jobs:
 
             @Override
             protected void onDestroy() {
+              if (pendingFileCallback != null) {
+                pendingFileCallback.onReceiveValue(null);
+                pendingFileCallback = null;
+              }
               if (webView != null) webView.destroy();
               super.onDestroy();
             }
