@@ -89,8 +89,8 @@ jobs:
             <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
               <item name="android:fontFamily">sans</item>
               <item name="android:colorAccent">#ffd000</item>
-              <item name="android:statusBarColor">#080808</item>
-              <item name="android:navigationBarColor">#050505</item>
+              <item name="android:statusBarColor">#211400</item>
+              <item name="android:navigationBarColor">#211400</item>
               <item name="android:windowLightStatusBar">false</item>
               <item name="android:windowBackground">#211400</item>
             </style>
@@ -105,7 +105,7 @@ jobs:
               <item name="android:statusBarColor">#080808</item>
               <item name="android:navigationBarColor">#050505</item>
               <item name="android:windowLightStatusBar">false</item>
-              <item name="android:windowBackground">#080808</item>
+              <item name="android:windowBackground">#211400</item>
               <item name="android:windowSplashScreenBackground">#211400</item>
               <item name="android:windowSplashScreenAnimatedIcon">@drawable/camxd_logo</item>
               <item name="android:windowSplashScreenAnimationDuration">500</item>
@@ -146,6 +146,7 @@ jobs:
           import android.graphics.Paint;
           import android.graphics.RectF;
           import android.graphics.LinearGradient;
+           import android.graphics.RadialGradient;
           import android.graphics.Shader;
           import android.content.res.ColorStateList;
           import android.animation.ObjectAnimator;
@@ -315,8 +316,8 @@ jobs:
                 if(outer>0f){
                   paint.setStyle(Paint.Style.STROKE);
                   paint.setStrokeWidth(1.6f);
-                  paint.setColor(Color.argb((int)(145*outer),255,224,110));
-                  canvas.drawCircle(cx,cy,Math.min(w,h)*0.285f*outer,paint);
+                  paint.setColor(Color.argb((int)(145*haloProgress),255,224,110));
+                  canvas.drawCircle(cx,cy,Math.min(w,h)*0.285f*haloProgress,paint);
                 }
 
                 // 3) Gold particles are pulled into orbit.
