@@ -236,10 +236,16 @@
               <small class="form-help">Kosongkan jika stok belum ingin ditampilkan.</small>
             </div>
             <div>
-              <label>Voucher Produk</label>
+              <label>Kode Voucher</label>
               <input id="productVoucher" maxlength="40" placeholder="Contoh: CAMXD10">
-              <small class="form-help">Kode voucher yang tampil pada produk. Tidak mengubah harga checkout otomatis.</small>
+              <small class="form-help">Kode yang pembeli masukkan saat checkout.</small>
             </div>
+            <div><label>Jenis Diskon</label><select id="productVoucherType"><option value="percent">Persentase (%)</option><option value="fixed">Potongan Rupiah (Rp / item)</option></select></div>
+            <div><label>Nilai Diskon</label><input id="productVoucherValue" type="number" min="0" step="0.01" placeholder="Contoh: 10"></div>
+            <div><label>Batas Penggunaan</label><input id="productVoucherLimit" type="number" min="1" step="1" placeholder="Kosong = tanpa batas"></div>
+            <div><label>Mulai Voucher</label><input id="productVoucherFrom" type="datetime-local"></div>
+            <div><label>Berakhir Voucher</label><input id="productVoucherUntil" type="datetime-local"></div>
+            <div class="toggle-row"><label class="check-label"><input id="productVoucherActive" type="checkbox" checked><span>Voucher aktif</span></label></div>
             <div class="full">
               <label>Bukti Transaksi Produk</label>
               <input id="productProofUrl" placeholder="URL gambar bukti transaksi (opsional)">
@@ -360,7 +366,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261007-30"></script>
+  <script src="admin.js?v=20261007-31"></script>
   <script src="admin-profile.js?v=20261006-4"></script>
 
 </body>
