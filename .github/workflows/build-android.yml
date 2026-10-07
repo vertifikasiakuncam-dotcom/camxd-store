@@ -87,8 +87,8 @@ jobs:
               applicationId 'com.camxd.store'
               minSdk 23
               targetSdk 35
-              versionCode 2
-              versionName '1.0.1'
+              versionCode 3
+              versionName '1.0.2'
             }
           }
           EOF
@@ -370,7 +370,7 @@ jobs:
                   return handleUrl(view,url);
                 }
               });
-              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final");
+              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final2");
             }
 
             private void startMainMusic(){
