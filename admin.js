@@ -829,6 +829,55 @@ async function saveDelivery(id, sendAfter){
   setOrderActionBusy(id,true,busyMode);
 
   try{
+    if(sendAfter){
+      if(!["Sudah Dibayar","Sedang Diproses"].includes(order.status)){
+        alert("Pesanan belum siap dikirim. Verifikasi pembayaran dan ubah status menjadi Sudah Dibayar atau Sedang Diproses terlebih dahulu.");
+        return;
+      }
+
+      if(!details) details = defaultDeliveryDetails;
+
+      const {error: detailError} = await sb.from("orders").update({
+        delivery_details: details,
+        delivered_at: new Date().toISOString()
+      }).eq("id", id);
+
+      if(detailError){
+        alert("Gagal menyimpan detail: " + detailError.message);
+        return;
+      }
+
+      const {data: completeData, error: completeError} = await sb.rpc("complete_order_delivery", {
+        p_order_id: Number(id)
+      });
+
+      if(completeError){
+        alert("Detail tersimpan, tetapi pesanan belum bisa diselesaikan: " + completeError.message);
+        return;
+      }
+
+      if(!completeData?.ok){
+        alert("Pesanan belum bisa diselesaikan. Silakan coba lagi.");
+        return;
+      }
+
+      order.delivery_details = details;
+      order.delivered_at = new Date().toISOString();
+      order.status = "Selesai";
+
+      const url = buildWhatsAppUrl(order, details);
+      if(url === "#"){
+        alert("Pesanan sudah Selesai dan stok sudah diperbarui, tetapi nomor WhatsApp pelanggan tidak valid.");
+        await loadOrders();
+        return;
+      }
+
+      await loadOrders();
+      addAdminActivity("Pesanan selesai & dikirim via WhatsApp", order.order_id||"Pesanan");
+      window.location.href = url;
+      return;
+    }
+
     if(details){
       const {error: detailError} = await sb.from("orders").update({
         delivery_details: details,
@@ -839,38 +888,6 @@ async function saveDelivery(id, sendAfter){
         alert("Gagal menyimpan detail: " + detailError.message);
         return;
       }
-    }
-
-    if(sendAfter){
-      if(!["Sudah Dibayar","Sedang Diproses"].includes(order.status)){
-        alert("Pesanan belum siap dikirim. Verifikasi pembayaran dan ubah status menjadi Sudah Dibayar atau Sedang Diproses terlebih dahulu.");
-        return;
-      }
-      if(!details) details = defaultDeliveryDetails;
-      const {error: statusError} = await sb.from("orders").update({
-        status: "Selesai"
-      }).eq("id", id);
-
-      if(statusError){
-        alert("Detail sudah tersimpan, tetapi status gagal diubah: " + statusError.message);
-        return;
-      }
-
-      order.delivery_details = details;
-      order.delivered_at = new Date().toISOString();
-      order.status = "Selesai";
-
-      const url = buildWhatsAppUrl(order, details);
-      if(url === "#"){
-        alert("Detail sudah disimpan dan status menjadi Selesai, tetapi nomor WhatsApp pelanggan tidak valid.");
-        await loadOrders();
-        return;
-      }
-
-      await loadOrders();
-      addAdminActivity("Pesanan dikirim via WhatsApp", order.order_id||"Pesanan");
-      window.location.href = url;
-      return;
     }
 
     order.delivery_details = details;
