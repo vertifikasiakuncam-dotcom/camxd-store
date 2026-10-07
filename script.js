@@ -143,6 +143,29 @@ function render(){
  document.querySelectorAll(".choose").forEach(b=>b.onclick=()=>openDetail(b.dataset.id));
 }
 
+function renderRelatedProducts(){
+  const box=$("#relatedProducts");
+  if(!box||!selectedProduct)return;
+  const same=products.filter(p=>p.id!==selectedProduct.id&&p.category===selectedProduct.category&&p.plans&&p.plans.length);
+  const other=products.filter(p=>p.id!==selectedProduct.id&&p.plans&&p.plans.length&&!same.some(x=>x.id===p.id));
+  const list=[...same,...other].slice(0,3);
+  box.innerHTML=list.map(p=>{
+    const price=p.plans[0][1]?rupiah(p.plans[0][1]):"Sesuai kebutuhan";
+    return `<article class="related-card">
+      <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">
+      <div class="related-card-body">
+        <span class="featured-card-badge">${escapeHtml(p.badge||"PILIHAN")}</span>
+        <h4>${escapeHtml(p.name)}</h4>
+        <strong>${price}</strong>
+        <button type="button" class="choose" data-related-id="${escapeHtml(p.id)}">Lihat →</button>
+      </div>
+    </article>`;
+  }).join("");
+  box.querySelectorAll("[data-related-id]").forEach(btn=>{
+    btn.onclick=()=>openDetail(btn.dataset.relatedId);
+  });
+}
+
 function openDetail(id){
  selectedProduct=products.find(p=>p.id===id); if(!selectedProduct)return; selectedPlan=selectedProduct.plans[0];
  addRecentProduct(selectedProduct.id);
