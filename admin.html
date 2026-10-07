@@ -230,6 +230,29 @@
               <label>Deskripsi singkat</label>
               <input id="productDescription" placeholder="Deskripsi yang tampil di kartu produk">
             </div>
+            <div>
+              <label>Stok tersedia</label>
+              <input id="productStock" type="number" min="0" step="1" placeholder="Contoh: 25">
+              <small class="form-help">Kosongkan jika stok belum ingin ditampilkan.</small>
+            </div>
+            <div>
+              <label>Voucher Produk</label>
+              <input id="productVoucher" maxlength="40" placeholder="Contoh: CAMXD10">
+              <small class="form-help">Kode voucher yang tampil pada produk. Tidak mengubah harga checkout otomatis.</small>
+            </div>
+            <div class="full">
+              <label>Bukti Transaksi Produk</label>
+              <input id="productProofUrl" placeholder="URL gambar bukti transaksi (opsional)">
+              <div class="image-upload-box">
+                <div id="productProofPreview" class="product-image-preview">
+                  <span>Belum ada bukti transaksi</span>
+                </div>
+                <div class="image-upload-controls">
+                  <input id="productProofFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                  <small class="form-help">Upload screenshot/foto bukti transaksi dari HP. Maksimal 5 MB. Gunakan bukti yang sudah disamarkan dari data pelanggan.</small>
+                </div>
+              </div>
+            </div>
             <div class="full">
               <label>Gambar / Logo</label>
               <input id="productImage" placeholder="contoh: youtube-premium.jpg">
@@ -337,7 +360,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=20261006-29"></script>
+  <script src="admin.js?v=20261007-30"></script>
   <script src="admin-profile.js?v=20261006-4"></script>
 
 </body>
