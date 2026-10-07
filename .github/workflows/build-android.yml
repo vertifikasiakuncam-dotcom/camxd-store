@@ -153,6 +153,7 @@ jobs:
           import android.media.AudioTrack;
           import android.view.Gravity;
           import android.view.View;
+          import android.view.ViewTreeObserver;
           import android.view.animation.AccelerateDecelerateInterpolator;
           import android.webkit.WebResourceRequest;
           import android.webkit.WebSettings;
@@ -386,6 +387,13 @@ jobs:
               FrameLayout.LayoutParams cp=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
               splash.addView(content,cp);
               setContentView(splash);
+
+              // Keep the logo exactly at the visual center of the main gold ring.
+              splash.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+                float ringCenterY=splash.getHeight()*0.405f;
+                float logoCenterY=logo.getY()+logo.getHeight()/2f;
+                logo.setTranslationY(ringCenterY-logoCenterY);
+              });
 
               // Reveal sequence: flare -> ring -> particles -> logo -> title -> tagline.
               logo.animate().alpha(1f).scaleX(1.08f).scaleY(1.08f)
