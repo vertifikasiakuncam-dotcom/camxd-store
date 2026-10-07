@@ -186,11 +186,35 @@ jobs:
                 for(int i=0;i<ps.length;i++) ps[i]=1.2f+random.nextFloat()*3.8f;
               }
 
-              private void drawCloud(Canvas canvas,float x,float y,float scale){
-                canvas.drawOval(new RectF(x,y,x+170f*scale,y+38f*scale),paint);
-                canvas.drawCircle(x+48f*scale,y,30f*scale,paint);
-                canvas.drawCircle(x+92f*scale,y-12f*scale,42f*scale,paint);
-                canvas.drawCircle(x+132f*scale,y+2f*scale,27f*scale,paint);
+              private void drawGoldCloud(Canvas canvas,float x,float y,float scale){
+                paint.setColor(Color.argb(24,255,178,0));
+                canvas.drawOval(new RectF(x,y,x+180f*scale,y+42f*scale),paint);
+                paint.setColor(Color.argb(30,255,193,7));
+                canvas.drawCircle(x+50f*scale,y,32f*scale,paint);
+                canvas.drawCircle(x+96f*scale,y-14f*scale,44f*scale,paint);
+                canvas.drawCircle(x+140f*scale,y+3f*scale,29f*scale,paint);
+                paint.setColor(Color.argb(12,255,230,120));
+                canvas.drawOval(new RectF(x+18f*scale,y-8f*scale,x+158f*scale,y+20f*scale),paint);
+              }
+
+              private void drawLoading(Canvas canvas,float cx,float cy,float scale,float elapsed){
+                float p=(elapsed-1.82f)*3.2f;
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(2.8f);
+                paint.setColor(Color.argb(210,255,193,7));
+                paint.setShadowLayer(12f,0,0,Color.rgb(255,170,0));
+                float r=19f*scale;
+                float sweep=85f+105f*(float)Math.abs(Math.sin(p));
+                canvas.drawArc(new RectF(cx-r,cy-r,cx+r,cy+r),p*130f,sweep,false,paint);
+                paint.clearShadowLayer();
+
+                paint.setStyle(Paint.Style.FILL);
+                for(int i=0;i<3;i++){
+                  float phase=p-(i*0.65f);
+                  float pulse=0.55f+0.45f*(float)((Math.sin(phase)+1f)/2f);
+                  paint.setColor(Color.argb((int)(180*pulse),255,193,7));
+                  canvas.drawCircle(cx+(i-1)*13f*scale,cy+31f*scale,2.8f*scale*pulse,paint);
+                }
               }
 
               private float clamp(float x){ return Math.max(0f,Math.min(1f,x)); }
@@ -205,15 +229,13 @@ jobs:
                 float cx=w/2f, cy=h*0.405f;
                 canvas.drawColor(Color.rgb(2,2,2));
 
-                // Soft drifting clouds for the premium sky atmosphere.
-                float cloudPhase=clamp((elapsed-0.05f)/2.5f);
+                // Gold clouds, matching the reference animation.
                 paint.setStyle(Paint.Style.FILL);
-                paint.setColor(Color.argb(34,255,255,255));
-                paint.setShadowLayer(22f,0,0,Color.argb(35,255,210,90));
-                float drift=(elapsed*42f)% (w+260f);
-                drawCloud(canvas,-170f+drift,h*0.25f,1.0f);
-                drawCloud(canvas,w+120f-drift*0.72f,h*0.57f,0.72f);
-                drawCloud(canvas,-260f+((drift*0.48f)%(w+420f)),h*0.72f,0.55f);
+                paint.setShadowLayer(28f,0,0,Color.argb(80,255,170,0));
+                float drift=(elapsed*46f)%(w+320f);
+                drawGoldCloud(canvas,-190f+drift,h*0.24f,1.0f);
+                drawGoldCloud(canvas,w+130f-drift*0.68f,h*0.56f,0.76f);
+                drawGoldCloud(canvas,-280f+((drift*0.44f)%(w+460f)),h*0.72f,0.58f);
                 paint.clearShadowLayer();
 
                 // 1) Gold flare is born from a single point.
@@ -280,7 +302,12 @@ jobs:
                   canvas.drawCircle(cx,cy,Math.min(w,h)*0.26f,paint);
                 }
 
-                if(elapsed<2.55f) postInvalidateDelayed(16);
+                // 5) Small premium loading animation appears before launch.
+                if(elapsed>1.82f && elapsed<2.62f){
+                  drawLoading(canvas,cx,cy+Math.min(w,h)*0.285f,1f,elapsed);
+                }
+
+                if(elapsed<2.70f) postInvalidateDelayed(16);
               }
             }
 
@@ -345,7 +372,7 @@ jobs:
 
               playIntroSound();
 
-              new Handler().postDelayed(() -> setupWebView(),2700);
+              new Handler().postDelayed(() -> setupWebView(),2850);
             }
 
               private void playIntroSound() {
