@@ -13,6 +13,10 @@ on:
       - "camxd-background.png"
       - "camxd-store-music.mp3"
 
+concurrency:
+  group: camxd-store-apk-build
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
