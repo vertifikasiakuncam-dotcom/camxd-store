@@ -541,7 +541,7 @@ function renderOrderCheck(order){
   <div class="order-result-meta"><span>Dibuat</span><strong>${new Date(order.created_at).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}</strong></div>
   <div class="order-result-items">${itemHtml}</div>
   <div class="order-result-total"><span>Total</span><strong>${order.total_label||rupiah(order.total||0)}</strong></div>
-  ${order.delivery_details?`<div class="delivery-box"><b>📦 Detail Pesanan</b><p>${String(order.delivery_details).replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\\n/g,"<br>")}</p></div>`:"<p class='order-result-note'>Detail pengiriman akan muncul setelah pesanan selesai diproses admin.</p>"}
+  ${order.delivery_details?`<div class="delivery-box"><b>📦 Detail Pesanan</b><p>${String(order.delivery_details).replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\r?\n/g,"<br>")}</p></div>`:"<p class='order-result-note'>Detail pengiriman akan muncul setelah pesanan selesai diproses admin.</p>"}
  `;
  result.hidden=false;
 }
