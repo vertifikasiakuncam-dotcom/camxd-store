@@ -294,8 +294,6 @@ jobs:
               logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
               logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
               logo.setAdjustViewBounds(true);
-              logo.setClipChildren(false);
-              logo.setClipToPadding(false);
               logo.setPadding(8,8,8,8);
               logo.setAlpha(0f);
               logo.setScaleX(.35f); logo.setScaleY(.35f);
