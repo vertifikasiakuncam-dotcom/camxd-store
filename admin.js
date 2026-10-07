@@ -379,7 +379,7 @@ function buildWhatsAppUrl(order, details){
     itemText || "   1. Pesanan CAMXD Store",
     "",
     "\u{1F4B0} TOTAL PEMBAYARAN",
-    "   " + (order.total_label || rupiah(order.total)),
+    "   " + (order.total_label || ("Rp. " + rupiah(order.total).replace(/^Rp\s*/, ""))),
     "",
     "\u{1F510} DETAIL PRODUK / AKUN",
     deliveryText,
