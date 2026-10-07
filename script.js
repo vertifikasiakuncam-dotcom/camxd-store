@@ -70,13 +70,13 @@ function initStoreWebMusic(){
       startSilent();
     }
 
-    // One real user gesture is enough: unmute/play immediately.
+    // One real pointer gesture is enough to unmute/play.
+    // Keep this listener isolated from normal link/click handling so audio
+    // cannot interfere with anchor navigation or page scrolling.
     const unlock=()=>{
       if(!storeWebMusicMuted)enableSound();
     };
-    document.addEventListener("pointerup",unlock,{passive:true,capture:true});
-    document.addEventListener("touchend",unlock,{passive:true,capture:true});
-    document.addEventListener("click",unlock,{passive:true,capture:true});
+    document.addEventListener("pointerup",unlock,{passive:true});
 
     window.addEventListener("pageshow",()=>{
       if(!storeWebMusicMuted)startSilent();
