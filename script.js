@@ -65,6 +65,16 @@ function setStoreWebMusicMuted(muted){
 function hasNativeStoreMusic(){
   return !!(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function");
 }
+
+function syncMusicButton(){
+  const btn=$("#musicBtn");
+  if(!btn)return;
+  const muted=hasNativeStoreMusic()?false:storeWebMusicMuted;
+  btn.dataset.muted=muted?"1":"0";
+  btn.textContent=muted?"🔇":"🔊";
+  btn.setAttribute("aria-label",muted?"Nyalakan musik":"Matikan musik");
+  btn.title=muted?"Nyalakan musik":"Matikan musik";
+}
 let sb=null;
 try{
   if(window.supabase && typeof SUPABASE_URL!=="undefined" && typeof SUPABASE_PUBLISHABLE_KEY!=="undefined"){
@@ -725,6 +735,7 @@ $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal")
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
 initStoreWebMusic();
+syncMusicButton();
 restoreCart();
 updateCart();
 render();
