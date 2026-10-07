@@ -147,6 +147,8 @@ jobs:
           import android.graphics.RectF;
           import android.graphics.LinearGradient;
           import android.graphics.Shader;
+          import android.content.res.ColorStateList;
+          import android.animation.ObjectAnimator;
           import android.graphics.Typeface;
           import android.media.AudioFormat;
           import android.media.AudioManager;
@@ -166,6 +168,7 @@ jobs:
           import android.widget.FrameLayout;
           import android.widget.ImageView;
           import android.widget.LinearLayout;
+          import android.widget.ProgressBar;
           import android.widget.TextView;
           import android.widget.Toast;
 
@@ -238,10 +241,10 @@ jobs:
                 // Gold clouds, matching the reference animation.
                 paint.setStyle(Paint.Style.FILL);
                 paint.setShadowLayer(28f,0,0,Color.argb(80,255,170,0));
-                float drift=(elapsed*46f)%(w+320f);
-                drawGoldCloud(canvas,-190f+drift,h*0.24f,1.0f);
-                drawGoldCloud(canvas,w+130f-drift*0.68f,h*0.56f,0.76f);
-                drawGoldCloud(canvas,-280f+((drift*0.44f)%(w+460f)),h*0.72f,0.58f);
+                float sway=(float)Math.sin(elapsed*0.75f)*w*0.035f;
+                drawGoldCloud(canvas,w*0.035f+sway,h*0.24f,0.82f);
+                drawGoldCloud(canvas,w*0.66f-sway,h*0.53f,0.76f);
+                drawGoldCloud(canvas,w*0.22f+sway*0.65f,h*0.72f,0.58f);
                 paint.clearShadowLayer();
 
                 // 1) Gold flare is born from a single point.
@@ -384,6 +387,27 @@ jobs:
               lpTag.topMargin=7;
               content.addView(tagline,lpTag);
 
+              TextView loadingText=new TextView(this);
+              loadingText.setText("MEMUAT CAMXD STORE");
+              loadingText.setTextColor(Color.rgb(255,205,35));
+              loadingText.setTextSize(11);
+              loadingText.setLetterSpacing(0.08f);
+              loadingText.setGravity(Gravity.CENTER);
+              loadingText.setAlpha(0f);
+              LinearLayout.LayoutParams lpLoadingText=new LinearLayout.LayoutParams(-1,-2);
+              lpLoadingText.topMargin=24;
+              content.addView(loadingText,lpLoadingText);
+
+              ProgressBar loadingBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+              loadingBar.setMax(100);
+              loadingBar.setProgress(0);
+              loadingBar.setIndeterminate(false);
+              loadingBar.setProgressTintList(ColorStateList.valueOf(Color.rgb(255,193,7)));
+              loadingBar.setAlpha(0f);
+              LinearLayout.LayoutParams lpBar=new LinearLayout.LayoutParams(190,7);
+              lpBar.topMargin=9;
+              content.addView(loadingBar,lpBar);
+
               FrameLayout.LayoutParams cp=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
               splash.addView(content,cp);
               setContentView(splash);
@@ -391,7 +415,7 @@ jobs:
               // Keep the logo exactly at the visual center of the main gold ring.
               splash.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
                 float ringCenterY=splash.getHeight()*0.405f;
-                float logoCenterY=logo.getY()+logo.getHeight()/2f;
+                float logoCenterY=content.getY()+logo.getY()+logo.getHeight()/2f;
                 logo.setTranslationY(ringCenterY-logoCenterY);
               });
 
@@ -404,6 +428,12 @@ jobs:
                 .setStartDelay(1420).setDuration(480).start();
               tagline.animate().alpha(1f)
                 .setStartDelay(1690).setDuration(420).start();
+              loadingText.animate().alpha(1f).setStartDelay(1900).setDuration(350).start();
+              loadingBar.animate().alpha(1f).setStartDelay(1900).setDuration(350).start();
+              ObjectAnimator progress=ObjectAnimator.ofInt(loadingBar,"progress",0,100);
+              progress.setStartDelay(1950);
+              progress.setDuration(1900);
+              progress.start();
 
               // Gold shimmer across the title.
               title.postDelayed(() -> {
@@ -413,7 +443,7 @@ jobs:
 
               playIntroSound();
 
-              new Handler().postDelayed(() -> setupWebView(),3050);
+              new Handler().postDelayed(() -> setupWebView(),4200);
             }
 
               private void playIntroSound() {
