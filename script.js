@@ -819,6 +819,7 @@ window.addEventListener("scroll",()=>{
 backTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 
 $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart;
+$("#checkoutCart")?.addEventListener("click",checkoutCart);
 $("#applyVoucherBtn")?.addEventListener("click",applyVoucher);
 $("#cartVoucher")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();applyVoucher();}});
 $("#musicBtn")?.addEventListener("click",()=>{
