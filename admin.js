@@ -542,6 +542,15 @@ function renderOrders(){
 
         </div>
 
+        ${o.payment_proof_path ? `
+        <div class="payment-proof-actions">
+          <span class="payment-proof-status">📎 Bukti pembayaran tersimpan</span>
+          <button type="button" class="btn view-payment-proof" data-path="${escapeHtml(o.payment_proof_path)}">👁️ Lihat Bukti</button>
+        </div>` : `
+        <div class="payment-proof-actions no-proof">
+          <span>📎 Belum ada bukti pembayaran</span>
+        </div>`}
+
         <details class="delivery-details" ${o.delivery_details ? "open" : ""}>
           <summary>
             <span>\u{1F510} Detail Produk / Akun</span>
@@ -655,6 +664,27 @@ Masa aktif: 30 hari"
     }).join("");
 
   document.querySelectorAll(".order-check").forEach(el=>{ el.addEventListener("change",()=>{ const id=String(el.dataset.id); if(el.checked) selectedOrderIds.add(id); else selectedOrderIds.delete(id); updateBulkDeleteUi(); }); });
+
+  document.querySelectorAll(".view-payment-proof").forEach(btn=>{
+    btn.addEventListener("click",async()=>{
+      const path=btn.dataset.path;
+      if(!path)return;
+      const old=btn.textContent;
+      btn.disabled=true;
+      btn.textContent="⏳ Membuka...";
+      try{
+        const {data,error}=await sb.storage.from("payment-proofs").createSignedUrl(path,600);
+        if(error)throw error;
+        if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener");
+        else throw new Error("URL bukti tidak tersedia.");
+      }catch(error){
+        alert("Bukti pembayaran belum dapat dibuka: "+(error?.message||"Kesalahan."));
+      }finally{
+        btn.disabled=false;
+        btn.textContent=old;
+      }
+    });
+  });
 
   document
     .querySelectorAll(".status-select")
