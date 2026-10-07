@@ -1260,6 +1260,17 @@ async function loadProductsAdmin(){
     p.plans = (plans || []).filter(x => Number(x.product_id) === Number(p.id));
   });
 
+  // Sales are derived from completed orders so the admin never has to maintain
+  // a manual counter and old orders remain the source of truth.
+  try{
+    const {data:sales,error:salesError}=await sb.rpc("get_product_sales_stats");
+    if(!salesError){
+      const byKey={};
+      (sales||[]).forEach(row=>{byKey[String(row.product_key)]=Number(row.sold_count||0);});
+      allProducts.forEach(p=>{p.sold_count=Number(byKey[String(p.product_key)]||0);});
+    }
+  }catch{}
+
   renderProductsAdmin();
 }
 
