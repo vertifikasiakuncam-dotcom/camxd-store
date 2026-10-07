@@ -10,6 +10,7 @@ on:
       - "pwa.js"
       - "manifest.webmanifest"
       - ".github/workflows/build-android.yml"
+      - "camxd-background.jpg"
 
 permissions:
   contents: write
