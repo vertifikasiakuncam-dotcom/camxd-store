@@ -453,7 +453,18 @@ jobs:
               // Reveal sequence: flare -> ring -> particles -> logo -> title -> tagline.
               logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
                 .setStartDelay(760).setDuration(900)
-                .withEndAction(() -> logo.animate().scaleX(1f).scaleY(1f).setDuration(180).start())
+                .withEndAction(() -> {
+                  logo.animate().scaleX(1.035f).scaleY(1.035f).setDuration(180)
+                    .withEndAction(() -> {
+                      logo.animate().scaleX(1f).scaleY(1f).setDuration(180).start();
+                      ObjectAnimator twinkle=ObjectAnimator.ofFloat(logo,"alpha",1f,0.72f,1f,0.84f,1f);
+                      twinkle.setStartDelay(180);
+                      twinkle.setDuration(900);
+                      twinkle.setRepeatCount(3);
+                      twinkle.setRepeatMode(ObjectAnimator.RESTART);
+                      twinkle.start();
+                    }).start();
+                })
                 .setInterpolator(new AccelerateDecelerateInterpolator()).start();
               title.animate().alpha(1f)
                 .setStartDelay(1420).setDuration(480).start();
