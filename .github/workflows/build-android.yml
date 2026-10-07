@@ -191,6 +191,16 @@ jobs:
                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                   String url = request.getUrl().toString();
 
+                  if (url.startsWith("https://wa.me/") || url.startsWith("whatsapp://")) {
+                    try {
+                      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                      startActivity(intent);
+                    } catch (Exception e) {
+                      Toast.makeText(MainActivity.this, "WhatsApp tidak ditemukan", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                  }
+
                   if (url.endsWith(".apk") || url.contains("/downloads/")) {
                     try {
                       Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
