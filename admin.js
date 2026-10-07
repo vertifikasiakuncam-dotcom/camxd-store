@@ -552,10 +552,10 @@ function renderOrders(){
           <span>📎 Belum ada bukti pembayaran</span>
         </div>`}
 
-        <details class="delivery-details" ${!o.delivery_details ? "open" : ""}>
+        <details class="delivery-details" open>
           <summary>
             <span>\u{1F510} Detail Produk / Akun</span>
-            <small>${o.delivery_details ? "Tersimpan" : "Belum diisi"}</small>
+            <small>${o.delivery_details ? "Tersimpan" : "Siap diisi / dikirim"}</small>
           </summary>
 
         <div class="delivery-box">
@@ -573,7 +573,7 @@ Email: pelanggan@email.com
 Password: ********
 Kode: ABCD-EFGH
 Masa aktif: 30 hari"
-          >${escapeHtml(o.delivery_details || "")}</textarea>
+          >${escapeHtml(o.delivery_details || "Email: -\nPassword: -\nKode: -\nMasa aktif: -")}</textarea>
 
           <div class="delivery-actions">
 
@@ -600,8 +600,8 @@ Masa aktif: 30 hari"
           </div>
 
           <small class="delivery-note">
-            Simpan detail terlebih dahulu agar data
-            tetap tersimpan di pesanan.
+            Isi detail akun jika tersedia. Klik <b>Simpan & Kirim WhatsApp</b> untuk menyimpan detail,
+            mengubah status menjadi <b>Selesai</b>, dan langsung membuka WhatsApp pelanggan.
           </small>
 
         </div>
@@ -736,16 +736,7 @@ Masa aktif: 30 hari"
           return;
         }
 
-        const ok = confirm(
-          "Kirim pesanan melalui WhatsApp?\n\n" +
-          "ID: " + (order.order_id || "-") + "\n" +
-          "Pelanggan: " + (order.customer_name || "-") + "\n" +
-          "Status akan diubah menjadi Selesai."
-        );
-
-        if(ok){
-          saveDelivery(Number(el.dataset.id), true);
-        }
+        saveDelivery(Number(el.dataset.id), true);
       });
 
     });
@@ -851,6 +842,10 @@ async function saveDelivery(id, sendAfter){
     }
 
     if(sendAfter){
+      if(!["Sudah Dibayar","Sedang Diproses"].includes(order.status)){
+        alert("Pesanan belum siap dikirim. Verifikasi pembayaran dan ubah status menjadi Sudah Dibayar atau Sedang Diproses terlebih dahulu.");
+        return;
+      }
       if(!details) details = defaultDeliveryDetails;
       const {error: statusError} = await sb.from("orders").update({
         status: "Selesai"
