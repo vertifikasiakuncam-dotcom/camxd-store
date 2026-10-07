@@ -753,3 +753,57 @@ html{scroll-padding-top:90px}
 .catalog-mini-note{display:flex;align-items:center;gap:10px;margin:12px 0 10px;padding:10px 12px;border:1px solid rgba(255,208,0,.16);border-radius:13px;background:linear-gradient(90deg,rgba(255,208,0,.055),rgba(255,255,255,.018));color:#bbb}
 .catalog-mini-note>span{font-size:19px;flex:none}.catalog-mini-note strong{display:block;color:#eee;font-size:11px;margin-bottom:2px}.catalog-mini-note small{display:block;color:#777;font-size:10px;line-height:1.35}
 @media(max-width:760px){.catalog-mini-note{margin:9px 0;padding:9px 10px}.catalog-mini-note>span{font-size:17px}.catalog-mini-note small{font-size:9px}}
+
+
+/* V31 — Mobile readability boost */
+@media screen and (max-width:1200px){
+  .section{padding-left:16px;padding-right:16px}
+  .section h2{font-size:38px}
+  .section-head p,.lead{font-size:17px;line-height:1.55}
+  .eyebrow{font-size:12px;letter-spacing:2.2px}
+  .catalog-tools-label{font-size:12px}
+  #sortProducts{font-size:13px}
+  .benefits span{font-size:14px}
+  .catalog-mini-note{padding:11px 13px}
+  .catalog-mini-note strong{font-size:13px}
+  .catalog-mini-note small{font-size:12px;color:#aaa;line-height:1.45}
+  .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .product-body{padding:6px 14px 16px;min-height:154px}
+  .product h3{font-size:19px;line-height:1.25}
+  .product p{font-size:13.5px;line-height:1.4;min-height:38px;color:#c0c0c0}
+  .price{font-size:21px}
+  .choose{font-size:12px;padding:10px 10px}
+  .badge{font-size:9px;padding:5px 8px}
+  .featured-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .featured-card{grid-template-columns:105px 1fr;padding:12px}
+  .featured-card img{width:105px;height:84px}
+  .featured-card h3{font-size:17px}
+  .featured-card p{font-size:12.5px;color:#b5b5b5}
+  .featured-price{font-size:18px}
+  .featured-buy{font-size:12px;padding:8px 10px}
+  .deal-copy h2{font-size:23px}
+  .deal-copy p{font-size:15px;color:#bdbdbd}
+  .deal-points span{font-size:12px}
+}
+
+@media screen and (max-width:620px){
+  .section h2{font-size:34px}
+  .section-head p,.lead{font-size:16px}
+  .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .product-body{padding:6px 10px 14px;min-height:150px}
+  .product h3{font-size:17px}
+  .product p{font-size:12.5px;min-height:36px}
+  .price{font-size:19px}
+  .choose{font-size:11px;padding:9px 8px}
+  .featured-products{grid-template-columns:1fr}
+  .featured-card{grid-template-columns:105px 1fr}
+}
+
+@media screen and (max-width:420px){
+  .section{padding-left:12px;padding-right:12px}
+  .products{gap:8px}
+  .product-body{padding-left:9px;padding-right:9px}
+  .product h3{font-size:16.5px}
+  .product p{font-size:12px}
+  .benefits span{font-size:13px}
+}
