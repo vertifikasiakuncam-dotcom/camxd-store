@@ -1186,3 +1186,39 @@ body:before{
     font-size:14px;
   }
 }
+
+/* V37 — QRIS payment reported state */
+.payment-reported{
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  margin-top:13px;
+  padding:12px;
+  border:1px solid rgba(105,230,166,.35);
+  border-radius:14px;
+  background:rgba(105,230,166,.07);
+}
+.payment-reported-icon{
+  width:28px;height:28px;flex:none;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#69e6a6;
+  color:#06140d;
+  font-weight:900;
+}
+.payment-reported strong{
+  display:block;
+  color:#69e6a6;
+  font-size:14px;
+}
+.payment-reported p{
+  margin:3px 0 0;
+  color:#bbb;
+  font-size:12px;
+  line-height:1.45;
+}
+@media(max-width:760px){
+  .payment-reported{padding:11px;gap:9px}
+  .payment-reported strong{font-size:13px}
+  .payment-reported p{font-size:11px}
+}
