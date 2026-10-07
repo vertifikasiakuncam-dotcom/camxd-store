@@ -260,7 +260,7 @@ jobs:
               super.onDestroy();
             }
           }
-          EOFF
+          EOF
 
       - name: Build and sign
         working-directory: store-android
