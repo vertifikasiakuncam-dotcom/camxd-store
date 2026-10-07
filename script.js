@@ -389,11 +389,27 @@ function closePayment(){
  document.body.style.overflow="";
 }
 
-function sendProof(){
+async function sendProof(){
  if(!pendingOrder)return;
 
  const o=pendingOrder;
  const lines=String(o.lines||"").split(/\r?\n/).filter(Boolean);
+
+ // Tandai sebagai pembayaran yang dilaporkan; admin tetap wajib memverifikasi bukti QRIS.
+ try{
+  const {error}=await sb.from("orders").update({status:"Menunggu Verifikasi"}).eq("order_id",o.orderId);
+  if(error) console.warn("Status pembayaran belum dapat diperbarui:",error);
+ }catch(error){
+  console.warn("Update status pembayaran:",error);
+ }
+
+ const reported=$("#paymentReported");
+ const proofButton=$("#sendProof");
+ if(reported) reported.hidden=false;
+ if(proofButton){
+  proofButton.disabled=true;
+  proofButton.textContent="✓ Pembayaran Dilaporkan";
+ }
 
  const msg=[
   "🛍️ *CAMXD STORE*",
