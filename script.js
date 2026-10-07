@@ -461,16 +461,31 @@ function closePayment(){
  document.body.style.overflow="";
 }
 
-async function uploadPaymentProof(file, orderId){
+async function uploadPaymentProof(file, orderId, customerWa){
  if(!file) throw new Error("Pilih screenshot bukti pembayaran terlebih dahulu.");
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("Format bukti harus JPG, PNG, atau WebP.");
  if(file.size>5*1024*1024) throw new Error("Ukuran bukti maksimal 5 MB.");
+ if(!sb) throw new Error("Koneksi database belum tersedia.");
+
  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
  const path=orderId+"/"+Date.now()+"-"+crypto.randomUUID()+"."+ext;
+
  const {error:uploadError}=await sb.storage.from("payment-proofs").upload(path,file,{contentType:file.type,upsert:false});
  if(uploadError) throw uploadError;
- const {error:updateError}=await sb.from("orders").update({payment_proof_path:path,payment_proof_uploaded_at:new Date().toISOString(),status:"Menunggu Verifikasi"}).eq("order_id",orderId);
- if(updateError){try{await sb.storage.from("payment-proofs").remove([path]);}catch{} throw updateError;}
+
+ // Customer tidak lagi melakukan UPDATE orders langsung.
+ // Supabase RPC memverifikasi ID Pesanan + nomor WhatsApp sebelum mengubah status.
+ const {data:updateOk,error:updateError}=await sb.rpc("submit_payment_proof",{
+   p_order_id:orderId,
+   p_customer_wa:customerWa,
+   p_payment_proof_path:path
+ });
+
+ if(updateError || updateOk !== true){
+   try{await sb.storage.from("payment-proofs").remove([path]);}catch{}
+   throw updateError || new Error("Bukti pembayaran gagal dicatat.");
+ }
+
  return path;
 }
 
@@ -483,7 +498,7 @@ async function sendProof(){
  if(errorBox) errorBox.textContent="";
  if(proofButton){proofButton.disabled=true;proofButton.textContent="⏳ Mengunggah bukti…";}
  try{
-   await uploadPaymentProof(file,o.orderId);
+   await uploadPaymentProof(file,o.orderId,o.wa);
    showPaymentStatus("Menunggu Verifikasi");
    if(proofButton) proofButton.textContent="✓ Bukti Terkirim";
    const msg="🛍️ CAMXD STORE\n🆔 ID Pesanan: "+o.orderId+"\n💰 Total: "+o.total+"\n✅ Pembayaran sudah dilakukan. Bukti pembayaran sudah diupload ke CAMXD Store.\nMohon dicek dan diproses.";
