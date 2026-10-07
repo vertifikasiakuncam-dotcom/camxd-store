@@ -1222,3 +1222,12 @@ body:before{
   .payment-reported strong{font-size:13px}
   .payment-reported p{font-size:11px}
 }
+
+/* V38 — Verified payment state */
+.payment-reported.paid{
+  border-color:rgba(105,230,166,.62);
+  background:linear-gradient(90deg,rgba(105,230,166,.12),rgba(105,230,166,.045));
+}
+.payment-reported.paid strong{
+  color:#69e6a6;
+}
