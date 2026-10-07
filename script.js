@@ -163,7 +163,7 @@ async function loadProducts(){
   try{
     const queryPromise=Promise.all([
       sb.from("products")
-        .select("id,product_key,name,description,category,image_url,badge,detail,sort_order")
+        .select("id,product_key,name,description,category,image_url,badge,detail,sort_order,voucher_code,voucher_discount_type,voucher_discount_value,voucher_valid_from,voucher_valid_until,voucher_usage_limit,voucher_usage_count,voucher_active")
         .eq("is_active",true)
         .order("sort_order",{ascending:true}),
       sb.from("product_plans")
@@ -196,7 +196,7 @@ async function loadProducts(){
       image:p.image_url,
       badge:p.badge,
       plans:plansByProduct[p.id]||[],
-      detail:p.detail
+      detail:p.detail,voucher_code:p.voucher_code,voucher_discount_type:p.voucher_discount_type,voucher_discount_value:p.voucher_discount_value,voucher_valid_from:p.voucher_valid_from,voucher_valid_until:p.voucher_valid_until,voucher_usage_limit:p.voucher_usage_limit,voucher_usage_count:p.voucher_usage_count,voucher_active:p.voucher_active
     })).filter(p=>p.plans.length);
 
     // Ganti katalog lokal hanya jika database benar-benar mengembalikan data.
@@ -219,7 +219,7 @@ async function loadProductFeatureMeta(){
   if(!sb||!products.length)return;
   try{
     const [metaResult,salesResult]=await Promise.all([
-      sb.from("products").select("product_key,stock_quantity,voucher_code,transaction_proof_url"),
+      sb.from("products").select("product_key,stock_quantity,voucher_code,transaction_proof_url,voucher_discount_type,voucher_discount_value,voucher_valid_from,voucher_valid_until,voucher_usage_limit,voucher_usage_count,voucher_active"),
       sb.rpc("get_product_sales_stats")
     ]);
     if(!metaResult.error){
@@ -230,7 +230,7 @@ async function loadProductFeatureMeta(){
         if(meta){
           p.stock_quantity=meta.stock_quantity==null?null:Number(meta.stock_quantity);
           p.voucher_code=String(meta.voucher_code||"").trim();
-          p.transaction_proof_url=String(meta.transaction_proof_url||"").trim();
+          p.transaction_proof_url=String(meta.transaction_proof_url||"").trim();p.voucher_discount_type=String(meta.voucher_discount_type||"percent");p.voucher_discount_value=Number(meta.voucher_discount_value||0);p.voucher_valid_from=meta.voucher_valid_from||null;p.voucher_valid_until=meta.voucher_valid_until||null;p.voucher_usage_limit=meta.voucher_usage_limit==null?null:Number(meta.voucher_usage_limit);p.voucher_usage_count=Number(meta.voucher_usage_count||0);p.voucher_active=meta.voucher_active!==false;
         }
       });
     }
@@ -524,16 +524,23 @@ function changeQty(index,delta){cart[index].qty=Math.max(1,cart[index].qty+delta
 function cartTotal(){return cart.reduce((s,x)=>s+(x.price*x.qty),0);}
 function updateCart(){
  saveCart();
- const count=cart.reduce((s,x)=>s+x.qty,0); $("#cartCount").textContent=count; $("#cartItems").innerHTML=cart.length?cart.map((x,i)=>`<div class="cart-item"><img src="${escapeHtml(x.image)}" alt=""><div class="cart-item-main"><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.plan)}</small><b>${x.price?rupiah(x.price):"Sesuai kebutuhan"}</b><div class="qty"><button data-q="-" data-i="${i}">−</button><span>${x.qty}</span><button data-q="+" data-i="${i}">+</button><button class="remove" data-remove="${i}">Hapus</button></div></div></div>`).join(""):"<div class='cart-empty'>Keranjang masih kosong.<br>Pilih produk untuk mulai berbelanja.</div>";
- $("#cartTotal").textContent=cart.some(x=>!x.price)?"Cek nominal":""+rupiah(cartTotal());
- document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>changeQty(Number(b.dataset.i),b.dataset.q==="+"?1:-1));
- document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeCart(Number(b.dataset.remove)));
- $("#checkoutCart").disabled=!cart.length;
+ const count=cart.reduce((s,x)=>s+x.qty,0);$("#cartCount").textContent=count;
+ $("#cartItems").innerHTML=cart.length?cart.map((x,i)=>{const lineTotal=x.price*x.qty;return `<div class="cart-item"><img src="${escapeHtml(x.image)}" alt=""><div class="cart-item-main"><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.plan)}</small><b>${x.price?rupiah(lineTotal):"Sesuai kebutuhan"}</b><div class="qty"><button data-q="-" data-i="${i}">−</button><span>${x.qty}</span><button data-q="+" data-i="${i}">+</button><button class="remove" data-remove="${i}">Hapus</button></div></div></div>`;}).join(""):"<div class='cart-empty'>Keranjang masih kosong.<br>Pilih produk untuk mulai berbelanja.</div>";
+ const subtotal=cartTotal(),discount=cartDiscountAmount(),finalTotal=cartFinalTotal();$("#cartTotal").textContent=cart.some(x=>!x.price)?"Cek nominal":rupiah(finalTotal);const subtotalEl=$("#cartSubtotal"),discountEl=$("#cartDiscount");if(subtotalEl)subtotalEl.textContent=rupiah(subtotal);if(discountEl)discountEl.textContent=discount>0?"- "+rupiah(discount):"Rp 0";renderVoucherSummary();
+ document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>changeQty(Number(b.dataset.i),b.dataset.q==="+"?1:-1));document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeCart(Number(b.dataset.remove)));$("#checkoutCart").disabled=!cart.length;
 }
 function openCart(){$("#cartDrawer").classList.add("open");$("#cartBackdrop").hidden=false;}
 function closeCart(){$("#cartDrawer").classList.remove("open");$("#cartBackdrop").hidden=true;}
 
 let pendingOrder=null;
+let appliedVoucher=null;
+function voucherProductForCode(code){const n=String(code||"").trim().toUpperCase();if(!n)return null;return products.find(p=>p.voucher_code&&String(p.voucher_code).trim().toUpperCase()===n)||null;}
+function voucherDiscountForProduct(p,subtotal){if(!appliedVoucher||!p||p.id!==appliedVoucher.productKey)return 0;const base=Math.max(0,Number(subtotal)||0),value=Math.max(0,Number(appliedVoucher.discountValue)||0);return appliedVoucher.discountType==="percent"?Math.min(base,Math.round(base*value/100)):Math.min(base,value);}
+function cartDiscountAmount(){if(!appliedVoucher)return 0;return cart.reduce((sum,x)=>{const line=Math.max(0,Number(x.price)||0)*Math.max(1,Number(x.qty)||1);return sum+voucherDiscountForProduct(products.find(p=>p.id===x.productId),line);},0);}
+function cartFinalTotal(){return Math.max(0,cartTotal()-cartDiscountAmount());}
+function renderVoucherSummary(){const box=$("#cartVoucherSummary");if(!box)return;if(!appliedVoucher){box.hidden=true;box.innerHTML="";return;}const discount=cartDiscountAmount();box.hidden=false;box.innerHTML='<div><span>🎟️ Voucher <b>'+escapeHtml(appliedVoucher.code)+'</b></span><strong>- '+rupiah(discount)+'</strong></div><small>'+escapeHtml(appliedVoucher.message||"Voucher berhasil digunakan.")+'</small>';}
+async function applyVoucher(){const input=$("#cartVoucher"),button=$("#applyVoucherBtn"),msg=$("#voucherMessage");if(!input||!sb)return;const code=input.value.trim().toUpperCase();if(!code){appliedVoucher=null;renderVoucherSummary();if(msg)msg.textContent="Masukkan kode voucher.";return;}const product=voucherProductForCode(code);if(!product){if(msg)msg.textContent="Voucher tidak ditemukan atau tidak berlaku untuk produk di keranjang.";return;}if(!cart.some(x=>x.productId===product.id)){if(msg)msg.textContent="Voucher ini hanya berlaku untuk produk: "+product.name+".";return;}if(button){button.disabled=true;button.textContent="Memeriksa…";}try{const {data,error}=await sb.rpc("check_product_voucher",{p_product_key:product.id,p_code:code});if(error)throw error;const row=Array.isArray(data)?data[0]:data;if(!row?.valid)throw new Error(row?.message||"Voucher tidak valid.");appliedVoucher={code,productKey:product.id,discountType:row.discount_type,discountValue:Number(row.discount_value||0),message:row.message||"Voucher berhasil digunakan."};if(msg){msg.textContent="✓ Voucher berhasil digunakan.";msg.classList.add("success");}renderVoucherSummary();updateCart();}catch(error){appliedVoucher=null;renderVoucherSummary();if(msg){msg.classList.remove("success");msg.textContent=error?.message||"Voucher tidak dapat digunakan."}}finally{if(button){button.disabled=false;button.textContent="Gunakan Voucher";}}}
+function clearVoucher(){appliedVoucher=null;const input=$("#cartVoucher"),msg=$("#voucherMessage");if(input)input.value="";if(msg){msg.textContent="";msg.classList.remove("success");}renderVoucherSummary();updateCart();}
 
 async function checkoutCart(){
  if(!cart.length)return;
@@ -548,15 +555,15 @@ async function checkoutCart(){
  try{
   const orderId="CX"+Date.now().toString().slice(-8);
   const lines=cart.map((x,i)=>(i+1)+". "+x.name+" — "+x.plan+" x"+x.qty+" = "+(x.price?rupiah(x.price*x.qty):"Sesuai kebutuhan")).join("\n");
-  const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(cartTotal());
-  const orderItems=cart.map(x=>({product_id:x.productId,name:x.name,plan:x.plan,price:Number(x.price||0),qty:Number(x.qty||1)}));
+  const subtotal=cartTotal();const discountAmount=cartDiscountAmount();const finalTotal=cartFinalTotal();const total=cart.some(x=>!x.price)?"Sesuai kebutuhan / konfirmasi admin":rupiah(finalTotal);
+  const orderItems=cart.map(x=>({product_id:x.productId,name:x.name,plan:x.plan,price:Number(x.price||0),qty:Number(x.qty||1)}));if(appliedVoucher){const {data:voucherData,error:voucherError}=await sb.rpc("redeem_product_voucher",{p_product_key:appliedVoucher.productKey,p_code:appliedVoucher.code});if(voucherError)throw voucherError;const voucherRow=Array.isArray(voucherData)?voucherData[0]:voucherData;if(!voucherRow?.valid)throw new Error(voucherRow?.message||"Voucher sudah tidak tersedia.");}
   closeCart();
   if(!navigator.onLine) throw new Error("iPhone sedang tidak terhubung ke internet.");
-  const insertPromise=sb.from("orders").insert({order_id:orderId,customer_name:name,customer_wa:wa,items:orderItems,total:cartTotal(),total_label:total,status:"Menunggu Pembayaran"});
+  const insertPromise=sb.from("orders").insert({order_id:orderId,customer_name:name,customer_wa:wa,items:orderItems,total:finalTotal,total_label:total,status:"Menunggu Pembayaran",voucher_code:appliedVoucher?.code||null,discount_amount:discountAmount});
   const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Koneksi ke server terlalu lama. Silakan cek internet iPhone lalu coba lagi.")),12000));
   const {error}=await Promise.race([insertPromise,timeoutPromise]);
   if(error)throw error;
-  pendingOrder={orderId,name,wa,lines,total};
+  pendingOrder={orderId,name,wa,lines,total,voucherCode:appliedVoucher?.code||"",discountAmount};appliedVoucher=null;
   closeCart();
   $("#paymentOrderId").textContent=orderId;
   $("#paymentTotal").textContent=total;
