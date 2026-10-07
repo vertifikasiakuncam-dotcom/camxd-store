@@ -1,3 +1,14 @@
+// Always open CAMXD Store at the dashboard top unless a specific section/hash was requested.
+try{history.scrollRestoration="manual";}catch(e){}
+function resetStoreScroll(){
+  if(!window.location.hash){
+    window.scrollTo(0,0);
+    requestAnimationFrame(()=>window.scrollTo(0,0));
+  }
+}
+window.addEventListener("pageshow",resetStoreScroll);
+window.addEventListener("load",resetStoreScroll);
+
 const STORE_WA="6282133942994";
 let storeWebMusic=null;
 let storeWebMusicStarted=false;
