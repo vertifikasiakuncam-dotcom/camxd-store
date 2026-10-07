@@ -148,10 +148,8 @@ jobs:
           import android.graphics.Paint;
           import android.graphics.RectF;
           import android.graphics.LinearGradient;
-          import android.graphics.RadialGradient;
           import android.graphics.Shader;
           import android.view.View;
-          import android.view.animation.LinearInterpolator;
           import android.webkit.ValueCallback;
           import android.webkit.WebChromeClient;
           import android.webkit.WebResourceRequest;
@@ -167,134 +165,107 @@ jobs:
           
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
-              getWindow().setStatusBarColor(Color.rgb(28,12,2));
-              getWindow().setNavigationBarColor(Color.rgb(10,5,2));
+              getWindow().setStatusBarColor(Color.rgb(35,14,2));
+              getWindow().setNavigationBarColor(Color.rgb(18,7,1));
               showIntro();
             }
           
             private void showIntro(){
-              setContentView(new GoldIntroView());
+              setContentView(new StaticIntroView());
             }
           
-            private final class GoldIntroView extends View {
+            private final class StaticIntroView extends View {
               private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
               private final Paint textPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
               private final Bitmap logo;
               private final long startTime=System.currentTimeMillis();
               private final long duration=4800L;
           
-              GoldIntroView(){
+              StaticIntroView(){
                 super(MainActivity.this);
-                setLayerType(View.LAYER_TYPE_SOFTWARE,null);
                 logo=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_logo);
                 textPaint.setTypeface(android.graphics.Typeface.create("sans",android.graphics.Typeface.BOLD));
-                setBackgroundColor(Color.rgb(18,7,1));
+                setBackgroundColor(Color.rgb(35,12,2));
                 postInvalidateOnAnimation();
               }
           
               @Override protected void onDraw(Canvas c){
                 super.onDraw(c);
                 final float w=getWidth(), h=getHeight();
-                drawGoldenSky(c,w,h);
           
-                long elapsed=System.currentTimeMillis()-startTime;
-                float t=Math.min(1f,elapsed/(float)duration);
-                float eased=1f-(float)Math.pow(1f-t,3);
+                // Static premium gold/brown background. No cloud or logo animation.
+                p.setStyle(Paint.Style.FILL);
+                p.setShader(new LinearGradient(0,0,0,h,
+                    Color.rgb(48,18,2),Color.rgb(156,58,3),Shader.TileMode.CLAMP));
+                c.drawRect(0,0,w,h,p);
+                p.setShader(null);
           
-                float logoMax=w*0.78f;
-                float scale=Math.min(logoMax/logo.getWidth(),logoMax/logo.getHeight());
+                // Static soft golden glow behind the logo.
+                p.setColor(Color.argb(55,255,188,35));
+                c.drawCircle(w/2f,h*0.43f,w*0.42f,p);
+                p.setColor(Color.argb(30,255,225,120));
+                c.drawCircle(w/2f,h*0.43f,w*0.30f,p);
+          
+                // Static subtle sun rays.
+                p.setStrokeWidth(3f);
+                p.setColor(Color.argb(65,255,196,45));
+                float cx=w/2f, cy=h*0.43f;
+                for(int i=-6;i<=6;i++){
+                  float tx=cx+i*w*0.14f;
+                  c.drawLine(cx,cy,tx,cy-h*0.24f,p);
+                }
+          
+                // Logo stays completely still and fully contained.
+                float maxW=w*0.78f;
+                float maxH=h*0.40f;
+                float scale=Math.min(maxW/logo.getWidth(),maxH/logo.getHeight());
                 float lw=logo.getWidth()*scale;
                 float lh=logo.getHeight()*scale;
-                float logoTop=h*0.19f+(1f-eased)*18f;
                 float logoLeft=(w-lw)/2f;
-                p.setAlpha((int)(255*eased));
-                c.drawBitmap(logo,null,new RectF(logoLeft,logoTop,logoLeft+lw,logoTop+lh),p);
+                float logoTop=h*0.18f;
                 p.setAlpha(255);
+                c.drawBitmap(logo,null,new RectF(logoLeft,logoTop,logoLeft+lw,logoTop+lh),p);
           
-                float textY=logoTop+lh+Math.min(72f,h*0.055f);
-                drawTextCentered(c,"DIGITAL STORE • CEPAT • AMAN",textY,18f,Color.WHITE,0.92f);
-                drawTextCentered(c,"CAMXD STORE",textY+58f,36f,Color.rgb(255,214,60),1f);
+                drawTextCentered(c,"DIGITAL STORE • CEPAT • AMAN",logoTop+lh+42f,16f,Color.WHITE);
+                drawTextCentered(c,"CAMXD STORE",logoTop+lh+88f,30f,Color.rgb(255,218,72));
           
+                // Only the loading fill moves.
+                float t=Math.min(1f,(System.currentTimeMillis()-startTime)/(float)duration);
                 float barW=Math.min(w*0.72f,560f);
-                float barH=24f;
+                float barH=22f;
                 float barX=(w-barW)/2f;
-                float barY=textY+94f;
+                float barY=logoTop+lh+122f;
+          
                 p.setStyle(Paint.Style.FILL);
-                p.setColor(Color.argb(210,20,10,2));
+                p.setColor(Color.argb(220,30,12,2));
                 c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH/2f,barH/2f,p);
+          
                 p.setStyle(Paint.Style.STROKE);
                 p.setStrokeWidth(3f);
                 p.setColor(Color.rgb(255,190,25));
                 c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH/2f,barH/2f,p);
+          
                 p.setStyle(Paint.Style.FILL);
-                p.setShader(new LinearGradient(barX,0,barX+barW,0,Color.rgb(255,174,0),Color.rgb(255,244,150),Shader.TileMode.CLAMP));
-                c.drawRoundRect(new RectF(barX+3,barY+3,barX+3+(barW-6)*eased,barY+barH-3),9,9,p);
+                p.setShader(new LinearGradient(barX,0,barX+barW,0,
+                    Color.rgb(255,170,0),Color.rgb(255,244,150),Shader.TileMode.CLAMP));
+                c.drawRoundRect(new RectF(barX+3,barY+3,
+                    barX+3+(barW-6)*t,barY+barH-3),9,9,p);
                 p.setShader(null);
+          
+                drawTextCentered(c,"MEMUAT CAMXD STORE",barY+48f,12f,Color.rgb(255,226,112));
           
                 if(t<1f){
-                  textPaint.setTextSize(14f);
-                  textPaint.setTextAlign(Paint.Align.CENTER);
-                  textPaint.setColor(Color.rgb(255,226,112));
-                  c.drawText("MEMUAT CAMXD STORE",w/2f,barY+52f,textPaint);
+                  postInvalidateOnAnimation();
+                }else{
+                  postDelayed(() -> setupWebView(),180);
                 }
-                if(t<1f) postInvalidateOnAnimation();
-                else postDelayed(() -> setupWebView(),180);
               }
           
-              private void drawTextCentered(Canvas c,String s,float y,float size,int color,float alpha){
+              private void drawTextCentered(Canvas c,String s,float y,float size,int color){
                 textPaint.setTextSize(size);
                 textPaint.setTextAlign(Paint.Align.CENTER);
-                textPaint.setColor(Color.argb((int)(255*alpha),Color.red(color),Color.green(color),Color.blue(color)));
+                textPaint.setColor(color);
                 c.drawText(s,getWidth()/2f,y,textPaint);
-              }
-          
-              private void drawGoldenSky(Canvas c,float w,float h){
-                p.setStyle(Paint.Style.FILL);
-                p.setShader(new LinearGradient(0,0,0,h,Color.rgb(4,2,1),Color.rgb(92,34,3),Shader.TileMode.CLAMP));
-                c.drawRect(0,0,w,h,p);
-                p.setShader(null);
-          
-                float cx=w/2f, cy=h*0.46f;
-                p.setShader(new RadialGradient(cx,cy,Math.max(w,h)*0.55f,
-                    new int[]{Color.rgb(255,190,40),Color.rgb(160,65,3),Color.TRANSPARENT},
-                    new float[]{0f,0.28f,1f},Shader.TileMode.CLAMP));
-                c.drawRect(0,0,w,h,p);
-                p.setShader(null);
-          
-                p.setStrokeWidth(5f);
-                p.setStrokeCap(Paint.Cap.ROUND);
-                p.setColor(Color.argb(75,255,193,40));
-                for(int i=-6;i<=6;i++){
-                  float tx=cx+i*w*0.13f;
-                  c.drawLine(cx,cy,tx,cy-h*0.33f,p);
-                }
-          
-                drawCloudBand(c,w,h*0.08f,w*0.38f,h*0.12f,Color.rgb(55,18,2),Color.rgb(255,157,25));
-                drawCloudBand(c,w,h*0.42f,w*0.34f,h*0.16f,Color.rgb(50,15,2),Color.rgb(255,190,40));
-                drawCloudBand(c,w,h*0.72f,w*0.44f,h*0.18f,Color.rgb(42,12,2),Color.rgb(255,176,25));
-                drawCloudBand(c,w,h*0.90f,w*0.50f,h*0.20f,Color.rgb(32,9,2),Color.rgb(255,142,15));
-          
-                p.setColor(Color.argb(210,255,198,45));
-                for(int i=0;i<28;i++){
-                  float x=(float)((i*83+37)%Math.max(1,(int)w));
-                  float y=(float)((i*137+53)%Math.max(1,(int)h));
-                  float r=(i%3==0)?2.5f:1.2f;
-                  c.drawCircle(x,y,r,p);
-                }
-              }
-          
-              private void drawCloudBand(Canvas c,float w,float y,float half,float height,int shadow,int glow){
-                p.setStyle(Paint.Style.FILL);
-                p.setColor(shadow);
-                c.drawOval(new RectF(w/2f-half,y-height/2f,w/2f+half,y+height/2f),p);
-                p.setColor(glow);
-                p.setAlpha(180);
-                for(int i=-4;i<=4;i++){
-                  float x=w/2f+i*half*0.22f;
-                  float rr=height*(0.28f+(Math.abs(i)%3)*0.08f);
-                  c.drawCircle(x,y-height*0.15f,rr,p);
-                }
-                p.setAlpha(255);
               }
             }
           
