@@ -374,6 +374,17 @@ async function checkoutCart(){
   $("#paymentModal").hidden=false;
   $("#paymentModal").scrollTop=0;
   document.body.style.overflow="hidden";
+  const reported=$("#paymentReported");
+  const proofButton=$("#sendProof");
+  if(reported){
+   reported.hidden=true;
+   reported.classList.remove("paid");
+  }
+  if(proofButton){
+   proofButton.disabled=false;
+   proofButton.textContent="Saya Sudah Bayar — Kirim Bukti →";
+  }
+  startPaymentStatusWatch();
  }catch(error){
   console.error("Checkout CAMXD:",error);
   alert("Checkout belum berhasil. Periksa koneksi internet lalu coba lagi.\n\nDetail: "+(error&&error.message?error.message:"Terjadi kesalahan saat menyimpan pesanan."));
@@ -384,7 +395,62 @@ async function checkoutCart(){
  }
 }
 
+let paymentStatusTimer=null;
+let paymentStatusBusy=false;
+
+function stopPaymentStatusWatch(){
+ if(paymentStatusTimer){
+  clearInterval(paymentStatusTimer);
+  paymentStatusTimer=null;
+ }
+ paymentStatusBusy=false;
+}
+
+function showPaymentStatus(status){
+ const s=String(status||"").toLowerCase();
+ const reported=$("#paymentReported");
+ const proofButton=$("#sendProof");
+ if(!reported)return;
+
+ const paid=s.includes("sudah dibayar")||s.includes("lunas")||s.includes("selesai");
+ const verified=s.includes("menunggu verifikasi")||s.includes("verifikasi");
+ if(paid){
+  reported.hidden=false;
+  reported.classList.add("paid");
+  reported.innerHTML='<div class="payment-reported-icon">✓</div><div><strong>Pembayaran SUDAH DIBAYAR / LUNAS</strong><p>Pembayaran telah diverifikasi admin. Pesanan dapat diproses.</p></div>';
+  if(proofButton){
+   proofButton.disabled=true;
+   proofButton.textContent="✓ Pembayaran Lunas";
+  }
+  stopPaymentStatusWatch();
+ }else if(verified){
+  reported.hidden=false;
+  reported.classList.remove("paid");
+  reported.innerHTML='<div class="payment-reported-icon">✓</div><div><strong>Pembayaran telah dilaporkan</strong><p>Pesanan sedang menunggu verifikasi admin. Status akan diperbarui otomatis setelah admin memverifikasi.</p></div>';
+ }
+}
+
+async function checkPaymentStatus(){
+ if(!pendingOrder||paymentStatusBusy)return;
+ paymentStatusBusy=true;
+ try{
+  const {data,error}=await sb.rpc("check_order",{p_order_id:pendingOrder.orderId,p_customer_wa:pendingOrder.wa});
+  if(!error&&data) showPaymentStatus(data.status);
+ }catch(error){
+  console.warn("Pemantauan status pembayaran:",error);
+ }finally{
+  paymentStatusBusy=false;
+ }
+}
+
+function startPaymentStatusWatch(){
+ stopPaymentStatusWatch();
+ checkPaymentStatus();
+ paymentStatusTimer=setInterval(checkPaymentStatus,4000);
+}
+
 function closePayment(){
+ stopPaymentStatusWatch();
  $("#paymentModal").hidden=true;
  document.body.style.overflow="";
 }
@@ -405,11 +471,15 @@ async function sendProof(){
 
  const reported=$("#paymentReported");
  const proofButton=$("#sendProof");
- if(reported) reported.hidden=false;
+ if(reported){
+  reported.hidden=false;
+  reported.classList.remove("paid");
+ }
  if(proofButton){
   proofButton.disabled=true;
   proofButton.textContent="✓ Pembayaran Dilaporkan";
  }
+ showPaymentStatus("Menunggu Verifikasi");
 
  const msg=[
   "🛍️ *CAMXD STORE*",
@@ -452,7 +522,7 @@ function normalizeWa(value){
 
 function statusClass(status){
  const s=String(status||"").toLowerCase();
- if(s.includes("selesai")) return "done";
+ if(s.includes("selesai")||s.includes("sudah dibayar")||s.includes("lunas")) return "done";
  if(s.includes("batal")) return "cancel";
  if(s.includes("verifikasi")||s.includes("proses")) return "process";
  return "waiting";
@@ -461,7 +531,7 @@ function statusClass(status){
 function renderOrderTimeline(status){
  const current=String(status||"Menunggu Pembayaran");
  if(current.includes("Dibatalkan")) return '<div class="order-timeline cancelled"><div class="timeline-step active"><i>×</i><span>Pesanan dibatalkan</span></div></div>';
- const steps=["Menunggu Pembayaran","Menunggu Verifikasi","Sedang Diproses","Selesai"];
+ const steps=["Menunggu Pembayaran","Menunggu Verifikasi","Sudah Dibayar","Sedang Diproses","Selesai"];
  let idx=steps.findIndex(x=>current===x); if(idx<0) idx=steps.findIndex(x=>current.includes(x)); if(idx<0) idx=0;
  return '<div class="order-timeline">'+steps.map((step,i)=>'<div class="timeline-step '+(i<=idx?"active":"")+'"><i>'+(i<idx?"✓":(i===idx?"•":"○"))+'</i><span>'+step+'</span></div>').join("")+'</div>';
 }
