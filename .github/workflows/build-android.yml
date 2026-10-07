@@ -316,8 +316,8 @@ jobs:
                 if(outer>0f){
                   paint.setStyle(Paint.Style.STROKE);
                   paint.setStrokeWidth(1.6f);
-                  paint.setColor(Color.argb((int)(145*haloProgress),255,224,110));
-                  canvas.drawCircle(cx,cy,Math.min(w,h)*0.285f*haloProgress,paint);
+                  paint.setColor(Color.argb((int)(145*outer),255,224,110));
+                  canvas.drawCircle(cx,cy,Math.min(w,h)*0.285f*outer,paint);
                 }
 
                 // 3) Gold particles are pulled into orbit.
