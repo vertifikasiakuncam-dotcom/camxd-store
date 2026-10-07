@@ -156,7 +156,23 @@ jobs:
 
             @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
-              setupWebView();
+              showIntroStage1();
+            }
+
+            private void showIntroStage1(){
+              android.widget.FrameLayout root=new android.widget.FrameLayout(this);
+              root.setBackgroundColor(android.graphics.Color.rgb(54,28,2));
+
+              android.widget.ImageView logo=new android.widget.ImageView(this);
+              logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
+              logo.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+              logo.setAdjustViewBounds(false);
+              android.widget.FrameLayout.LayoutParams lp=new android.widget.FrameLayout.LayoutParams(300,300,android.view.Gravity.CENTER);
+              root.addView(logo,lp);
+
+              setContentView(root);
+
+              new android.os.Handler().postDelayed(() -> setupWebView(),1800);
             }
 
             private void setupWebView(){
