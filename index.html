@@ -312,7 +312,14 @@
     <div class="payment-steps">
       <div><b>1</b><span>Scan QRIS dan bayar sesuai total.</span></div>
       <div><b>2</b><span>Screenshot bukti pembayaran.</span></div>
-      <div><b>3</b><span>Kirim bukti ke admin melalui WhatsApp.</span></div>
+      <div><b>3</b><span>Pilih bukti pembayaran di bawah.</span></div>
+    </div>
+    <div class="payment-proof-box">
+      <label class="field-label" for="paymentProofFile">BUKTI PEMBAYARAN</label>
+      <input id="paymentProofFile" class="input" type="file" accept="image/jpeg,image/png,image/webp">
+      <small class="form-help">JPG, PNG, atau WebP • maksimal 5 MB.</small>
+      <div id="paymentProofPreview" class="payment-proof-preview" hidden></div>
+      <p id="paymentProofError" class="error"></p>
     </div>
     <button class="btn primary wide" id="sendProof">Saya Sudah Bayar — Kirim Bukti →</button>
     <div class="payment-reported" id="paymentReported" hidden>
