@@ -1047,3 +1047,142 @@ body:before{
     font-size:17px;
   }
 }
+
+/* V36 — Premium cart drawer + checkout form */
+.cart-drawer{
+  background:
+    radial-gradient(circle at 100% 0,rgba(255,208,0,.07),transparent 28%),
+    linear-gradient(145deg,#0a0a0a,#050505);
+}
+.cart-head{
+  background:rgba(255,255,255,.012);
+}
+.cart-head h2{
+  letter-spacing:-.3px;
+}
+.cart-items{
+  scrollbar-width:thin;
+}
+.cart-item{
+  padding:14px 0;
+}
+.cart-item img{
+  border-color:rgba(255,208,0,.25);
+}
+.cart-item-main strong{
+  font-size:16px;
+}
+.cart-item-main small{
+  color:#aaa;
+}
+.cart-item-main b{
+  font-size:16px;
+}
+.qty button{
+  border-color:#555;
+  background:#111;
+}
+.qty .remove{
+  color:#aaa;
+}
+.cart-checkout{
+  background:
+    linear-gradient(180deg,rgba(255,208,0,.025),#090909 22%);
+  border-top-color:rgba(255,208,0,.18);
+}
+.cart-total{
+  padding:5px 2px 12px;
+}
+.cart-total strong{
+  font-size:27px;
+}
+.cart-checkout .input{
+  border-color:#444;
+  background:#101010;
+}
+.cart-checkout .input::placeholder{
+  color:#777;
+}
+.cart-checkout .payment-box{
+  border-color:rgba(255,208,0,.25);
+  background:rgba(255,208,0,.055);
+}
+.cart-checkout .btn{
+  min-height:52px;
+  font-size:15px;
+}
+.cart-checkout .btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+@media(max-width:760px){
+  .cart-head{
+    padding:18px 15px 14px;
+  }
+  .cart-head h2{
+    font-size:24px;
+  }
+  .cart-items{
+    padding:10px 13px;
+  }
+  .cart-item{
+    gap:10px;
+    padding:12px 0;
+  }
+  .cart-item img{
+    width:72px;
+    height:52px;
+  }
+  .cart-item-main strong{
+    font-size:14px;
+  }
+  .cart-item-main small{
+    font-size:11px;
+  }
+  .cart-item-main b{
+    font-size:14px;
+  }
+  .qty{
+    margin-top:7px;
+  }
+  .qty button{
+    min-width:32px;
+    height:32px;
+  }
+  .qty .remove{
+    padding:0 8px;
+    font-size:11px;
+  }
+  .cart-checkout{
+    padding:12px 13px calc(17px + env(safe-area-inset-bottom));
+    max-height:64dvh;
+  }
+  .cart-total{
+    font-size:17px;
+    padding-bottom:10px;
+  }
+  .cart-total strong{
+    font-size:23px;
+  }
+  .cart-checkout .input{
+    min-height:47px;
+    font-size:15px;
+    margin:4px 0;
+  }
+  .cart-checkout .payment-box{
+    padding:12px;
+    margin-top:7px;
+  }
+  .cart-checkout .payment-box strong{
+    font-size:14px;
+  }
+  .cart-checkout .payment-box p{
+    font-size:12px;
+    line-height:1.45;
+  }
+  .cart-checkout .btn{
+    min-height:50px;
+    font-size:14px;
+  }
+}
