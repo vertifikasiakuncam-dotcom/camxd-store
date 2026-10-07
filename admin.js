@@ -730,6 +730,16 @@ Masa aktif: 30 hari"
         const order = allOrders.find(o => Number(o.id) === Number(el.dataset.id));
         if(!order) return;
 
+        if(!["Sudah Dibayar","Sedang Diproses"].includes(order.status)){
+          alert("Pesanan belum siap dikirim. Pastikan pembayaran sudah diverifikasi dan status pesanan minimal Sudah Dibayar.");
+          return;
+        }
+
+        if(!String(getDeliveryValue(Number(el.dataset.id)) || "").trim()){
+          alert("Detail Produk / Akun / Kode masih kosong. Isi detail terlebih dahulu sebelum mengirim pesanan.");
+          return;
+        }
+
         const ok = confirm(
           "Kirim pesanan melalui WhatsApp?\n\n" +
           "ID: " + (order.order_id || "-") + "\n" +
