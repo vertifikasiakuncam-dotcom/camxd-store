@@ -526,7 +526,7 @@ function updateCart(){
  saveCart();
  const count=cart.reduce((s,x)=>s+x.qty,0);$("#cartCount").textContent=count;
  $("#cartItems").innerHTML=cart.length?cart.map((x,i)=>{const lineTotal=x.price*x.qty;return `<div class="cart-item"><img src="${escapeHtml(x.image)}" alt=""><div class="cart-item-main"><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.plan)}</small><b>${x.price?rupiah(lineTotal):"Sesuai kebutuhan"}</b><div class="qty"><button data-q="-" data-i="${i}">−</button><span>${x.qty}</span><button data-q="+" data-i="${i}">+</button><button class="remove" data-remove="${i}">Hapus</button></div></div></div>`;}).join(""):"<div class='cart-empty'>Keranjang masih kosong.<br>Pilih produk untuk mulai berbelanja.</div>";
- const subtotal=cartTotal(),discount=cartDiscountAmount(),finalTotal=cartFinalTotal();$("#cartTotal").textContent=cart.some(x=>!x.price)?"Cek nominal":rupiah(finalTotal);const subtotalEl=$("#cartSubtotal"),discountEl=$("#cartDiscount");if(subtotalEl)subtotalEl.textContent=rupiah(subtotal);if(discountEl)discountEl.textContent=discount>0?"- "+rupiah(discount):"Rp 0";renderVoucherSummary();
+ if(appliedVoucher&&!cart.some(x=>x.productId===appliedVoucher.productKey)){appliedVoucher=null;const vi=$("#cartVoucher"),vm=$("#voucherMessage");if(vi)vi.value="";if(vm)vm.textContent="";}const subtotal=cartTotal(),discount=cartDiscountAmount(),finalTotal=cartFinalTotal();$("#cartTotal").textContent=cart.some(x=>!x.price)?"Cek nominal":rupiah(finalTotal);const subtotalEl=$("#cartSubtotal"),discountEl=$("#cartDiscount");if(subtotalEl)subtotalEl.textContent=rupiah(subtotal);if(discountEl)discountEl.textContent=discount>0?"- "+rupiah(discount):"Rp 0";renderVoucherSummary();
  document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>changeQty(Number(b.dataset.i),b.dataset.q==="+"?1:-1));document.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeCart(Number(b.dataset.remove)));$("#checkoutCart").disabled=!cart.length;
 }
 function openCart(){$("#cartDrawer").classList.add("open");$("#cartBackdrop").hidden=false;}
@@ -819,6 +819,8 @@ window.addEventListener("scroll",()=>{
 backTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 
 $("#cartBtn").onclick=openCart; $("#closeCart").onclick=closeCart; $("#cartBackdrop").onclick=closeCart;
+$("#applyVoucherBtn")?.addEventListener("click",applyVoucher);
+$("#cartVoucher")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();applyVoucher();}});
 $("#musicBtn")?.addEventListener("click",()=>{
   const btn=$("#musicBtn");
   const muted=btn.dataset.muted==="1";
