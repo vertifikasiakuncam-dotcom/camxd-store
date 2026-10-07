@@ -7,7 +7,7 @@ function initStoreWebMusic(){
   try{
     try{storeWebMusicMuted=localStorage.getItem("camxdMusicMuted")==="1";}catch(e){storeWebMusicMuted=false;}
     if(window.CAMXDMusic&&typeof window.CAMXDMusic.setMuted==="function") return;
-    storeWebMusic=new Audio("camxd-store-music.mp3?v=20261007-2");
+    storeWebMusic=new Audio("camxd-store-music.mp3?v=20261007-3");
     storeWebMusic.loop=true;
     storeWebMusic.preload="auto";
     storeWebMusic.volume=storeWebMusicMuted?0:0.25;
@@ -25,14 +25,23 @@ function initStoreWebMusic(){
     if(!storeWebMusicMuted)start();
 
     const unlock=()=>{
-      start();
-      window.removeEventListener("pointerdown",unlock);
-      window.removeEventListener("touchstart",unlock);
-      window.removeEventListener("keydown",unlock);
+      if(!storeWebMusicMuted)start();
     };
+
+    // Try again when the page becomes visible/active.
+    window.addEventListener("pageshow",unlock,{passive:true});
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible")unlock();
+    });
+
+    // Browser autoplay policies may require a user gesture.
     window.addEventListener("pointerdown",unlock,{passive:true});
     window.addEventListener("touchstart",unlock,{passive:true});
-    window.addEventListener("keydown",unlock);
+    window.addEventListener("keydown",unlock,{passive:true});
+
+    storeWebMusic.addEventListener("canplay",()=>{
+      if(!storeWebMusicMuted)start();
+    },{once:false});
   }catch(error){
     console.warn("Musik website tidak tersedia:",error);
   }
