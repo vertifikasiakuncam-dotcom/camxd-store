@@ -146,7 +146,7 @@ jobs:
           import android.graphics.Paint;
           import android.graphics.RectF;
           import android.graphics.LinearGradient;
-           import android.graphics.RadialGradient;
+          import android.graphics.RadialGradient;
           import android.graphics.Shader;
           import android.content.res.ColorStateList;
           import android.animation.ObjectAnimator;
@@ -156,7 +156,6 @@ jobs:
           import android.media.AudioTrack;
           import android.view.Gravity;
           import android.view.View;
-          import android.view.ViewTreeObserver;
           import android.view.animation.AccelerateDecelerateInterpolator;
           import android.webkit.WebResourceRequest;
           import android.webkit.WebSettings;
@@ -177,348 +176,208 @@ jobs:
 
           public class MainActivity extends Activity {
             private WebView webView;
-            private long lastBackPress = 0;
+            private long lastBackPress=0;
             private ValueCallback<Uri[]> pendingFileCallback;
             private AudioTrack introAudio;
 
             private static class GoldIntroView extends View {
-              private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-              private final Random random = new Random(2026);
-              private final float[] ps = new float[54];
-              private final long startedAt = System.currentTimeMillis();
+              private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
+              private final Random rnd=new Random(2026);
+              private final float[] stars=new float[46];
+              private final long start=System.currentTimeMillis();
 
-              GoldIntroView(android.content.Context context) {
-                super(context);
-                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                for(int i=0;i<ps.length;i++) ps[i]=1.2f+random.nextFloat()*3.8f;
+              GoldIntroView(android.content.Context c){
+                super(c);
+                setLayerType(View.LAYER_TYPE_SOFTWARE,null);
+                for(int i=0;i<stars.length;i++) stars[i]=1.2f+rnd.nextFloat()*3.4f;
               }
 
-              private void drawGoldCloud(Canvas canvas,float x,float y,float scale){
-                paint.setShader(new RadialGradient(x+100f*scale,y-5f*scale,125f*scale,
-                  new int[]{Color.argb(120,255,190,35),Color.argb(48,255,145,0),Color.argb(0,255,100,0)},
-                  new float[]{0f,0.55f,1f},Shader.TileMode.CLAMP));
-                canvas.drawOval(new RectF(x,y-70f*scale,x+250f*scale,y+75f*scale),paint);
-                paint.setShader(null);
-                paint.setColor(Color.argb(75,255,176,8));
-                canvas.drawCircle(x+55f*scale,y,58f*scale,paint);
-                canvas.drawCircle(x+112f*scale,y-30f*scale,78f*scale,paint);
-                canvas.drawCircle(x+178f*scale,y+5f*scale,55f*scale,paint);
-                paint.setColor(Color.argb(32,255,230,130));
-                canvas.drawOval(new RectF(x+18f*scale,y-28f*scale,x+215f*scale,y+35f*scale),paint);
+              private float clamp(float v){return Math.max(0f,Math.min(1f,v));}
+              private float ease(float v){v=clamp(v);return v*v*(3f-2f*v);}
+
+              private void cloud(Canvas c,float x,float y,float s,float alpha){
+                p.setStyle(Paint.Style.FILL);
+                p.setShader(new RadialGradient(x+105*s,y,125*s,
+                  new int[]{Color.argb((int)alpha,255,190,30),Color.argb((int)(alpha*.38f),255,145,0),Color.TRANSPARENT},
+                  new float[]{0f,.55f,1f},Shader.TileMode.CLAMP));
+                c.drawOval(new RectF(x,y-72*s,x+235*s,y+70*s),p);
+                p.setShader(null);
+                p.setColor(Color.argb((int)(alpha*.55f),255,175,10));
+                c.drawCircle(x+48*s,y,52*s,p);
+                c.drawCircle(x+108*s,y-28*s,76*s,p);
+                c.drawCircle(x+174*s,y+4*s,54*s,p);
               }
 
-              private void drawLoading(Canvas canvas,float cx,float cy,float scale,float elapsed){
-                float p=(elapsed-1.82f)*3.2f;
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(2.8f);
-                paint.setColor(Color.argb(210,255,193,7));
-                paint.setShadowLayer(12f,0,0,Color.rgb(255,170,0));
-                float r=19f*scale;
-                float sweep=85f+105f*(float)Math.abs(Math.sin(p));
-                canvas.drawArc(new RectF(cx-r,cy-r,cx+r,cy+r),p*130f,sweep,false,paint);
-                paint.clearShadowLayer();
+              @Override protected void onDraw(Canvas c){
+                float w=getWidth(),h=getHeight(),t=(System.currentTimeMillis()-start)/1000f;
+                float cx=w/2f,cy=h*.38f;
 
-                paint.setStyle(Paint.Style.FILL);
-                for(int i=0;i<3;i++){
-                  float phase=p-(i*0.65f);
-                  float pulse=0.55f+0.45f*(float)((Math.sin(phase)+1f)/2f);
-                  paint.setColor(Color.argb((int)(180*pulse),255,193,7));
-                  canvas.drawCircle(cx+(i-1)*13f*scale,cy+31f*scale,2.8f*scale*pulse,paint);
-                }
-              }
+                // Gold atmosphere — no black background.
+                p.setStyle(Paint.Style.FILL);
+                p.setShader(new LinearGradient(0,0,0,h,
+                  new int[]{Color.rgb(112,60,4),Color.rgb(83,42,2),Color.rgb(48,23,1)},
+                  new float[]{0f,.48f,1f},Shader.TileMode.CLAMP));
+                c.drawRect(0,0,w,h,p); p.setShader(null);
 
-              private float clamp(float x){ return Math.max(0f,Math.min(1f,x)); }
-              private float ease(float x){
-                x=clamp(x);
-                return x*x*(3f-2f*x);
-              }
+                // Soft cloud banks around the screen.
+                float drift=(float)Math.sin(t*.35f)*18f;
+                cloud(c,-115+drift,h*.08f,1.65f,145);
+                cloud(c,w-115-drift,h*.08f,1.65f,145);
+                cloud(c,-135-drift,h*.31f,1.35f,120);
+                cloud(c,w-105+drift,h*.31f,1.35f,120);
+                cloud(c,-145+drift,h*.73f,1.55f,135);
+                cloud(c,w-125-drift,h*.73f,1.55f,135);
+                cloud(c,-110,h*.93f,1.25f,110);
+                cloud(c,w-105,h*.93f,1.25f,110);
 
-              @Override protected void onDraw(Canvas canvas) {
-                float w=getWidth(), h=getHeight();
-                float elapsed=(System.currentTimeMillis()-startedAt)/1000f;
-                float cx=w/2f, cy=h*0.405f;
-                // Full-screen cinematic gold-cloud atmosphere.
-                paint.setStyle(Paint.Style.FILL);
-                paint.setShader(new LinearGradient(0,0,0,h,
-                  new int[]{Color.rgb(62,34,3),Color.rgb(92,48,3),Color.rgb(48,25,2)},
-                  new float[]{0f,0.50f,1f},Shader.TileMode.CLAMP));
-                canvas.drawRect(0,0,w,h,paint);
-                paint.setShader(null);
+                // Central warm glow.
+                p.setShader(new RadialGradient(cx,cy,Math.min(w,h)*.43f,
+                  new int[]{Color.argb(95,255,196,45),Color.argb(28,255,135,0),Color.TRANSPARENT},
+                  new float[]{0f,.55f,1f},Shader.TileMode.CLAMP));
+                c.drawCircle(cx,cy,Math.min(w,h)*.43f,p); p.setShader(null);
 
-                float sway=(float)Math.sin(elapsed*0.55f)*w*0.025f;
+                // Ring reveal.
+                float ring=ease((t-.35f)/1.05f);
+                float r=Math.min(w,h)*.205f;
+                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(5f);
+                p.setColor(Color.rgb(255,195,15)); p.setShadowLayer(22f,0,0,Color.rgb(255,165,0));
+                c.drawArc(new RectF(cx-r,cy-r,cx+r,cy+r),-90f,360f*ring,false,p);
+                p.clearShadowLayer();
 
-                // Large cloud banks around the whole frame.
-                drawGoldCloud(canvas,-180f+sway,h*0.08f,2.7f);
-                drawGoldCloud(canvas,w*0.58f-sway,h*0.10f,2.55f);
-                drawGoldCloud(canvas,-220f-sway,h*0.36f,2.35f);
-                drawGoldCloud(canvas,w*0.60f+sway,h*0.35f,2.45f);
-                drawGoldCloud(canvas,-250f+sway,h*0.67f,2.7f);
-                drawGoldCloud(canvas,w*0.58f-sway,h*0.68f,2.6f);
-                drawGoldCloud(canvas,-170f,h*0.88f,2.5f);
-                drawGoldCloud(canvas,w*0.56f,h*0.87f,2.55f);
-
-                // Warm atmospheric glow behind the logo.
-                paint.setShader(new RadialGradient(cx,h*0.43f,Math.min(w,h)*0.48f,
-                  new int[]{Color.argb(125,255,180,20),Color.argb(45,255,130,0),Color.argb(0,255,120,0)},
-                  new float[]{0f,0.45f,1f},Shader.TileMode.CLAMP));
-                canvas.drawCircle(cx,h*0.43f,Math.min(w,h)*0.48f,paint);
-                paint.setShader(null);
-
-                // Golden horizon glow at the bottom.
-                paint.setShader(new RadialGradient(cx,h*0.86f,Math.min(w,h)*0.52f,
-                  Color.argb(100,255,185,25),Color.argb(0,255,120,0),Shader.TileMode.CLAMP));
-                canvas.drawCircle(cx,h*0.86f,Math.min(w,h)*0.52f,paint);
-                paint.setShader(null);
-
-                // Sun rays rising through the clouds.
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(3f);
-                paint.setColor(Color.argb(48,255,190,35));
-                for(int i=0;i<18;i++){
-                  float x2=(i/17f)*w;
-                  canvas.drawLine(cx,h*0.48f,x2,h*0.05f,paint);
+                // Orbit particles.
+                float part=ease((t-.8f)/1.1f);
+                p.setStyle(Paint.Style.FILL);
+                for(int i=0;i<stars.length;i++){
+                  double a=i*.73+t*(.75+(i%4)*.08);
+                  float or=Math.min(w,h)*(.16f+(i%7)*.014f);
+                  float x=cx+(float)Math.cos(a)*or;
+                  float y=cy+(float)Math.sin(a)*or;
+                  float tw=.45f+.55f*(float)Math.abs(Math.sin(a*1.7));
+                  p.setColor(Color.argb((int)(180*part*tw),255,205,45));
+                  c.drawCircle(x,y,stars[i]*part,p);
                 }
 
-                // 1) Gold flare is born from a single point.
-                float flare=ease(clamp(elapsed/0.42f));
-                if(elapsed<0.75f){
-                  float radius=Math.min(w,h)*(0.012f+0.22f*flare);
-                  paint.setStyle(Paint.Style.FILL);
-                  paint.setColor(Color.argb((int)(235*(1f-flare*0.55f)),255,205,45));
-                  paint.setShadowLayer(42f*flare,0,0,Color.rgb(255,170,0));
-                  canvas.drawCircle(cx,cy,radius,paint);
-                  paint.clearShadowLayer();
+                // Small loading spinner under the logo.
+                if(t>1.7f){
+                  p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(3f);
+                  p.setColor(Color.rgb(255,205,40)); p.setShadowLayer(10f,0,0,Color.rgb(255,165,0));
+                  float q=(t-1.7f)*150f;
+                  c.drawArc(new RectF(cx-18,cy+Math.min(w,h)*.225f,cx+18,cy+Math.min(w,h)*.225f+36),q,105,false,p);
+                  p.clearShadowLayer();
+                  p.setStyle(Paint.Style.FILL);
+                  for(int i=0;i<3;i++){
+                    float pulse=.5f+.5f*(float)Math.sin((t*4f)-i);
+                    p.setColor(Color.argb((int)(190*pulse),255,205,40));
+                    c.drawCircle(cx+(i-1)*12,cy+Math.min(w,h)*.225f+49,2.5f*pulse,p);
+                  }
                 }
-
-                // 2) A bright gold light draws the ring around the logo.
-                float ringProgress=ease(clamp((elapsed-0.28f)/0.92f));
-                if(ringProgress>0f){
-                  float r=Math.min(w,h)*0.205f;
-                  paint.setStyle(Paint.Style.STROKE);
-                  paint.setStrokeWidth(5.5f);
-                  paint.setColor(Color.argb(235,255,193,7));
-                  paint.setShadowLayer(26f,0,0,Color.rgb(255,168,0));
-                  RectF oval=new RectF(cx-r,cy-r,cx+r,cy+r);
-                  canvas.drawArc(oval,-90f,360f*ringProgress,false,paint);
-
-                  float angle=(float)Math.toRadians(-90f+360f*ringProgress);
-                  float hx=cx+(float)Math.cos(angle)*r;
-                  float hy=cy+(float)Math.sin(angle)*r;
-                  paint.setStyle(Paint.Style.FILL);
-                  paint.setColor(Color.WHITE);
-                  paint.setShadowLayer(20f,0,0,Color.rgb(255,195,20));
-                  canvas.drawCircle(hx,hy,6f,paint);
-                  paint.clearShadowLayer();
-                }
-
-                // Outer halo appears after the main ring.
-                float outer=ease(clamp((elapsed-0.72f)/0.85f));
-                if(outer>0f){
-                  paint.setStyle(Paint.Style.STROKE);
-                  paint.setStrokeWidth(1.6f);
-                  paint.setColor(Color.argb((int)(145*outer),255,224,110));
-                  canvas.drawCircle(cx,cy,Math.min(w,h)*0.285f*outer,paint);
-                }
-
-                // 3) Gold particles are pulled into orbit.
-                float particles=ease(clamp((elapsed-0.82f)/0.95f));
-                paint.setStyle(Paint.Style.FILL);
-                for(int i=0;i<ps.length;i++){
-                  double a=i*0.69+elapsed*(1.6+(i%5)*0.13);
-                  float orbit=Math.min(w,h)*(0.14f+(i%9)*0.018f);
-                  float x=cx+(float)Math.cos(a)*orbit;
-                  float y=cy+(float)Math.sin(a)*orbit;
-                  float twinkle=0.45f+0.55f*(float)Math.abs(Math.sin(a*1.9));
-                  int alpha=(int)(175*particles*twinkle);
-                  paint.setColor(Color.argb(alpha,255,193,7));
-                  canvas.drawCircle(x,y,ps[i]*particles,paint);
-                }
-
-                // Radiating gold rays behind the logo.
-                float ray=ease(clamp((elapsed-1.08f)/0.78f));
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(2f);
-                paint.setColor(Color.argb((int)(58*ray),255,193,7));
-                for(int i=0;i<20;i++){
-                  double a=i*Math.PI*2/20.0+elapsed*0.35;
-                  float inner=Math.min(w,h)*0.18f;
-                  float rayOuter=inner+Math.min(w,h)*(0.09f+0.08f*ray);
-                  canvas.drawLine(cx+(float)Math.cos(a)*inner,cy+(float)Math.sin(a)*inner,
-                    cx+(float)Math.cos(a)*rayOuter,cy+(float)Math.sin(a)*rayOuter,paint);
-                }
-
-                // 4) Brief gold flash behind the logo reveal.
-                float flash=clamp((elapsed-1.20f)/0.58f);
-                if(flash>0f && flash<1f){
-                  float a=(float)Math.sin(Math.PI*flash);
-                  paint.setStyle(Paint.Style.FILL);
-                  paint.setColor(Color.argb((int)(28*a),255,196,20));
-                  canvas.drawCircle(cx,cy,Math.min(w,h)*0.26f,paint);
-                }
-
-                // 5) Small premium loading animation appears before launch.
-                if(elapsed>1.82f && elapsed<2.62f){
-                  drawLoading(canvas,cx,cy+Math.min(w,h)*0.285f,1f,elapsed);
-                }
-
-                // Final gold sweep before entering the store.
-                if(elapsed>2.45f && elapsed<2.82f){
-                  float q=ease(clamp((elapsed-2.45f)/0.37f));
-                  paint.setStyle(Paint.Style.FILL);
-                  paint.setColor(Color.argb((int)(150*q),255,193,7));
-                  canvas.drawRect(0,h*(1f-q),w,h*(1f-q)+Math.max(3f,h*0.12f),paint);
-                }
-
-                if(elapsed<2.82f) postInvalidateDelayed(16);
+                if(t<5.15f) postInvalidateDelayed(16);
               }
             }
 
-              @Override protected void onCreate(Bundle savedInstanceState) {
+            @Override protected void onCreate(Bundle savedInstanceState){
               super.onCreate(savedInstanceState);
               showIntro();
             }
 
-            private void showIntro() {
-              FrameLayout splash=new FrameLayout(this);
-              splash.setBackgroundColor(Color.rgb(62,34,3));
-              splash.addView(new GoldIntroView(this),new FrameLayout.LayoutParams(-1,-1));
+            private void showIntro(){
+              FrameLayout root=new FrameLayout(this);
+              root.setBackgroundColor(Color.rgb(83,42,2));
+              root.addView(new GoldIntroView(this),new FrameLayout.LayoutParams(-1,-1));
 
               LinearLayout content=new LinearLayout(this);
               content.setOrientation(LinearLayout.VERTICAL);
-              content.setGravity(Gravity.CENTER);
-              content.setPadding(32,32,32,32);
+              content.setGravity(Gravity.CENTER_HORIZONTAL);
+              content.setPadding(24,0,24,0);
 
               ImageView logo=new ImageView(this);
               logo.setImageResource(com.camxd.store.R.drawable.camxd_logo);
-              logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-               logo.setPadding(14,14,14,14);
+              logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+              logo.setAdjustViewBounds(true);
+              logo.setClipChildren(false);
+              logo.setClipToPadding(false);
+              logo.setPadding(8,8,8,8);
               logo.setAlpha(0f);
-              logo.setScaleX(0.12f);
-              logo.setScaleY(0.12f);
+              logo.setScaleX(.35f); logo.setScaleY(.35f);
 
               TextView title=new TextView(this);
               title.setText("CAMXD STORE");
-              title.setTextColor(Color.rgb(255,208,0));
-              title.setTextSize(27);
+              title.setTextColor(Color.rgb(255,210,0));
+              title.setTextSize(28);
               title.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
               title.setGravity(Gravity.CENTER);
               title.setAlpha(0f);
 
-              TextView tagline=new TextView(this);
-              tagline.setText("DIGITAL STORE  •  CEPAT  •  AMAN");
-              tagline.setTextColor(Color.WHITE);
-              tagline.setTextSize(12);
-              tagline.setGravity(Gravity.CENTER);
-              tagline.setAlpha(0f);
+              TextView tag=new TextView(this);
+              tag.setText("DIGITAL STORE  •  CEPAT  •  AMAN");
+              tag.setTextColor(Color.WHITE); tag.setTextSize(12); tag.setGravity(Gravity.CENTER); tag.setAlpha(0f);
 
-              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(330,330);
-              content.addView(logo,lpLogo);
-              LinearLayout.LayoutParams lpTitle=new LinearLayout.LayoutParams(-1,-2);
-              lpTitle.topMargin=0;
-              content.addView(title,lpTitle);
-              LinearLayout.LayoutParams lpTag=new LinearLayout.LayoutParams(-1,-2);
-              lpTag.topMargin=5;
-              content.addView(tagline,lpTag);
+              TextView load=new TextView(this);
+              load.setText("MEMUAT CAMXD STORE");
+              load.setTextColor(Color.rgb(255,210,55)); load.setTextSize(11); load.setGravity(Gravity.CENTER); load.setAlpha(0f);
 
-              TextView loadingText=new TextView(this);
-              loadingText.setText("MEMUAT CAMXD STORE");
-              loadingText.setTextColor(Color.rgb(255,205,35));
-              loadingText.setTextSize(11);
-              loadingText.setLetterSpacing(0.08f);
-              loadingText.setGravity(Gravity.CENTER);
-              loadingText.setAlpha(0f);
-              LinearLayout.LayoutParams lpLoadingText=new LinearLayout.LayoutParams(-1,-2);
-              lpLoadingText.topMargin=18;
-              content.addView(loadingText,lpLoadingText);
+              ProgressBar bar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+              bar.setMax(100); bar.setProgress(0); bar.setIndeterminate(false);
+              bar.setProgressTintList(ColorStateList.valueOf(Color.rgb(255,195,10))); bar.setAlpha(0f);
 
-              ProgressBar loadingBar=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
-              loadingBar.setMax(100);
-              loadingBar.setProgress(0);
-              loadingBar.setIndeterminate(false);
-              loadingBar.setProgressTintList(ColorStateList.valueOf(Color.rgb(255,193,7)));
-              loadingBar.setAlpha(0f);
-              LinearLayout.LayoutParams lpBar=new LinearLayout.LayoutParams(190,7);
-              lpBar.topMargin=9;
-              content.addView(loadingBar,lpBar);
+              LinearLayout.LayoutParams lpLogo=new LinearLayout.LayoutParams(300,300);
+              lpLogo.bottomMargin=0; content.addView(logo,lpLogo);
+              content.addView(title,new LinearLayout.LayoutParams(-1,-2));
+              LinearLayout.LayoutParams lpTag=new LinearLayout.LayoutParams(-1,-2); lpTag.topMargin=5; content.addView(tag,lpTag);
+              LinearLayout.LayoutParams lpLoad=new LinearLayout.LayoutParams(-1,-2); lpLoad.topMargin=20; content.addView(load,lpLoad);
+              LinearLayout.LayoutParams lpBar=new LinearLayout.LayoutParams(180,7); lpBar.topMargin=8; content.addView(bar,lpBar);
 
               FrameLayout.LayoutParams cp=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
-              splash.addView(content,cp);
-              setContentView(splash);
+              cp.gravity=Gravity.CENTER; root.addView(content,cp);
+              setContentView(root);
 
-              // Keep the logo exactly at the visual center of the main gold ring.
-              splash.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-                float ringCenterY=splash.getHeight()*0.405f;
-                float logoCenterY=content.getY()+logo.getY()+logo.getHeight()/2f;
-                logo.setTranslationY(ringCenterY-logoCenterY);
+              root.post(() -> {
+                float ringY=root.getHeight()*.38f;
+                float logoY=content.getY()+logo.getY()+logo.getHeight()/2f;
+                logo.setTranslationY(ringY-logoY);
               });
 
-              // Reveal sequence: flare -> ring -> particles -> logo -> title -> tagline.
-              logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
-                .setStartDelay(760).setDuration(900)
+              logo.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(650).setDuration(950)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
                 .withEndAction(() -> {
-                  logo.animate().scaleX(1.035f).scaleY(1.035f).setDuration(180)
-                    .withEndAction(() -> {
-                      logo.animate().scaleX(1f).scaleY(1f).setDuration(180).start();
-                      ObjectAnimator twinkle=ObjectAnimator.ofFloat(logo,"alpha",1f,0.72f,1f,0.84f,1f);
-                      twinkle.setStartDelay(180);
-                      twinkle.setDuration(900);
-                      twinkle.setRepeatCount(3);
-                      twinkle.setRepeatMode(ObjectAnimator.RESTART);
-                      twinkle.start();
-                    }).start();
-                })
-                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
-              title.animate().alpha(1f)
-                .setStartDelay(1420).setDuration(480).start();
-              tagline.animate().alpha(1f)
-                .setStartDelay(1690).setDuration(420).start();
-              loadingText.animate().alpha(1f).setStartDelay(1900).setDuration(350).start();
-              loadingBar.animate().alpha(1f).setStartDelay(1900).setDuration(350).start();
-              ObjectAnimator progress=ObjectAnimator.ofInt(loadingBar,"progress",0,100);
-              progress.setStartDelay(1950);
-              progress.setDuration(3000);
-              progress.start();
+                  ObjectAnimator blink=ObjectAnimator.ofFloat(logo,"alpha",1f,.55f,1f,.72f,1f);
+                  blink.setDuration(900); blink.setRepeatCount(2); blink.start();
+                }).start();
 
-              // Gold shimmer across the title.
+              title.animate().alpha(1f).setStartDelay(1350).setDuration(500).start();
+              tag.animate().alpha(1f).setStartDelay(1650).setDuration(450).start();
+              load.animate().alpha(1f).setStartDelay(2050).setDuration(350).start();
+              bar.animate().alpha(1f).setStartDelay(2050).setDuration(350).start();
+
+              ObjectAnimator prog=ObjectAnimator.ofInt(bar,"progress",0,100);
+              prog.setStartDelay(2100); prog.setDuration(3000); prog.start();
+
               title.postDelayed(() -> {
-                title.setShadowLayer(18f,0,0,Color.rgb(255,180,0));
-                title.postDelayed(() -> title.setShadowLayer(0f,0,0,Color.TRANSPARENT),320);
-              }, 1950);
+                title.setShadowLayer(18f,0,0,Color.rgb(255,175,0));
+                title.postDelayed(() -> title.setShadowLayer(0,0,0,Color.TRANSPARENT),380);
+              },2200);
 
               playIntroSound();
-
               new Handler().postDelayed(() -> setupWebView(),5600);
             }
 
-              private void playIntroSound() {
-              final int sr=44100;
-              final int total=sr*2;
+            private void playIntroSound(){
+              final int sr=44100,total=sr*2;
               final short[] samples=new short[total];
               double[] tones={330,494,659,988};
-              int[] starts={0,420,780,1120};
-              int[] lengths={360,360,420,700};
+              int[] starts={0,420,780,1120},lens={360,360,420,700};
               for(int k=0;k<tones.length;k++){
-                int from=starts[k]*sr/1000;
-                int len=lengths[k]*sr/1000;
-                for(int j=0;j<len && from+j<samples.length;j++){
-                  double x=(double)j/len;
-                  double env=Math.sin(Math.PI*Math.min(1.0,x))*Math.pow(1.0-x,0.55);
-                  double wave=Math.sin(2*Math.PI*tones[k]*j/sr);
-                  int v=(int)(wave*env*10500);
-                  int idx=from+j;
-                  int mixed=samples[idx]+v;
-                  samples[idx]=(short)Math.max(Short.MIN_VALUE,Math.min(Short.MAX_VALUE,mixed));
+                int from=starts[k]*sr/1000,len=lens[k]*sr/1000;
+                for(int j=0;j<len&&from+j<samples.length;j++){
+                  double x=(double)j/len,env=Math.sin(Math.PI*Math.min(1.0,x))*Math.pow(1.0-x,.55);
+                  int idx=from+j,v=(int)(Math.sin(2*Math.PI*tones[k]*j/sr)*env*10500);
+                  samples[idx]=(short)Math.max(Short.MIN_VALUE,Math.min(Short.MAX_VALUE,samples[idx]+v));
                 }
               }
               byte[] pcm=new byte[samples.length*2];
-              for(int i=0;i<samples.length;i++){
-                pcm[i*2]=(byte)(samples[i]&0xff);
-                pcm[i*2+1]=(byte)((samples[i]>>8)&0xff);
-              }
+              for(int i=0;i<samples.length;i++){pcm[i*2]=(byte)(samples[i]&255);pcm[i*2+1]=(byte)((samples[i]>>8)&255);}
               introAudio=new AudioTrack(AudioManager.STREAM_MUSIC,sr,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,pcm.length,AudioTrack.MODE_STATIC);
-              introAudio.write(pcm,0,pcm.length);
-              introAudio.setStereoVolume(0.55f,0.55f);
-              introAudio.play();
+              introAudio.write(pcm,0,pcm.length); introAudio.setStereoVolume(.55f,.55f); introAudio.play();
             }
 
             private void setupWebView() {
