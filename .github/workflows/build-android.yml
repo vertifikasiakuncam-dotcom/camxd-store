@@ -151,6 +151,9 @@ jobs:
           import android.graphics.RectF;
           import android.graphics.LinearGradient;
           import android.graphics.Shader;
+          import android.media.AudioFormat;
+          import android.media.AudioManager;
+          import android.media.AudioTrack;
           import android.view.View;
           import android.view.Window;
           import android.webkit.ValueCallback;
@@ -189,99 +192,125 @@ jobs:
               private final Bitmap background;
               private final long startTime=System.currentTimeMillis();
               private final long duration=4800L;
+              private AudioTrack audioTrack;
+              private boolean soundStarted=false;
 
               StaticIntroView(){
                 super(MainActivity.this);
+                setLayerType(View.LAYER_TYPE_SOFTWARE,null);
                 background=BitmapFactory.decodeResource(getResources(),R.drawable.camxd_background);
                 postInvalidateOnAnimation();
               }
 
-              private Bitmap sharpenBitmap(Bitmap src){
-                if(src==null) return null;
-                int w=src.getWidth(), h=src.getHeight();
-                Bitmap out=Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
-                int[] in=new int[w*h];
-                int[] px=new int[w*h];
-                src.getPixels(in,0,w,0,0,w,h);
-                System.arraycopy(in,0,px,0,in.length);
-                for(int y=1;y<h-1;y++){
-                  int row=y*w;
-                  for(int x=1;x<w-1;x++){
-                    int i=row+x;
-                    int c0=in[i], l=in[i-1], r=in[i+1], u=in[i-w], d=in[i+w];
-                    int a=Color.alpha(c0);
-                    int rr=clamp(Color.red(c0)*3-Color.red(l)-Color.red(r)-Color.red(u)-Color.red(d));
-                    int gg=clamp(Color.green(c0)*3-Color.green(l)-Color.green(r)-Color.green(u)-Color.green(d));
-                    int bb=clamp(Color.blue(c0)*3-Color.blue(l)-Color.blue(r)-Color.blue(u)-Color.blue(d));
-                    px[i]=Color.argb(a,rr,gg,bb);
+              private void playIntroSound(){
+                if(soundStarted) return;
+                soundStarted=true;
+                try{
+                  final int sampleRate=22050;
+                  final int samples=(int)(sampleRate*0.9);
+                  final short[] data=new short[samples];
+                  for(int i=0;i<samples;i++){
+                    double t=i/(double)sampleRate;
+                    double fade=Math.min(1.0,t/0.08)*Math.min(1.0,(0.9-t)/0.18);
+                    double f1=180.0+420.0*t;
+                    double f2=520.0+900.0*t;
+                    double tone=Math.sin(2*Math.PI*f1*t)*0.42+Math.sin(2*Math.PI*f2*t)*0.18;
+                    double sparkle=(i>sampleRate*0.42 && i<sampleRate*0.68)
+                      ? Math.sin(2*Math.PI*(1500.0+800.0*t)*t)*0.10 : 0.0;
+                    data[i]=(short)(Math.max(-1,Math.min(1,(tone+sparkle)*fade))*28000);
                   }
-                }
-                out.setPixels(px,0,w,0,0,w,h);
-                src.recycle();
-                return out;
+                  audioTrack=new AudioTrack(
+                    AudioManager.STREAM_MUSIC,
+                    sampleRate,
+                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    data.length*2,
+                    AudioTrack.MODE_STATIC
+                  );
+                  audioTrack.write(data,0,data.length);
+                  audioTrack.play();
+                }catch(Exception ignored){}
               }
 
-              private int clamp(int v){ return v<0?0:(v>255?255:v); }
+              private void stopIntroSound(){
+                try{
+                  if(audioTrack!=null){
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioTrack=null;
+                  }
+                }catch(Exception ignored){}
+              }
 
               @Override protected void onDraw(Canvas c){
                 super.onDraw(c);
                 final float w=getWidth(), h=getHeight();
+                final float t=Math.min(1f,(System.currentTimeMillis()-startTime)/(float)duration);
 
-                // The supplied CAMXD golden-cloud artwork is the entire static splash.
+                if(!soundStarted) playIntroSound();
+
                 p.setAlpha(255);
-                c.drawBitmap(background,null,new RectF(0,0,w,h),p);
-
-                // The artwork already contains the logo, CAMXD STORE text and bar frame.
-                // Do not redraw or animate any of those elements. Only the bar fill moves.
-                float barX=w*0.155f;
-                float barW=w*0.690f;
-                float barY=h*0.742f;
-                float barH=h*0.043f;
-
-                // Hide the pre-rendered fill inside the artwork so the real progress starts empty.
                 p.setStyle(Paint.Style.FILL);
                 p.setShader(null);
-                p.setColor(Color.rgb(32,16,5));
-                c.drawRoundRect(
-                  new RectF(barX+8f,barY+8f,barX+barW-8f,barY+barH-8f),
-                  barH*0.42f,barH*0.42f,p
-                );
+                p.setFilterBitmap(true);
+                c.drawBitmap(background,null,new RectF(0,0,w,h),p);
 
-                // Restore a clean animated gold border over the original bar area.
+                // Dynamic loading UI: the artwork stays clean; only this text and bar animate.
+                final float barX=w*0.155f;
+                final float barW=w*0.690f;
+                final float barY=h*0.742f;
+                final float barH=Math.max(30f,h*0.043f);
+
+                p.setTypeface(android.graphics.Typeface.create("sans-serif",android.graphics.Typeface.BOLD));
+                p.setTextAlign(Paint.Align.CENTER);
+                p.setTextSize(Math.max(18f,w*0.035f));
+                p.setColor(Color.rgb(255,226,70));
+                p.setShadowLayer(12f,0f,0f,Color.rgb(255,150,0));
+                c.drawText("MEMUAT CAMXD STORE",w,barY-p.getTextSize()*0.85f,p);
+                p.clearShadowLayer();
+
+                p.setStyle(Paint.Style.FILL);
+                p.setColor(Color.argb(210,20,10,4));
+                c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH*0.48f,barH*0.48f,p);
+
                 p.setStyle(Paint.Style.STROKE);
                 p.setStrokeWidth(Math.max(3f,w*0.004f));
                 p.setColor(Color.rgb(255,205,60));
-                c.drawRoundRect(
-                  new RectF(barX,barY,barX+barW,barY+barH),
-                  barH*0.48f,barH*0.48f,p
-                );
+                p.setShadowLayer(10f,0f,0f,Color.rgb(255,155,0));
+                c.drawRoundRect(new RectF(barX,barY,barX+barW,barY+barH),barH*0.48f,barH*0.48f,p);
+                p.clearShadowLayer();
 
-                float t=Math.min(1f,(System.currentTimeMillis()-startTime)/(float)duration);
                 float innerX=barX+10f;
                 float innerY=barY+10f;
                 float innerW=Math.max(0f,(barW-20f)*t);
-                float innerH=Math.max(2f,barH-20f);
+                float innerH=Math.max(4f,barH-20f);
 
                 if(innerW>0f){
                   p.setStyle(Paint.Style.FILL);
-                  p.setShader(new LinearGradient(
-                    innerX,0,innerX+Math.max(1f,barW-20f),0,
-                    Color.rgb(255,166,0),
-                    Color.rgb(255,244,135),
-                    Shader.TileMode.CLAMP
-                  ));
-                  c.drawRoundRect(
-                    new RectF(innerX,innerY,innerX+innerW,innerY+innerH),
-                    innerH*0.45f,innerH*0.45f,p
-                  );
+                  p.setShader(new LinearGradient(innerX,0,innerX+Math.max(1f,barW-20f),0,
+                    Color.rgb(255,150,0),Color.rgb(255,246,150),Shader.TileMode.CLAMP));
+                  p.setShadowLayer(14f,0f,0f,Color.rgb(255,170,20));
+                  c.drawRoundRect(new RectF(innerX,innerY,innerX+innerW,innerY+innerH),
+                    innerH*0.45f,innerH*0.45f,p);
+                  p.clearShadowLayer();
                   p.setShader(null);
+
+                  // Moving golden highlight.
+                  float shineX=innerX+innerW-Math.min(22f,innerH*0.9f);
+                  p.setColor(Color.argb(230,255,255,225));
+                  c.drawCircle(shineX,innerY+innerH/2f,Math.max(4f,innerH*0.34f),p);
                 }
 
                 if(t<1f){
                   postInvalidateOnAnimation();
                 }else{
-                  postDelayed(() -> setupWebView(),180);
+                  postDelayed(() -> { stopIntroSound(); setupWebView(); },180);
                 }
+              }
+
+              @Override protected void onDetachedFromWindow(){
+                stopIntroSound();
+                super.onDetachedFromWindow();
               }
             }
 
