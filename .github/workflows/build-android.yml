@@ -145,6 +145,8 @@ jobs:
           import android.graphics.Color;
           import android.graphics.Paint;
           import android.graphics.RectF;
+          import android.graphics.LinearGradient;
+          import android.graphics.Shader;
           import android.graphics.Typeface;
           import android.media.AudioFormat;
           import android.media.AudioManager;
@@ -187,14 +189,17 @@ jobs:
               }
 
               private void drawGoldCloud(Canvas canvas,float x,float y,float scale){
-                paint.setColor(Color.argb(24,255,178,0));
-                canvas.drawOval(new RectF(x,y,x+180f*scale,y+42f*scale),paint);
-                paint.setColor(Color.argb(30,255,193,7));
-                canvas.drawCircle(x+50f*scale,y,32f*scale,paint);
-                canvas.drawCircle(x+96f*scale,y-14f*scale,44f*scale,paint);
-                canvas.drawCircle(x+140f*scale,y+3f*scale,29f*scale,paint);
-                paint.setColor(Color.argb(12,255,230,120));
-                canvas.drawOval(new RectF(x+18f*scale,y-8f*scale,x+158f*scale,y+20f*scale),paint);
+                paint.setShader(new LinearGradient(x,y-42f*scale,x,y+42f*scale,
+                  Color.argb(0,255,224,120),Color.argb(48,255,174,0),Color.argb(0,255,224,120),
+                  Shader.TileMode.CLAMP));
+                canvas.drawOval(new RectF(x,y,x+190f*scale,y+48f*scale),paint);
+                paint.setShader(null);
+                paint.setColor(Color.argb(38,255,193,7));
+                canvas.drawCircle(x+52f*scale,y,34f*scale,paint);
+                canvas.drawCircle(x+100f*scale,y-16f*scale,47f*scale,paint);
+                canvas.drawCircle(x+148f*scale,y+2f*scale,31f*scale,paint);
+                paint.setColor(Color.argb(20,255,235,150));
+                canvas.drawOval(new RectF(x+20f*scale,y-10f*scale,x+168f*scale,y+22f*scale),paint);
               }
 
               private void drawLoading(Canvas canvas,float cx,float cy,float scale,float elapsed){
@@ -293,6 +298,19 @@ jobs:
                   canvas.drawCircle(x,y,ps[i]*particles,paint);
                 }
 
+                // Radiating gold rays behind the logo.
+                float ray=ease(clamp((elapsed-1.08f)/0.78f));
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(2f);
+                paint.setColor(Color.argb((int)(58*ray),255,193,7));
+                for(int i=0;i<20;i++){
+                  double a=i*Math.PI*2/20.0+elapsed*0.35;
+                  float inner=Math.min(w,h)*0.18f;
+                  float outer=inner+Math.min(w,h)*(0.09f+0.08f*ray);
+                  canvas.drawLine(cx+(float)Math.cos(a)*inner,cy+(float)Math.sin(a)*inner,
+                    cx+(float)Math.cos(a)*outer,cy+(float)Math.sin(a)*outer,paint);
+                }
+
                 // 4) Brief gold flash behind the logo reveal.
                 float flash=clamp((elapsed-1.20f)/0.58f);
                 if(flash>0f && flash<1f){
@@ -307,7 +325,15 @@ jobs:
                   drawLoading(canvas,cx,cy+Math.min(w,h)*0.285f,1f,elapsed);
                 }
 
-                if(elapsed<2.70f) postInvalidateDelayed(16);
+                // Final gold sweep before entering the store.
+                if(elapsed>2.45f && elapsed<2.82f){
+                  float q=ease(clamp((elapsed-2.45f)/0.37f));
+                  paint.setStyle(Paint.Style.FILL);
+                  paint.setColor(Color.argb((int)(150*q),255,193,7));
+                  canvas.drawRect(0,h*(1f-q),w,h*(1f-q)+Math.max(3f,h*0.12f),paint);
+                }
+
+                if(elapsed<2.82f) postInvalidateDelayed(16);
               }
             }
 
@@ -362,17 +388,24 @@ jobs:
               setContentView(splash);
 
               // Reveal sequence: flare -> ring -> particles -> logo -> title -> tagline.
-              logo.animate().alpha(1f).scaleX(1f).scaleY(1f)
+              logo.animate().alpha(1f).scaleX(1.08f).scaleY(1.08f)
                 .setStartDelay(820).setDuration(650)
+                .withEndAction(() -> logo.animate().scaleX(1f).scaleY(1f).setDuration(180).start())
                 .setInterpolator(new AccelerateDecelerateInterpolator()).start();
               title.animate().alpha(1f)
                 .setStartDelay(1420).setDuration(480).start();
               tagline.animate().alpha(1f)
                 .setStartDelay(1690).setDuration(420).start();
 
+              // Gold shimmer across the title.
+              title.postDelayed(() -> {
+                title.setShadowLayer(18f,0,0,Color.rgb(255,180,0));
+                title.postDelayed(() -> title.setShadowLayer(0f,0,0,Color.TRANSPARENT),320);
+              }, 1950);
+
               playIntroSound();
 
-              new Handler().postDelayed(() -> setupWebView(),2850);
+              new Handler().postDelayed(() -> setupWebView(),3050);
             }
 
               private void playIntroSound() {
