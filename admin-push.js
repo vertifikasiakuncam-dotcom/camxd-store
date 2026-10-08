@@ -100,6 +100,29 @@
     const status=await getPushStatus();
     setButtonStatus(btn,status);
 
+    if(new URLSearchParams(location.search).get("push-test-server")==="1"){
+      try{
+        const testSb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+          auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+        });
+        const {data:{session}}=await testSb.auth.getSession();
+        if(session?.access_token){
+          const response=await fetch(SUPABASE_URL+"/functions/v1/send-admin-push-test",{
+            method:"POST",
+            headers:{
+              "Authorization":"Bearer "+session.access_token,
+              "Content-Type":"application/json"
+            },
+            body:"{}"
+          });
+          const result=await response.json().catch(()=>({}));
+          console.log("CAMXD server push test:",response.status,result);
+        }
+      }catch(error){
+        console.error("CAMXD server push test:",error);
+      }
+    }
+
     // Temporary isolated diagnostic: open admin.html?app=camxd-admin&push-test=1
     // to verify Android/Chrome can display a local service-worker notification.
     if(new URLSearchParams(location.search).get("push-test")==="1"){
