@@ -98,7 +98,14 @@
     if(!btn) return;
     btn.disabled=false;
     const status=await getPushStatus();
-    setButtonStatus(btn,status);
+    if(status==="active"){
+      btn.textContent="🔄 Sinkronisasi Push...";
+      const synced=await subscribeAdminPush();
+      setButtonStatus(btn,synced ? "active" : "active");
+      if(!synced) btn.title="Subscription Android belum tersinkron ke server";
+    }else{
+      setButtonStatus(btn,status);
+    }
 
     if(new URLSearchParams(location.search).get("push-test-server")==="1"){
       try{
@@ -143,7 +150,7 @@
     }
     btn.addEventListener("click",async()=>{
       btn.disabled=true;
-      btn.textContent="🔄 Mengecek...";
+      btn.textContent="🔄 Sinkronisasi...";
       const ok=await subscribeAdminPush();
       if(ok){
         setButtonStatus(btn,"active");
