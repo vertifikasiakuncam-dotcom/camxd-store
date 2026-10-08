@@ -111,6 +111,17 @@
         </div>
 
         <div class="head-actions">
+          <div id="newOrderPopup" class="new-order-popup" hidden aria-live="assertive" role="alertdialog" aria-label="Pesanan baru">
+            <div class="new-order-popup-head">
+              <div class="new-order-popup-brand"><span class="new-order-popup-icon">🛒</span><div><strong>Pesanan Baru</strong><small>CAMXD Store</small></div></div>
+              <button id="closeNewOrderPopup" class="new-order-popup-close" type="button" aria-label="Tutup">×</button>
+            </div>
+            <div id="newOrderPopupBody" class="new-order-popup-body"></div>
+            <div class="new-order-popup-actions">
+              <button id="viewNewOrderBtn" class="new-order-popup-view" type="button">Lihat Pesanan</button>
+              <button id="dismissNewOrderBtn" class="new-order-popup-dismiss" type="button">Tutup</button>
+            </div>
+          </div>
           <div id="newOrderAlert" class="new-order-alert" hidden>
             🔔 <span id="newOrderCount">0</span> pesanan baru
           </div>
