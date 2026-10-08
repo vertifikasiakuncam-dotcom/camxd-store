@@ -251,12 +251,12 @@ async function loadOrders(){
     newlyArrived.forEach(o => unreadOrderIds.add(String(o.id)));
 
     if(newlyArrived.length){
+      showNewOrderPopup(newlyArrived);
       const pendingNew = newlyArrived.filter(o =>
         o.status === "Menunggu Pembayaran" ||
         o.status === "Menunggu Verifikasi"
       );
       if(pendingNew.length){
-        showNewOrderPopup(pendingNew);
         showAdminToast(
           "🔔 Pesanan baru masuk",
           pendingNew.length === 1
