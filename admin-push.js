@@ -99,6 +99,25 @@
     btn.disabled=false;
     const status=await getPushStatus();
     setButtonStatus(btn,status);
+
+    // Temporary isolated diagnostic: open admin.html?app=camxd-admin&push-test=1
+    // to verify Android/Chrome can display a local service-worker notification.
+    if(new URLSearchParams(location.search).get("push-test")==="1"){
+      try{
+        const reg=await getRegistration();
+        if(reg && Notification.permission==="granted"){
+          await reg.showNotification("CAMXD STORE",{
+            body:"Tes notifikasi berhasil diterima oleh Service Worker Android.",
+            tag:"camxd-local-push-test",
+            renotify:true,
+            requireInteraction:true,
+            data:{url:"./admin.html?app=camxd-admin"}
+          });
+        }
+      }catch(error){
+        console.error("CAMXD local push test:",error);
+      }
+    }
     btn.addEventListener("click",async()=>{
       btn.disabled=true;
       btn.textContent="🔄 Mengecek...";
