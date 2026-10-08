@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
-      navigator.serviceWorker.register("./admin-sw.js",{scope:"./"})
+      navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"})
         .then(reg=>reg.update())
         .catch(err=>console.warn("Admin PWA:",err));
     });
