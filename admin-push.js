@@ -1,7 +1,7 @@
 /* CAMXD Admin Web Push — isolated notification module */
 (() => {
   const VAPID_PUBLIC_KEY = "BHLHJoF5iZEleTr8wkf7VPwU_yOCvzLHS6xG6Nb9uP6fUfpxG2QCeZVXdl7rsQz9mt8WCMw0dM4pZFXgZOJZEZo";
-  const VAPID_KEY_VERSION = "v4";
+  const VAPID_KEY_VERSION = "v5";
 
   function urlBase64ToUint8Array(base64String){
     const padding="=".repeat((4-base64String.length%4)%4);
@@ -78,29 +78,33 @@
 
   document.addEventListener("DOMContentLoaded",()=>{
     const btn=document.getElementById("enableNotificationsBtn");
+    if(!btn) return;
 
-    // admin.js disables the button once Android/browser permission is already granted.
-    // Therefore, refresh the push subscription automatically when permission is granted.
+    // Keep the button clickable so the admin can manually re-check the push status.
+    // This is intentionally isolated from dashboard/order logic.
     if("Notification" in window && Notification.permission==="granted"){
       setTimeout(async()=>{
+        btn.disabled=false;
+        btn.textContent="🔄 Cek Notifikasi";
         const ok=await subscribeAdminPush();
-        if(ok && btn){
-          btn.textContent="🔔 Notifikasi Aktif";
-          btn.disabled=true;
-        }
+        btn.textContent=ok ? "🔔 Notifikasi Aktif" : "⚠️ Notifikasi Belum Siap";
+        btn.disabled=false;
       },800);
     }
 
-    if(!btn) return;
     const original=btn.textContent;
     btn.addEventListener("click",async()=>{
+      btn.disabled=true;
+      btn.textContent="🔄 Mengecek...";
       const ok=await subscribeAdminPush();
       if(ok){
         btn.textContent="🔔 Notifikasi Aktif";
-        btn.disabled=true;
-      }else if(Notification.permission==="granted"){
-        btn.textContent=original;
+      }else if("Notification" in window && Notification.permission==="denied"){
+        btn.textContent="🔕 Notifikasi Diblokir";
+      }else{
+        btn.textContent="⚠️ Notifikasi Belum Siap";
       }
+      setTimeout(()=>{ btn.disabled=false; },400);
     },true);
   });
 })();
