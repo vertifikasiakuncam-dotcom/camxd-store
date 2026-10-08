@@ -13,7 +13,7 @@
     if(!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
 
     // Admin push must use admin-sw.js. The store's sw.js is a different worker.
-    const reg=await navigator.serviceWorker.register("./admin-sw.js",{scope:"./",updateViaCache:"none"});
+    const reg=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
     await reg.update();
 
     if(reg.active) return reg;
