@@ -144,11 +144,6 @@
     btn.addEventListener("click",async()=>{
       btn.disabled=true;
       btn.textContent="🔄 Mengecek...";
-      const statusBefore=await getPushStatus();
-      if(statusBefore==="active"){
-        setButtonStatus(btn,"active");
-        return;
-      }
       const ok=await subscribeAdminPush();
       if(ok){
         setButtonStatus(btn,"active");
