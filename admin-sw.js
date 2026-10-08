@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-admin-v17";
+const CACHE_NAME="camxd-admin-v18";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
@@ -18,17 +18,29 @@ self.addEventListener("activate",event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
 self.addEventListener("push",event=>{
-  let data={};
-  try{ data=event.data ? event.data.json() : {}; }catch{ data={body:event.data?.text()||"Pesanan baru masuk"}; }
-  const title=data.title || "CAMXD STORE";
-  const options={
-    body:data.body || "Pesanan baru masuk.",
-    tag:data.tag || "camxd-order",
-    renotify:true,
-    requireInteraction:true,
-    data:{url:data.url || "./admin.html?app=camxd-admin"}
-  };
-  event.waitUntil(self.registration.showNotification(title,options));
+  event.waitUntil((async()=>{
+    let data={};
+    try{
+      if(event.data){
+        const raw=event.data.text();
+        try{ data=JSON.parse(raw); }catch{ data={body:raw}; }
+      }
+    }catch{
+      data={body:"Pesanan baru masuk."};
+    }
+    const title=data.title || "CAMXD STORE";
+    const options={
+      body:data.body || "Pesanan baru masuk.",
+      tag:data.tag || ("camxd-push-"+Date.now()),
+      renotify:true,
+      requireInteraction:true,
+      silent:false,
+      vibrate:[200,100,200],
+      timestamp:Date.now(),
+      data:{url:data.url || "./admin.html?app=camxd-admin"}
+    };
+    await self.registration.showNotification(title,options);
+  })());
 });
 self.addEventListener("notificationclick",event=>{
   event.notification.close();
