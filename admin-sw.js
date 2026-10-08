@@ -1,10 +1,10 @@
-const CACHE_NAME="camxd-admin-v7";
+const CACHE_NAME="camxd-admin-v8";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
   "./admin.js",
   "./admin-pwa.js",
-  "./admin-push.js",
+  "./admin-push.js?v=20261008-3",
   "./admin-profile.js",
   "./admin-manifest.webmanifest?v=20261006-3",
   "./camxd-admin-icon.svg",
