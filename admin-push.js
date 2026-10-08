@@ -1,6 +1,6 @@
 /* CAMXD Admin Web Push — isolated notification module */
 (() => {
-  const VAPID_PUBLIC_KEY = "BHLHJoF5iZEleTr8wkf7VPwU_yOCvzLHS6xG6Nb9uP6fUfpxG2QCeZVXdl7rsQz9mt8WCMw0dM4pZFXgZOJZEZo";
+  const VAPID_PUBLIC_KEY = "BD5nIoOP11mvsDoTJjTsNIRQkLevxbjlb4zgDdH9Ls_5-ikCWWCKm7Ca_Dp8Sti7Jdli-gJsSWFoCy2ZxLPTAzM";
 
   function urlBase64ToUint8Array(base64String){
     const padding="=".repeat((4-base64String.length%4)%4);
@@ -47,32 +47,19 @@
   async function subscribeAdminPush(){
     try{
       if(!("Notification" in window) || !("PushManager" in window)) return false;
-
-      // admin.js keeps its Supabase client in a module-scoped const ("sb"),
-      // so it is not available as window.sb. Use a separate client here.
-      // It shares the same Supabase auth storage/session and does not touch
-      // the existing dashboard client.
       if(!window.supabase || typeof window.supabase.createClient!=="function") return false;
       const pushSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-        auth:{
-          persistSession:true,
-          autoRefreshToken:true,
-          detectSessionInUrl:false
-        }
+        auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
       });
-
       const {data:{session}}=await pushSb.auth.getSession();
       if(!session?.user?.id) return false;
-
       if(Notification.permission==="default"){
         const permission=await Notification.requestPermission();
         if(permission!=="granted") return false;
       }
       if(Notification.permission!=="granted") return false;
-
       const reg=await getRegistration();
       if(!reg) return false;
-
       let sub=await reg.pushManager.getSubscription();
       if(!sub){
         sub=await reg.pushManager.subscribe({
@@ -80,7 +67,6 @@
           applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
       }
-
       const json=sub.toJSON();
       const payload={
         user_id:session.user.id,
@@ -92,16 +78,11 @@
         },
         user_agent:navigator.userAgent
       };
-
-      const {error}=await pushSb
-        .from("admin_push_subscriptions")
-        .upsert(payload,{onConflict:"endpoint"});
-
+      const {error}=await pushSb.from("admin_push_subscriptions").upsert(payload,{onConflict:"endpoint"});
       if(error){
         console.error("CAMXD push subscription:",error);
         return false;
       }
-
       localStorage.setItem("camxd_admin_push_enabled","1");
       return true;
     }catch(error){
@@ -115,24 +96,17 @@
   document.addEventListener("DOMContentLoaded",async()=>{
     const btn=document.getElementById("enableNotificationsBtn");
     if(!btn) return;
-
-    // Permission alone is NOT the same as a Web Push subscription.
-    // Do not auto-subscribe: PushManager.subscribe() should follow a user gesture.
     btn.disabled=false;
-
     const status=await getPushStatus();
     setButtonStatus(btn,status);
-
     btn.addEventListener("click",async()=>{
       btn.disabled=true;
       btn.textContent="🔄 Mengecek...";
-
       const statusBefore=await getPushStatus();
       if(statusBefore==="active"){
         setButtonStatus(btn,"active");
         return;
       }
-
       const ok=await subscribeAdminPush();
       if(ok){
         setButtonStatus(btn,"active");
