@@ -4,7 +4,7 @@ const APP_SHELL=[
   "./admin.css",
   "./admin.js",
   "./admin-pwa.js",
-  "./admin-push.js?v=20261008-12",
+  "./admin-push.js?v=20261008-13",
   "./admin-profile.js",
   "./admin-manifest.webmanifest?v=20261006-3",
   "./camxd-admin-icon.svg",
