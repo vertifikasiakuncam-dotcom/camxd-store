@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAMXD — Server Push Test v2</title>
+<style>
+body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif;padding:24px}
+.card{max-width:520px;margin:40px auto;padding:24px;border:1px solid #d7ad00;border-radius:18px;background:#151515}
+h1{margin-top:0;color:#ffd400}.muted{color:#aaa;line-height:1.5}
+button{width:100%;padding:15px;border:0;border-radius:12px;background:#ffd400;color:#111;font-weight:700;font-size:16px;margin-top:10px}
+button:disabled{opacity:.6}.status{margin-top:18px;padding:14px;border-radius:12px;background:#222;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🔔 CAMXD Server Push Test v2</h1>
+<p class="muted">Halaman diagnostic terpisah. Tidak mengubah dashboard dan tidak membuat order.</p>
+<button id="statusBtn">Periksa Service Worker</button>
+<button id="test">Kirim Test Push</button>
+<div id="status" class="status">Memeriksa Service Worker...</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+(async()=>{
+ const btn=document.getElementById("test"), statusBtn=document.getElementById("statusBtn"), out=document.getElementById("status");
+ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+
+ async function inspect(){
+   const lines=[];
+   try{
+     if(!("serviceWorker" in navigator)){
+       lines.push("❌ Service Worker tidak didukung.");
+       out.textContent=lines.join("\n");
+       return;
+     }
+     const reg=await navigator.serviceWorker.getRegistration("./");
+     lines.push("Service Worker registration: "+(reg?"ADA":"TIDAK ADA"));
+     if(reg){
+       lines.push("scope: "+reg.scope);
+       lines.push("active: "+(reg.active?.scriptURL||"tidak ada"));
+       lines.push("waiting: "+(reg.waiting?.scriptURL||"tidak ada"));
+       lines.push("installing: "+(reg.installing?.scriptURL||"tidak ada"));
+       try{
+         const sub=await reg.pushManager.getSubscription();
+         lines.push("Push subscription: "+(sub?"ADA":"TIDAK ADA"));
+         if(sub){
+           lines.push("endpoint: "+new URL(sub.endpoint).hostname);
+         }
+       }catch(e){lines.push("Push subscription check error: "+String(e?.message||e))}
+       try{
+         const cache=await caches.open("camxd-admin-v21");
+         const response=await cache.match("./__camxd_push_received.json");
+         if(response){
+           const marker=await response.json();
+           lines.push("PUSH MARKER: DITERIMA");
+           lines.push("receivedAt: "+marker.receivedAt);
+           lines.push("title: "+marker.title);
+           lines.push("body: "+marker.body);
+         }else{
+           lines.push("PUSH MARKER: BELUM ADA");
+         }
+       }catch(e){lines.push("Marker check error: "+String(e?.message||e))}
+     }
+   }catch(e){
+     lines.push("❌ "+String(e?.message||e));
+   }
+   out.textContent=lines.join("\n");
+ }
+
+ async function run(){
+   btn.disabled=true; out.textContent="Mengirim test push ke server...";
+   try{
+     const {data:{session},error:sessionError}=await sb.auth.getSession();
+     if(sessionError||!session?.access_token){
+       out.textContent="❌ Sesi Admin tidak ditemukan. Buka Dashboard Admin dan login terlebih dahulu.";
+       return;
+     }
+     const res=await fetch(SUPABASE_URL+"/functions/v1/send-admin-push-test",{
+       method:"POST",
+       headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},
+       body:"{}"
+     });
+     const raw=await res.text();
+     let data; try{data=JSON.parse(raw)}catch{data={raw}};
+     out.textContent="SERVER RESULT\nHTTP "+res.status+"\n"+JSON.stringify(data,null,2)+"\n\nMenunggu lalu memeriksa Service Worker...";
+     setTimeout(inspect,4000);
+   }catch(e){out.textContent="❌ "+String(e?.message||e)}
+   finally{btn.disabled=false}
+ }
+
+ statusBtn.addEventListener("click",inspect);
+ btn.addEventListener("click",run);
+ await inspect();
+})();
+</script>
+</body>
+</html>
