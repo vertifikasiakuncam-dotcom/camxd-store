@@ -1,9 +1,10 @@
-const CACHE_NAME="camxd-admin-v6";
+const CACHE_NAME="camxd-admin-v7";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
   "./admin.js",
   "./admin-pwa.js",
+  "./admin-push.js",
   "./admin-profile.js",
   "./admin-manifest.webmanifest?v=20261006-3",
   "./camxd-admin-icon.svg",
@@ -15,6 +16,33 @@ self.addEventListener("install",event=>{
 });
 self.addEventListener("activate",event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener("push",event=>{
+  let data={};
+  try{ data=event.data ? event.data.json() : {}; }catch{ data={body:event.data?.text()||"Pesanan baru masuk"}; }
+  const title=data.title || "CAMXD STORE";
+  const options={
+    body:data.body || "Pesanan baru masuk.",
+    icon:"./camxd-admin-icon.svg",
+    badge:"./camxd-admin-icon.svg",
+    tag:data.tag || "camxd-order",
+    renotify:true,
+    requireInteraction:true,
+    data:{url:data.url || "./admin.html?app=camxd-admin"}
+  };
+  event.waitUntil(self.registration.showNotification(title,options));
+});
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  const target=new URL(event.notification.data?.url || "./admin.html?app=camxd-admin",self.location.origin).href;
+  event.waitUntil(
+    clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
+      for(const client of list){
+        if("focus" in client) return client.focus();
+      }
+      return clients.openWindow(target);
+    })
+  );
 });
 self.addEventListener("fetch",event=>{
   if(event.request.method!=="GET") return;
