@@ -69,7 +69,7 @@ async function inspect(){
 
       try{
         const sub=await withTimeout(reg.pushManager.getSubscription(),3000,"getSubscription");
-        lines.push("Push subscription: "+(sub?"ADA":"TIDAK ADA");
+        lines.push("Push subscription: "+(sub?"ADA":"TIDAK ADA"));
         if(sub) lines.push("endpoint: "+new URL(sub.endpoint).hostname);
       }catch(e){
         lines.push("Push subscription: ERROR - "+e.message);
