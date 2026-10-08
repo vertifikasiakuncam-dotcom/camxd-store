@@ -17,11 +17,10 @@ button:disabled{opacity:.6}.status{margin-top:18px;padding:14px;border-radius:12
 <h1>🔔 CAMXD Server Push Test v2</h1>
 <p class="muted">Halaman diagnostic terpisah. Tidak mengubah dashboard dan tidak membuat order.</p>
 <button id="statusBtn">Periksa Service Worker</button>
-<button id="test">Kirim Test Push</button>
+<button id="test" style="display:none">Kirim Test Push</button>
 <div id="status" class="status">Memeriksa Service Worker...</div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+
 <script>
 (async()=>{
  const btn=document.getElementById("test"), statusBtn=document.getElementById("statusBtn"), out=document.getElementById("status");
