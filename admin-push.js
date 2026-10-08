@@ -47,7 +47,21 @@
   async function subscribeAdminPush(){
     try{
       if(!("Notification" in window) || !("PushManager" in window)) return false;
-      const {data:{session}}=await window.sb.auth.getSession();
+
+      // admin.js keeps its Supabase client in a module-scoped const ("sb"),
+      // so it is not available as window.sb. Use a separate client here.
+      // It shares the same Supabase auth storage/session and does not touch
+      // the existing dashboard client.
+      if(!window.supabase || typeof window.supabase.createClient!=="function") return false;
+      const pushSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:false
+        }
+      });
+
+      const {data:{session}}=await pushSb.auth.getSession();
       if(!session?.user?.id) return false;
 
       if(Notification.permission==="default"){
@@ -79,7 +93,7 @@
         user_agent:navigator.userAgent
       };
 
-      const {error}=await window.sb
+      const {error}=await pushSb
         .from("admin_push_subscriptions")
         .upsert(payload,{onConflict:"endpoint"});
 
