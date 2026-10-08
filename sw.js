@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-store-v9";
+const CACHE_NAME="camxd-store-v10";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -27,6 +27,66 @@ self.addEventListener("activate",event=>{
         keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key))
       ))
       .then(()=>self.clients.claim())
+  );
+});
+
+
+const PUSH_DIAGNOSTIC_KEY="./__camxd_push_received.json";
+
+self.addEventListener("push",event=>{
+  event.waitUntil((async()=>{
+    let data={},raw="";
+    try{
+      if(event.data){
+        raw=event.data.text();
+        try{data=JSON.parse(raw);}catch{data={body:raw};}
+      }
+    }catch{data={body:"Pesanan baru masuk."};}
+
+    try{
+      const diagnostic={
+        receivedAt:new Date().toISOString(),
+        title:data.title||"CAMXD STORE",
+        body:data.body||"",
+        raw:raw.slice(0,2000)
+      };
+      const cache=await caches.open(CACHE_NAME);
+      await cache.put(PUSH_DIAGNOSTIC_KEY,new Response(JSON.stringify(diagnostic),{
+        headers:{"Content-Type":"application/json"}
+      }));
+    }catch(error){
+      console.error("CAMXD push marker:",error);
+    }
+
+    const isDiagnostic=String(data.body||"").includes("CX-DIAGNOSTIC");
+    const title=isDiagnostic ? "CAMXD STORE • PUSH DIAGNOSTIC" : (data.title||"CAMXD STORE");
+    const options={
+      body:isDiagnostic ? "Service Worker Android menerima push dari FCM." : (data.body||"Pesanan baru masuk."),
+      tag:data.tag||("camxd-push-"+Date.now()),
+      renotify:true,
+      requireInteraction:true,
+      silent:false,
+      vibrate:[200,100,200],
+      timestamp:Date.now(),
+      data:{url:data.url||"./admin.html?app=camxd-admin"}
+    };
+    await self.registration.showNotification(title,options);
+  })());
+});
+
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  const target=new URL(
+    event.notification.data?.url||"./admin.html?app=camxd-admin",
+    self.location.origin
+  ).href;
+  event.waitUntil(
+    clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
+      for(const client of list){
+        if("focus" in client) return client.focus();
+      }
+      return clients.openWindow(target);
+    })
   );
 });
 
