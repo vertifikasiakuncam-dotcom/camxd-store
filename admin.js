@@ -95,6 +95,40 @@ let seenOrderIds = new Set();
 let unreadOrderIds = new Set();
 let firstOrderLoad = true;
 
+function showNewOrderPopup(orders){
+  const popup=$("#newOrderPopup"), body=$("#newOrderPopupBody");
+  if(!popup || !body || !orders?.length) return;
+  const order=orders[0];
+  const items=Array.isArray(order.items)?order.items:[];
+  const itemText=items.length
+    ? items.slice(0,3).map(x=>escapeHtml((x.name||"Produk")+" ×"+(x.qty||1))).join("<br>")
+    : "Detail produk tersedia di pesanan";
+  body.innerHTML='<div class="new-order-popup-order">'+
+    '<strong>'+escapeHtml(order.order_id||"Pesanan Baru")+'</strong>'+
+    '<div class="new-order-popup-row"><span>Pelanggan</span><span>'+escapeHtml(order.customer_name||"Pelanggan")+'</span></div>'+
+    '<div class="new-order-popup-row"><span>WhatsApp</span><span>'+escapeHtml(order.customer_wa||"-")+'</span></div>'+
+    '<div class="new-order-popup-items">'+itemText+'</div>'+
+    '<div class="new-order-popup-total"><span>Total</span><strong>'+rupiah(order.total)+'</strong></div>'+
+    '</div>';
+  popup.hidden=false;
+  popup.dataset.orderId=String(order.id||"");
+  popup.dataset.orderCode=String(order.order_id||"");
+}
+function hideNewOrderPopup(){
+  const popup=$("#newOrderPopup");
+  if(popup) popup.hidden=true;
+}
+function focusNewOrderPopupOrder(){
+  const code=$("#newOrderPopup")?.dataset.orderCode||"";
+  hideNewOrderPopup();
+  $("#statusFilter").value="all";
+  renderOrders();
+  if(code){
+    const el=document.querySelector('[data-order-id="'+CSS.escape(code)+'"]');
+    el?.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+}
+
 function updateNewOrderAlert(){
   const pending = allOrders.filter(o =>
     (o.status === "Menunggu Pembayaran" ||
@@ -222,6 +256,7 @@ async function loadOrders(){
         o.status === "Menunggu Verifikasi"
       );
       if(pendingNew.length){
+        showNewOrderPopup(pendingNew);
         showAdminToast(
           "🔔 Pesanan baru masuk",
           pendingNew.length === 1
@@ -1186,6 +1221,21 @@ sb.auth.onAuthStateChange(
   }
 );
 
+$("#closeNewOrderPopup")?.addEventListener("click", hideNewOrderPopup);
+$("#dismissNewOrderPopup")?.addEventListener("click", hideNewOrderPopup);
+$("#dismissNewOrderBtn")?.addEventListener("click", hideNewOrderPopup);
+$("#viewNewOrderBtn")?.addEventListener("click", focusNewOrderPopupOrder);
+
+let orderRealtimeChannel = null;
+function startOrderRealtime(){
+  try{
+    if(orderRealtimeChannel) sb.removeChannel(orderRealtimeChannel);
+    orderRealtimeChannel = sb.channel("camxd-admin-orders")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"orders"},()=>loadOrders())
+      .subscribe();
+  }catch(e){ console.warn("Realtime order listener unavailable",e); }
+}
+
 let orderPollingTimer = null;
 
 function startOrderPolling(){
@@ -1193,11 +1243,12 @@ function startOrderPolling(){
   updateAdminConnectionStatus(true, true);
   orderPollingTimer = setInterval(async()=>{
     if(!document.hidden) await loadOrders();
-  }, 30000);
+  }, 10000);
 }
 
 showDashboard();
 startOrderPolling();
+startOrderRealtime();
 
 
 /* ==============================
