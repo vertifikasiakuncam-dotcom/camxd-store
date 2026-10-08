@@ -22,77 +22,88 @@ button:disabled{opacity:.6}.status{margin-top:18px;padding:14px;border-radius:12
 </div>
 
 <script>
-(async()=>{
- const btn=document.getElementById("test"), statusBtn=document.getElementById("statusBtn"), out=document.getElementById("status");
- const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const statusBtn=document.getElementById("statusBtn");
+const out=document.getElementById("status");
 
- async function inspect(){
-   const lines=[];
-   try{
-     if(!("serviceWorker" in navigator)){
-       lines.push("❌ Service Worker tidak didukung.");
-       out.textContent=lines.join("\n");
-       return;
-     }
-     const reg=await navigator.serviceWorker.getRegistration("./");
-     lines.push("Service Worker registration: "+(reg?"ADA":"TIDAK ADA"));
-     if(reg){
-       lines.push("scope: "+reg.scope);
-       lines.push("active: "+(reg.active?.scriptURL||"tidak ada"));
-       lines.push("waiting: "+(reg.waiting?.scriptURL||"tidak ada"));
-       lines.push("installing: "+(reg.installing?.scriptURL||"tidak ada"));
-       try{
-         const sub=await reg.pushManager.getSubscription();
-         lines.push("Push subscription: "+(sub?"ADA":"TIDAK ADA"));
-         if(sub){
-           lines.push("endpoint: "+new URL(sub.endpoint).hostname);
-         }
-       }catch(e){lines.push("Push subscription check error: "+String(e?.message||e))}
-       try{
-         const cache=await caches.open("camxd-admin-v21");
-         const response=await cache.match("./__camxd_push_received.json");
-         if(response){
-           const marker=await response.json();
-           lines.push("PUSH MARKER: DITERIMA");
-           lines.push("receivedAt: "+marker.receivedAt);
-           lines.push("title: "+marker.title);
-           lines.push("body: "+marker.body);
-         }else{
-           lines.push("PUSH MARKER: BELUM ADA");
-         }
-       }catch(e){lines.push("Marker check error: "+String(e?.message||e))}
-     }
-   }catch(e){
-     lines.push("❌ "+String(e?.message||e));
-   }
-   out.textContent=lines.join("\n");
- }
+function show(t){out.textContent=t;}
 
- async function run(){
-   btn.disabled=true; out.textContent="Mengirim test push ke server...";
-   try{
-     const {data:{session},error:sessionError}=await sb.auth.getSession();
-     if(sessionError||!session?.access_token){
-       out.textContent="❌ Sesi Admin tidak ditemukan. Buka Dashboard Admin dan login terlebih dahulu.";
-       return;
-     }
-     const res=await fetch(SUPABASE_URL+"/functions/v1/send-admin-push-test",{
-       method:"POST",
-       headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},
-       body:"{}"
-     });
-     const raw=await res.text();
-     let data; try{data=JSON.parse(raw)}catch{data={raw}};
-     out.textContent="SERVER RESULT\nHTTP "+res.status+"\n"+JSON.stringify(data,null,2)+"\n\nMenunggu lalu memeriksa Service Worker...";
-     setTimeout(inspect,4000);
-   }catch(e){out.textContent="❌ "+String(e?.message||e)}
-   finally{btn.disabled=false}
- }
+async function withTimeout(p,ms,label){
+  return await Promise.race([
+    p,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timeout")),ms))
+  ]);
+}
 
- statusBtn.addEventListener("click",inspect);
- btn.addEventListener("click",run);
- await inspect();
-})();
+async function inspect(){
+  show("⏳ Tombol bekerja. Memeriksa Service Worker...");
+  const lines=[];
+  try{
+    if(!("serviceWorker" in navigator)){
+      show("❌ Service Worker tidak didukung browser ini.");
+      return;
+    }
+
+    let regs=[];
+    try{
+      regs=await withTimeout(navigator.serviceWorker.getRegistrations(),3000,"getRegistrations");
+    }catch(e){
+      show("❌ Gagal membaca Service Worker: "+e.message);
+      return;
+    }
+
+    lines.push("Service Worker ditemukan: "+regs.length);
+
+    if(!regs.length){
+      lines.push("❌ Tidak ada Service Worker terdaftar.");
+      show(lines.join("\n"));
+      return;
+    }
+
+    for(let i=0;i<regs.length;i++){
+      const reg=regs[i];
+      lines.push("\n["+(i+1)+"]");
+      lines.push("scope: "+reg.scope);
+      lines.push("active: "+(reg.active?.scriptURL||"tidak ada"));
+      lines.push("waiting: "+(reg.waiting?.scriptURL||"tidak ada"));
+      lines.push("installing: "+(reg.installing?.scriptURL||"tidak ada"));
+
+      try{
+        const sub=await withTimeout(reg.pushManager.getSubscription(),3000,"getSubscription");
+        lines.push("Push subscription: "+(sub?"ADA":"TIDAK ADA");
+        if(sub) lines.push("endpoint: "+new URL(sub.endpoint).hostname);
+      }catch(e){
+        lines.push("Push subscription: ERROR - "+e.message);
+      }
+    }
+
+    try{
+      const cache=await withTimeout(caches.open("camxd-admin-v21"),3000,"cache open");
+      const response=await withTimeout(cache.match("./__camxd_push_received.json"),3000,"cache match");
+      if(response){
+        const marker=await response.json();
+        lines.push("\nPUSH MARKER: DITERIMA");
+        lines.push("receivedAt: "+marker.receivedAt);
+        lines.push("title: "+marker.title);
+        lines.push("body: "+marker.body);
+      }else{
+        lines.push("\nPUSH MARKER: BELUM ADA");
+      }
+    }catch(e){
+      lines.push("\nMarker check: ERROR - "+e.message);
+    }
+
+    show(lines.join("\n"));
+  }catch(e){
+    show("❌ ERROR: "+(e?.message||e));
+  }
+}
+
+statusBtn.addEventListener("click",()=>{
+  show("🟡 KLIK TERDETEKSI — memulai pemeriksaan...");
+  setTimeout(inspect,50);
+});
+
+inspect();
 </script>
 </body>
 </html>
