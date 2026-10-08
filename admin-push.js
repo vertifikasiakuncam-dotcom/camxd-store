@@ -1,7 +1,7 @@
 /* CAMXD Admin Web Push — isolated notification module */
 (() => {
-  const VAPID_PUBLIC_KEY = "BJ0wg7OoBKcta3db2y8PH_zUpCqdcOm-HfowjfY0MMmv26iqN3ayAZgakxG0VXUtBBJa8cPsaPiPkcNvUm1jPAQ";
-  const VAPID_KEY_VERSION = "v3";
+  const VAPID_PUBLIC_KEY = "BHLHJoF5iZEleTr8wkf7VPwU_yOCvzLHS6xG6Nb9uP6fUfpxG2QCeZVXdl7rsQz9mt8WCMw0dM4pZFXgZOJZEZo";
+  const VAPID_KEY_VERSION = "v4";
 
   function urlBase64ToUint8Array(base64String){
     const padding="=".repeat((4-base64String.length%4)%4);
