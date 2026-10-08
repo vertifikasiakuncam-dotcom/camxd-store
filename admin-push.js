@@ -1,6 +1,7 @@
 /* CAMXD Admin Web Push — isolated notification module */
 (() => {
-  const VAPID_PUBLIC_KEY = "BA4Q9VnF37bfRl0fJtqPST1J6nALWVDV-ituIRgMwFkUgYBya_kBFgFLBlBPzSUyi2B4z9qGF62MpPvm27jEL58";
+  const VAPID_PUBLIC_KEY = "BM8DTpppzB-4RqIu9--K227_9MonbApVXIs11DrCOE4hfaFlZwDLQOGilejh2I8akowQROZCzdD1GpwH7NpT1SA";
+  const VAPID_KEY_VERSION = "v2";
 
   function urlBase64ToUint8Array(base64String){
     const padding="=".repeat((4-base64String.length%4)%4);
@@ -28,6 +29,12 @@
       if(!reg) return false;
 
       let sub=await reg.pushManager.getSubscription();
+      const storedVersion=localStorage.getItem("camxd_admin_push_vapid_version");
+      if(sub && storedVersion!==VAPID_KEY_VERSION){
+        try{ await sub.unsubscribe(); }catch{}
+        sub=null;
+      }
+
       if(!sub){
         sub=await reg.pushManager.subscribe({
           userVisibleOnly:true,
@@ -57,6 +64,7 @@
       }
 
       localStorage.setItem("camxd_admin_push_enabled","1");
+      localStorage.setItem("camxd_admin_push_vapid_version",VAPID_KEY_VERSION);
       return true;
     }catch(error){
       console.error("CAMXD Web Push:",error);
