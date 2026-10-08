@@ -79,7 +79,7 @@ async function inspect(){
     }
 
     try{
-      const cache=await withTimeout(caches.open("camxd-admin-v21"),3000,"cache open");
+      const cache=await withTimeout(caches.open("camxd-store-v10"),3000,"cache open");
       const response=await withTimeout(cache.match("./__camxd_push_received.json"),3000,"cache match");
       if(response){
         const marker=await response.json();
