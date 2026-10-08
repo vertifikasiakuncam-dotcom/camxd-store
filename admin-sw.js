@@ -1,10 +1,10 @@
-const CACHE_NAME="camxd-admin-v11";
+const CACHE_NAME="camxd-admin-v12";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
   "./admin.js",
   "./admin-pwa.js",
-  "./admin-push.js?v=20261008-8",
+  "./admin-push.js?v=20261008-9",
   "./admin-profile.js",
   "./admin-manifest.webmanifest?v=20261006-3",
   "./camxd-admin-icon.svg",
@@ -23,8 +23,6 @@ self.addEventListener("push",event=>{
   const title=data.title || "CAMXD STORE";
   const options={
     body:data.body || "Pesanan baru masuk.",
-    icon:"./camxd-admin-icon.svg",
-    badge:"./camxd-admin-icon.svg",
     tag:data.tag || "camxd-order",
     renotify:true,
     requireInteraction:true,
