@@ -16,9 +16,9 @@ button:disabled{opacity:.6}.status{margin-top:18px;padding:14px;border-radius:12
 <div class="card">
 <h1>🔔 CAMXD Server Push Test v2</h1>
 <p class="muted">Halaman diagnostic terpisah. Tidak mengubah dashboard dan tidak membuat order.</p>
-<button id="statusBtn">Periksa Service Worker</button>
+<button id="statusBtn" type="button" onclick="window.camxdInspect && window.camxdInspect()">Periksa Service Worker</button>
 <button id="test" style="display:none">Kirim Test Push</button>
-<div id="status" class="status">Memeriksa Service Worker...</div>
+<div id="status" class="status">Siap. Tekan tombol untuk memeriksa Service Worker.</div>
 </div>
 
 <script>
@@ -98,12 +98,10 @@ async function inspect(){
   }
 }
 
-statusBtn.addEventListener("click",()=>{
+window.camxdInspect=()=>{
   show("🟡 KLIK TERDETEKSI — memulai pemeriksaan...");
   setTimeout(inspect,50);
-});
-
-inspect();
+};
 </script>
 </body>
 </html>
