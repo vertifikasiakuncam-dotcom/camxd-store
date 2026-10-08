@@ -11,7 +11,25 @@
 
   async function getRegistration(){
     if(!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
-    return navigator.serviceWorker.ready;
+
+    // Admin push must use admin-sw.js. The store's sw.js is a different worker.
+    const reg=await navigator.serviceWorker.register("./admin-sw.js",{scope:"./",updateViaCache:"none"});
+    await reg.update();
+
+    if(reg.active) return reg;
+
+    await new Promise(resolve=>{
+      const worker=reg.installing || reg.waiting;
+      if(!worker){
+        resolve();
+        return;
+      }
+      worker.addEventListener("statechange",()=>{
+        if(worker.state==="activated" || worker.state==="redundant") resolve();
+      });
+    });
+
+    return reg.active ? reg : navigator.serviceWorker.ready;
   }
 
   async function getPushStatus(){
@@ -48,18 +66,21 @@
     try{
       if(!("Notification" in window) || !("PushManager" in window)) return false;
       if(!window.supabase || typeof window.supabase.createClient!=="function") return false;
-      const pushSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      const pushSb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
         auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
       });
       const {data:{session}}=await pushSb.auth.getSession();
       if(!session?.user?.id) return false;
+
       if(Notification.permission==="default"){
         const permission=await Notification.requestPermission();
         if(permission!=="granted") return false;
       }
       if(Notification.permission!=="granted") return false;
+
       const reg=await getRegistration();
       if(!reg) return false;
+
       let sub=await reg.pushManager.getSubscription();
       if(!sub){
         sub=await reg.pushManager.subscribe({
@@ -67,6 +88,7 @@
           applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
       }
+
       const json=sub.toJSON();
       const payload={
         user_id:session.user.id,
@@ -78,11 +100,13 @@
         },
         user_agent:navigator.userAgent
       };
+
       const {error}=await pushSb.from("admin_push_subscriptions").upsert(payload,{onConflict:"endpoint"});
       if(error){
         console.error("CAMXD push subscription:",error);
         return false;
       }
+
       localStorage.setItem("camxd_admin_push_enabled","1");
       return true;
     }catch(error){
@@ -96,8 +120,10 @@
   document.addEventListener("DOMContentLoaded",async()=>{
     const btn=document.getElementById("enableNotificationsBtn");
     if(!btn) return;
+
     btn.disabled=false;
     const status=await getPushStatus();
+
     if(status==="active"){
       btn.textContent="🔄 Sinkronisasi Push...";
       const synced=await subscribeAdminPush();
@@ -130,8 +156,6 @@
       }
     }
 
-    // Temporary isolated diagnostic: open admin.html?app=camxd-admin&push-test=1
-    // to verify Android/Chrome can display a local service-worker notification.
     if(new URLSearchParams(location.search).get("push-test")==="1"){
       try{
         const reg=await getRegistration();
@@ -148,6 +172,7 @@
         console.error("CAMXD local push test:",error);
       }
     }
+
     btn.addEventListener("click",async()=>{
       btn.disabled=true;
       btn.textContent="🔄 Sinkronisasi...";
