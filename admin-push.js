@@ -1,7 +1,7 @@
 /* CAMXD Admin Web Push — isolated notification module */
 (() => {
-  const VAPID_PUBLIC_KEY = "BM8DTpppzB-4RqIu9--K227_9MonbApVXIs11DrCOE4hfaFlZwDLQOGilejh2I8akowQROZCzdD1GpwH7NpT1SA";
-  const VAPID_KEY_VERSION = "v2";
+  const VAPID_PUBLIC_KEY = "BJ0wg7OoBKcta3db2y8PH_zUpCqdcOm-HfowjfY0MMmv26iqN3ayAZgakxG0VXUtBBJa8cPsaPiPkcNvUm1jPAQ";
+  const VAPID_KEY_VERSION = "v3";
 
   function urlBase64ToUint8Array(base64String){
     const padding="=".repeat((4-base64String.length%4)%4);
@@ -21,9 +21,11 @@
       const {data:{session}}=await window.sb.auth.getSession();
       if(!session?.user?.id) return false;
 
-      let permission=Notification.permission;
-      if(permission==="default") permission=await Notification.requestPermission();
-      if(permission!=="granted") return false;
+      if(Notification.permission==="default"){
+        const permission=await Notification.requestPermission();
+        if(permission!=="granted") return false;
+      }
+      if(Notification.permission!=="granted") return false;
 
       const reg=await getRegistration();
       if(!reg) return false;
@@ -76,6 +78,19 @@
 
   document.addEventListener("DOMContentLoaded",()=>{
     const btn=document.getElementById("enableNotificationsBtn");
+
+    // admin.js disables the button once Android/browser permission is already granted.
+    // Therefore, refresh the push subscription automatically when permission is granted.
+    if("Notification" in window && Notification.permission==="granted"){
+      setTimeout(async()=>{
+        const ok=await subscribeAdminPush();
+        if(ok && btn){
+          btn.textContent="🔔 Notifikasi Aktif";
+          btn.disabled=true;
+        }
+      },800);
+    }
+
     if(!btn) return;
     const original=btn.textContent;
     btn.addEventListener("click",async()=>{
