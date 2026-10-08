@@ -1,7 +1,6 @@
 /* CAMXD Admin Web Push — isolated notification module */
 (() => {
   const VAPID_PUBLIC_KEY = "BHLHJoF5iZEleTr8wkf7VPwU_yOCvzLHS6xG6Nb9uP6fUfpxG2QCeZVXdl7rsQz9mt8WCMw0dM4pZFXgZOJZEZo";
-  const VAPID_KEY_VERSION = "v5";
 
   function urlBase64ToUint8Array(base64String){
     const padding="=".repeat((4-base64String.length%4)%4);
@@ -13,6 +12,36 @@
   async function getRegistration(){
     if(!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
     return navigator.serviceWorker.ready;
+  }
+
+  async function getPushStatus(){
+    try{
+      if(!("Notification" in window) || !("PushManager" in window)) return "unsupported";
+      if(Notification.permission==="denied") return "denied";
+      const reg=await getRegistration();
+      if(!reg) return "unsupported";
+      const sub=await reg.pushManager.getSubscription();
+      return sub ? "active" : "not_subscribed";
+    }catch(error){
+      console.error("CAMXD push status:",error);
+      return "error";
+    }
+  }
+
+  function setButtonStatus(btn,status){
+    if(!btn) return;
+    if(status==="active"){
+      btn.textContent="🔔 Notifikasi Aktif";
+    }else if(status==="denied"){
+      btn.textContent="🔕 Notifikasi Diblokir";
+    }else if(status==="not_subscribed"){
+      btn.textContent="🔔 Aktifkan Push";
+    }else if(status==="unsupported"){
+      btn.textContent="⚠️ Push Tidak Didukung";
+    }else{
+      btn.textContent="⚠️ Push Belum Siap";
+    }
+    btn.disabled=false;
   }
 
   async function subscribeAdminPush(){
@@ -31,12 +60,6 @@
       if(!reg) return false;
 
       let sub=await reg.pushManager.getSubscription();
-      const storedVersion=localStorage.getItem("camxd_admin_push_vapid_version");
-      if(sub && storedVersion!==VAPID_KEY_VERSION){
-        try{ await sub.unsubscribe(); }catch{}
-        sub=null;
-      }
-
       if(!sub){
         sub=await reg.pushManager.subscribe({
           userVisibleOnly:true,
@@ -66,7 +89,6 @@
       }
 
       localStorage.setItem("camxd_admin_push_enabled","1");
-      localStorage.setItem("camxd_admin_push_vapid_version",VAPID_KEY_VERSION);
       return true;
     }catch(error){
       console.error("CAMXD Web Push:",error);
@@ -76,35 +98,34 @@
 
   window.subscribeAdminPush=subscribeAdminPush;
 
-  document.addEventListener("DOMContentLoaded",()=>{
+  document.addEventListener("DOMContentLoaded",async()=>{
     const btn=document.getElementById("enableNotificationsBtn");
     if(!btn) return;
 
-    // Keep the button clickable so the admin can manually re-check the push status.
-    // This is intentionally isolated from dashboard/order logic.
-    if("Notification" in window && Notification.permission==="granted"){
-      setTimeout(async()=>{
-        btn.disabled=false;
-        btn.textContent="🔄 Cek Notifikasi";
-        const ok=await subscribeAdminPush();
-        btn.textContent=ok ? "🔔 Notifikasi Aktif" : "⚠️ Notifikasi Belum Siap";
-        btn.disabled=false;
-      },800);
-    }
+    // Permission alone is NOT the same as a Web Push subscription.
+    // Do not auto-subscribe: PushManager.subscribe() should follow a user gesture.
+    btn.disabled=false;
 
-    const original=btn.textContent;
+    const status=await getPushStatus();
+    setButtonStatus(btn,status);
+
     btn.addEventListener("click",async()=>{
       btn.disabled=true;
       btn.textContent="🔄 Mengecek...";
+
+      const statusBefore=await getPushStatus();
+      if(statusBefore==="active"){
+        setButtonStatus(btn,"active");
+        return;
+      }
+
       const ok=await subscribeAdminPush();
       if(ok){
-        btn.textContent="🔔 Notifikasi Aktif";
-      }else if("Notification" in window && Notification.permission==="denied"){
-        btn.textContent="🔕 Notifikasi Diblokir";
+        setButtonStatus(btn,"active");
       }else{
-        btn.textContent="⚠️ Notifikasi Belum Siap";
+        const after=await getPushStatus();
+        setButtonStatus(btn,after);
       }
-      setTimeout(()=>{ btn.disabled=false; },400);
     },true);
   });
 })();
