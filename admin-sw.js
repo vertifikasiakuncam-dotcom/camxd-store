@@ -1,11 +1,11 @@
-const CACHE_NAME="camxd-admin-v20";
+const CACHE_NAME="camxd-admin-v21";
 const PUSH_DIAGNOSTIC_KEY="./__camxd_push_received.json";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
   "./admin.js",
   "./admin-pwa.js",
-  "./admin-push.js?v=20261009-15",
+  "./admin-push.js?v=20261009-16",
   "./admin-profile.js",
   "./admin-manifest.webmanifest?v=20261006-3",
   "./camxd-admin-icon.svg",
