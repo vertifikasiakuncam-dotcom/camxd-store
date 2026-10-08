@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
-      navigator.serviceWorker.register("./sw.js?v=20261007-4")
+      navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"})
         .then(reg=>reg.update())
         .catch(err=>console.warn("PWA:",err));
     });
