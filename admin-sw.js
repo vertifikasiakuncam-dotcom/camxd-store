@@ -1,4 +1,5 @@
-const CACHE_NAME="camxd-admin-v19";
+const CACHE_NAME="camxd-admin-v20";
+const PUSH_DIAGNOSTIC_KEY="./__camxd_push_received.json";
 const APP_SHELL=[
   "./admin.html",
   "./admin.css",
@@ -11,26 +12,68 @@ const APP_SHELL=[
   "./supabase-config.js",
   "./camxd-logo.png"
 ];
+
 self.addEventListener("install",event=>{
-  event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache=>cache.addAll(APP_SHELL))
+      .then(()=>self.skipWaiting())
+  );
 });
+
 self.addEventListener("activate",event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+  event.waitUntil(
+    caches.keys()
+      .then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
+  );
 });
+
 self.addEventListener("push",event=>{
   event.waitUntil((async()=>{
     let data={};
+    let raw="";
+
     try{
       if(event.data){
-        const raw=event.data.text();
-        try{ data=JSON.parse(raw); }catch{ data={body:raw}; }
+        raw=event.data.text();
+        try{
+          data=JSON.parse(raw);
+        }catch{
+          data={body:raw};
+        }
       }
     }catch{
       data={body:"Pesanan baru masuk."};
     }
-    const title=data.title || "CAMXD STORE";
+
+    // Diagnostic marker: proves that the Android Service Worker received
+    // the server push, even if the notification UI is unavailable.
+    try{
+      const diagnostic={
+        receivedAt:new Date().toISOString(),
+        title:data.title || "CAMXD STORE",
+        body:data.body || "",
+        raw:raw.slice(0,2000)
+      };
+      const cache=await caches.open(CACHE_NAME);
+      await cache.put(
+        PUSH_DIAGNOSTIC_KEY,
+        new Response(JSON.stringify(diagnostic),{
+          headers:{"Content-Type":"application/json"}
+        })
+      );
+    }catch(error){
+      console.error("CAMXD push diagnostic marker:",error);
+    }
+
+    const isDiagnostic=String(data.body||"").includes("CX-DIAGNOSTIC");
+    const title=isDiagnostic ? "CAMXD STORE • PUSH DIAGNOSTIC" : (data.title || "CAMXD STORE");
+
     const options={
-      body:data.body || "Pesanan baru masuk.",
+      body:isDiagnostic
+        ? "Service Worker Android menerima push dari FCM."
+        : (data.body || "Pesanan baru masuk."),
       tag:data.tag || ("camxd-push-"+Date.now()),
       renotify:true,
       requireInteraction:true,
@@ -39,12 +82,23 @@ self.addEventListener("push",event=>{
       timestamp:Date.now(),
       data:{url:data.url || "./admin.html?app=camxd-admin"}
     };
-    await self.registration.showNotification(title,options);
+
+    try{
+      await self.registration.showNotification(title,options);
+    }catch(error){
+      console.error("CAMXD showNotification failed:",error);
+      throw error;
+    }
   })());
 });
+
 self.addEventListener("notificationclick",event=>{
   event.notification.close();
-  const target=new URL(event.notification.data?.url || "./admin.html?app=camxd-admin",self.location.origin).href;
+  const target=new URL(
+    event.notification.data?.url || "./admin.html?app=camxd-admin",
+    self.location.origin
+  ).href;
+
   event.waitUntil(
     clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
       for(const client of list){
@@ -54,13 +108,17 @@ self.addEventListener("notificationclick",event=>{
     })
   );
 });
+
 self.addEventListener("fetch",event=>{
   if(event.request.method!=="GET") return;
   const url=new URL(event.request.url);
   if(url.origin!==location.origin) return;
+
   event.respondWith(
     fetch(event.request).then(response=>{
-      if(response.ok)caches.open(CACHE_NAME).then(cache=>cache.put(event.request,response.clone()));
+      if(response.ok){
+        caches.open(CACHE_NAME).then(cache=>cache.put(event.request,response.clone()));
+      }
       return response;
     }).catch(()=>caches.match(event.request).then(c=>c||caches.match("./admin.html")))
   );
