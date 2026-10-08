@@ -66,6 +66,7 @@ jobs:
           cp camxd-logo.png store-android/app/src/main/res/drawable-nodpi/camxd_logo.png
           cp camxd-background.png store-android/app/src/main/res/drawable-nodpi/camxd_background.png
           cp camxd-store-music.mp3 store-android/app/src/main/res/raw/camxd_store_music.mp3
+          cp camxd-store-voice.mp3 store-android/app/src/main/res/raw/camxd_store_voice.mp3
 
           cat > store-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
