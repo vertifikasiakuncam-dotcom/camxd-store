@@ -50,7 +50,7 @@ button:disabled{opacity:.6}.status{margin-top:18px;padding:14px;border-radius:12
          }
        }catch(e){lines.push("Push subscription check error: "+String(e?.message||e))}
        try{
-         const cache=await caches.open("camxd-admin-v20");
+         const cache=await caches.open("camxd-admin-v21");
          const response=await cache.match("./__camxd_push_received.json");
          if(response){
            const marker=await response.json();
