@@ -153,7 +153,7 @@ jobs:
               if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
                 requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},5001);
               webView=new WebView(this); setContentView(webView);
-              WebSettings s=webView.getSettings(); s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setDatabaseEnabled(true);
+              WebSettings s=webView.getSettings(); s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setDatabaseEnabled(true); s.setCacheMode(WebSettings.LOAD_NO_CACHE);
               s.setSupportZoom(false); webView.setWebChromeClient(new WebChromeClient(){
                 @Override public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> callback, FileChooserParams params){
                   fileCallback=callback;
