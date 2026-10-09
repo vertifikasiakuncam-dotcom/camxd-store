@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
         : "🛒 Pesanan Baru • " + (order.order_id || "Order") + "\n" +
           (order.customer_name || "Pelanggan") + " • " + productText + " • Rp " + total,
       tag: "camxd-order-" + String(order.id) + (isPaymentReport ? "-payment" : ""),
-      url: "./admin.html?app=camxd-admin&order_id=" + encodeURIComponent(String(order.order_id || ""))
+      url: "https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?app=camxd-admin&order_id=" + encodeURIComponent(String(order.order_id || ""))
     };
 
     // Keep existing website Web Push behavior unchanged.
