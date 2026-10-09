@@ -124,7 +124,9 @@
     try{
       if(!window.supabase || typeof window.supabase.createClient!=="function") return false;
       if(!nativeRegistrationClient){
-        nativeRegistrationClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+        // Reuse the dashboard's actual Supabase client. A second client has a separate
+        // auth event lifecycle and may miss the login button's session change.
+        nativeRegistrationClient=window.camxdAdminSupabase || window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
           auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
         });
         nativeRegistrationClient.auth.onAuthStateChange((_event,session)=>{
