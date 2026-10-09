@@ -182,10 +182,14 @@ jobs:
                   return true;
                 }
               });
-              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-11");
               FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token->{
-                webView.post(()->webView.evaluateJavascript("localStorage.setItem('camxd_admin_fcm_token',"+org.json.JSONObject.quote(token)+"); window.onCamxdAdminFcmToken && window.onCamxdAdminFcmToken("+org.json.JSONObject.quote(token)+")",null));
+                webView.setTag(token);
+                webView.postDelayed(()->{
+                  String js="localStorage.setItem('camxd_admin_fcm_token',"+org.json.JSONObject.quote(token)+"); if(window.onCamxdAdminFcmToken){window.onCamxdAdminFcmToken("+org.json.JSONObject.quote(token)+");}";
+                  webView.evaluateJavascript(js,null);
+                },2500);
               });
+              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-11");
             }
             @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==FILE_REQUEST && fileCallback!=null){
