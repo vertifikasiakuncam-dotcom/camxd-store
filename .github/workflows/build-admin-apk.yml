@@ -56,7 +56,7 @@ jobs:
           plugins { id 'com.android.application'; id 'com.google.gms.google-services' }
           dependencies { implementation platform('com.google.firebase:firebase-bom:34.3.0'); implementation 'com.google.firebase:firebase-messaging' }
           android { namespace 'com.camxd.admin'; compileSdk 35
-            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 6; versionName '1.0.4' }
+            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 7; versionName '1.0.5' }
           }
           EOF
           sudo apt-get update -qq
@@ -166,21 +166,6 @@ jobs:
                     return false;
                   }
                 }
-              }); webView.setWebViewClient(new WebViewClient(){
-                @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r){
-                  String url=r.getUrl().toString();
-                  if(url.startsWith("http://") || url.startsWith("https://")){
-                    v.loadUrl(url);
-                    return true;
-                  }
-                  try{
-                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(intent);
-                  }catch(Exception e){
-                    android.widget.Toast.makeText(MainActivity.this,"Aplikasi untuk membuka link tidak ditemukan",android.widget.Toast.LENGTH_SHORT).show();
-                  }
-                  return true;
-                }
               });
               webView.setWebViewClient(new WebViewClient(){
                 @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r){
@@ -212,8 +197,30 @@ jobs:
                         + "}"
                         + "markNativePush();new MutationObserver(markNativePush).observe(document.documentElement,{childList:true,subtree:true});})();";
                       view.evaluateJavascript(apkPushUi,null);
+                      // APK-only login diagnostics: prevent an apparently frozen login with no feedback.
+                      String loginGuard = "(function(){"
+                        + "var form=document.getElementById('loginForm');if(!form||form.dataset.camxdGuard==='1')return;form.dataset.camxdGuard='1';"
+                        + "var btn=form.querySelector('button[type=submit]');var original=btn?btn.textContent:'Masuk ke Dashboard';var timer=null;"
+                        + "form.addEventListener('submit',function(){if(btn){btn.disabled=true;btn.textContent='Memeriksa login...';}"
+                        + "var err=document.getElementById('loginError');if(err)err.textContent='';"
+                        + "clearTimeout(timer);timer=setTimeout(function(){"
+                        + "var login=document.getElementById('loginView'),dash=document.getElementById('dashboardView');"
+                        + "if(login&&!login.hidden&&dash&&dash.hidden){if(err)err.textContent='Login belum mendapat respons dari server. Periksa koneksi internet, lalu coba masuk kembali.';"
+                        + "if(btn){btn.disabled=false;btn.textContent=original;}}},20000);"
+                        + "},true);"
+                        + "var observer=new MutationObserver(function(){var login=document.getElementById('loginView'),dash=document.getElementById('dashboardView');"
+                        + "if(login&&dash&&(login.hidden||!dash.hidden)){clearTimeout(timer);if(btn){btn.disabled=false;btn.textContent=original;}}});"
+                        + "observer.observe(document.body,{attributes:true,subtree:true,attributeFilter:['hidden']});})();";
+                      view.evaluateJavascript(loginGuard,null);
                     });
                   }).addOnFailureListener(error->android.util.Log.e("CAMXD_ADMIN_FCM","Unable to get FCM token",error));
+                }
+                @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){
+                  super.onReceivedError(view,request,error);
+                  if(request.isForMainFrame()){
+                    android.util.Log.e("CAMXD_ADMIN_WEB","Page load error: "+error.getDescription());
+                    android.widget.Toast.makeText(MainActivity.this,"Halaman admin gagal dimuat. Periksa koneksi internet lalu tekan Refresh.",android.widget.Toast.LENGTH_LONG).show();
+                  }
                 }
               });
               webView.loadUrl(buildAdminUrl(getIntent()));
