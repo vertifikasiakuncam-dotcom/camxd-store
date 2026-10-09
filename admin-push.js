@@ -132,7 +132,10 @@
         });
       }
       const {data:{session}}=await nativeRegistrationClient.auth.getSession();
-      if(!session?.access_token) return false;
+      if(!session?.access_token) {
+        // The dashboard may finish loading before the login page stores its session.
+        return false;
+      }
       return await sendNativeFcmRegistration(token,session.access_token);
     }catch(error){
       console.error("CAMXD native FCM registration:",error);
@@ -152,6 +155,18 @@
   }
   window.onCamxdAdminFcmToken=registerNativeFcmToken;
   if(nativeFcmToken) registerNativeFcmToken(nativeFcmToken);
+
+  // Retry after the dashboard finishes login/session restoration.
+  window.addEventListener("pageshow",()=>{
+    const token=localStorage.getItem("camxd_admin_fcm_token");
+    if(token) registerNativeFcmToken(token);
+  });
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"){
+      const token=localStorage.getItem("camxd_admin_fcm_token");
+      if(token) registerNativeFcmToken(token);
+    }
+  });
 
   window.subscribeAdminPush=subscribeAdminPush;
 
