@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-store-v13";
+const CACHE_NAME="camxd-store-v14";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -85,7 +85,7 @@ self.addEventListener("notificationclick",event=>{
   event.notification.close();
   const target=new URL(
     event.notification.data?.url || "./admin.html?app=camxd-admin",
-    self.location.origin
+    self.registration.scope
   );
   event.waitUntil((async()=>{
     const list=await clients.matchAll({type:"window",includeUncontrolled:true});
