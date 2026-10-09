@@ -56,7 +56,7 @@ jobs:
           plugins { id 'com.android.application'; id 'com.google.gms.google-services' }
           dependencies { implementation platform('com.google.firebase:firebase-bom:34.3.0'); implementation 'com.google.firebase:firebase-messaging' }
           android { namespace 'com.camxd.admin'; compileSdk 35
-            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 5; versionName '1.0.4' }
+            defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 6; versionName '1.0.4' }
           }
           EOF
           sudo apt-get update -qq
