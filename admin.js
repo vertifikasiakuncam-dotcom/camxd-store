@@ -120,14 +120,30 @@ function hideNewOrderPopup(){
   const popup=$("#newOrderPopup");
   if(popup) popup.hidden=true;
 }
-function focusNewOrderPopupOrder(){
+async function focusNewOrderPopupOrder(){
   const code=$("#newOrderPopup")?.dataset.orderCode||"";
   hideNewOrderPopup();
+
+  // Always switch from the overview/products view to the orders panel first.
+  $("#productsPanel").hidden=true;
+  $(".orders-panel").hidden=false;
+  $("#productsBtn").textContent="🛍️ Kelola Produk";
   $("#statusFilter").value="all";
+
+  const search=$("#orderSearch");
+  if(search) search.value=code;
+  const clear=$("#clearOrderSearch");
+  if(clear) clear.hidden=!code;
+
+  // Wait for the latest orders to finish loading before trying to focus a row.
+  await loadOrders();
   renderOrders();
+
   if(code){
-    const el=document.querySelector('[data-order-id="'+CSS.escape(code)+'"]');
-    el?.scrollIntoView({behavior:"smooth",block:"center"});
+    const selector='[data-order-id="'+CSS.escape(code)+'"]';
+    const el=document.querySelector(selector);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+    else showAdminToast("Pesanan tidak ditemukan","Gunakan pencarian pesanan untuk membuka "+code+".");
   }
 }
 
