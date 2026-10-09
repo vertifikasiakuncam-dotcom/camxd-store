@@ -290,6 +290,8 @@ jobs:
           import android.Manifest;
           import android.content.pm.PackageManager;
           import android.util.Log;
+          import java.net.HttpURLConnection;
+          import java.net.URL;
           import com.google.firebase.messaging.FirebaseMessaging;
           import android.net.Uri;
           import android.content.Intent;
