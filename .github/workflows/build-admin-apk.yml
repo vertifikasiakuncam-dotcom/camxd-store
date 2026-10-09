@@ -198,7 +198,23 @@ jobs:
                   }).addOnFailureListener(error->android.util.Log.e("CAMXD_ADMIN_FCM","Unable to get FCM token",error));
                 }
               });
-              webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-11");
+              webView.loadUrl(buildAdminUrl(getIntent()));
+            }
+            private String buildAdminUrl(Intent intent){
+              Uri.Builder builder=Uri.parse("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html")
+                .buildUpon().appendQueryParameter("v","20261009-18");
+              if(intent!=null && intent.getBooleanExtra("camxd_admin_notification",false)){
+                String orderId=intent.getStringExtra("camxd_admin_order_id");
+                if(orderId!=null && !orderId.trim().isEmpty()) builder.appendQueryParameter("order_id",orderId.trim());
+              }
+              return builder.build().toString();
+            }
+            @Override protected void onNewIntent(Intent intent){
+              super.onNewIntent(intent);
+              setIntent(intent);
+              if(webView!=null && intent!=null && intent.getBooleanExtra("camxd_admin_notification",false)){
+                webView.loadUrl(buildAdminUrl(intent));
+              }
             }
             @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==FILE_REQUEST && fileCallback!=null){
