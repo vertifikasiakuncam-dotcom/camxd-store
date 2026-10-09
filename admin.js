@@ -448,33 +448,36 @@ function buildWhatsAppUrl(order, details){
   ).join("\n");
 
   const message = [
-    "Halo " + (order.customer_name || "Kak") + " \u{1F44B}",
+    "👋 Halo " + (order.customer_name || "Kak") + "!",
     "",
-    "==================",
-    "\u{1F6CD}\u{FE0F} CAMXD STORE",
-    "\u{1F4E6} PESANAN SELESAI",
-    "==================",
+    "━━━━━━━━━━━━━━━━",
+    "🟡 CAMXD STORE",
+    "✅ PESANAN SELESAI",
+    "━━━━━━━━━━━━━━━━",
     "",
-    "\u{1F194} ID Pesanan : " + order.order_id,
-    "\u{1F4CC} Status     : Selesai \u{2705}",
+    "🧾 ID Pesanan: " + order.order_id,
+    "📌 Status: Selesai",
     "",
-    "\u{1F6D2} DETAIL PESANAN",
+    "🛍️ DETAIL PESANAN",
     itemText || "   1. Pesanan CAMXD Store",
     "",
-    "\u{1F4B0} TOTAL PEMBAYARAN",
-    "   " + (order.total_label || ("Rp. " + rupiah(order.total).replace(/^Rp\s*/, ""))),
+    "💰 TOTAL PEMBAYARAN",
+    "   " + (order.total_label || ("Rp. " + rupiah(order.total).replace(/^Rp\\s*/, ""))),
     "",
-    "\u{1F510} DETAIL PRODUK / AKUN",
-    deliveryText,
+    "🔐 DETAIL PRODUK / AKUN",
+    "📧 Email: " + (deliveryText.match(/(?:^|\\n)Email:\\s*(.*)/i)?.[1] || "-"),
+    "🔑 Password: " + (deliveryText.match(/(?:^|\\n)Password:\\s*(.*)/i)?.[1] || "-"),
+    "🎟️ Kode: " + (deliveryText.match(/(?:^|\\n)Kode:\\s*(.*)/i)?.[1] || "-"),
+    "📅 Masa aktif: " + (deliveryText.match(/(?:^|\\n)Masa aktif:\\s*(.*)/i)?.[1] || "-"),
     "",
-    "==================",
-    "\u{1F4CC} Mohon simpan informasi akun/kode ini dengan baik.",
+    "━━━━━━━━━━━━━━━━",
+    "📌 Mohon simpan informasi akun/kode ini dengan baik.",
     "",
-    "Terima kasih telah berbelanja di CAMXD Store \u{1F64F}",
-    "Jika ada kendala, silakan hubungi admin kami.",
+    "🙏 Terima kasih telah berbelanja di CAMXD Store.",
+    "💬 Jika ada kendala, silakan hubungi admin kami.",
     "",
     "— CAMXD STORE —"
-  ].join("\n");
+  ].join("\\n");
 
   return "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
 }
