@@ -1419,3 +1419,16 @@ body:before{
 
 /* VOUCHER CHECKOUT */
 .cart-discount-row strong{color:#76e08b}.cart-grand-total{border-top:1px solid #2a2a2a;margin-top:6px;padding-top:10px}.cart-voucher-box{margin:10px 0 12px;padding:12px;border:1px solid rgba(255,208,0,.20);border-radius:14px;background:rgba(255,208,0,.045)}.cart-voucher-box>label{display:block;font-size:12px;font-weight:900;color:#ddd;margin-bottom:7px}.cart-voucher-row{display:flex;gap:7px;align-items:center}.cart-voucher-row .input{flex:1;min-width:0;margin:0}.cart-voucher-row .btn{min-height:44px;white-space:nowrap}.cart-voucher-box .form-help{display:block;min-height:18px;margin-top:6px}.cart-voucher-box .form-help.success{color:#76e08b}.cart-voucher-summary{margin-top:8px;padding:9px 10px;border-radius:10px;background:rgba(118,224,139,.08);border:1px solid rgba(118,224,139,.20);color:#ddd}.cart-voucher-summary>div{display:flex;justify-content:space-between;gap:10px}.cart-voucher-summary strong{color:#76e08b}.cart-voucher-summary small{display:block;color:#999;margin-top:3px}@media(max-width:520px){.cart-voucher-row{flex-direction:column;align-items:stretch}.cart-voucher-row .btn{width:100%}}
+
+/* Customer order status notice and live status tracking */
+.order-status-notice{
+  margin:12px 0;
+  padding:13px 14px;
+  border:1px solid rgba(255,208,0,.30);
+  border-radius:13px;
+  background:linear-gradient(120deg,rgba(255,208,0,.10),rgba(255,208,0,.035));
+}
+.order-status-notice strong{display:block;color:var(--yellow);font-size:13px;font-weight:900}
+.order-status-notice p{margin:5px 0 4px;color:#f2f2f2;font-size:13px;line-height:1.5}
+.order-status-notice small{color:#aaa;font-size:10px}
+@media(max-width:760px){.order-status-notice{padding:11px}.order-status-notice p{font-size:12px}}
