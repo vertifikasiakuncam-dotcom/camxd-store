@@ -825,6 +825,10 @@ function renderOrderCheck(order){
    <p>${escapeHtml(orderStatusUpdateNotice||orderStatusMessage(status))}</p>
    <small>Pemeriksaan status otomatis aktif selama halaman ini terbuka.</small>
   </div>
+  <div class="customer-push-actions">
+   <button type="button" class="btn ghost wide" id="enableCustomerOrderPush">🔔 Aktifkan Notifikasi HP</button>
+   <p id="customerPushFeedback" role="status" aria-live="polite">Notifikasi akan memberi tahu saat status pesanan berubah, termasuk saat selesai.</p>
+  </div>
   ${renderOrderTimeline(status)}
   <div class="order-result-meta"><span>Nama</span><strong>${escapeHtml(order.customer_name||"-")}</strong></div>
   <div class="order-result-meta"><span>Dibuat</span><strong>${new Date(order.created_at).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}</strong></div>
@@ -833,6 +837,64 @@ function renderOrderCheck(order){
   ${order.delivery_details?`<div class="delivery-box"><b>📦 Detail Pesanan</b><p>${String(order.delivery_details).replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\r?\n/g,"<br>")}</p></div>:"<p class='order-result-note'>Detail pengiriman akan muncul setelah pesanan selesai diproses admin.</p>"}
  `;
  result.hidden=false;
+ const pushButton=$("#enableCustomerOrderPush");
+ if(pushButton){
+  pushButton.onclick=()=>enableCustomerOrderPush(order.order_id);
+ }
+}
+
+function customerUrlBase64ToUint8Array(base64String){
+ const padding="=".repeat((4-base64String.length%4)%4);
+ const base64=(base64String+padding).replace(/-/g,"+").replace(/_/g,"/");
+ const raw=atob(base64);
+ return Uint8Array.from([...raw].map(char=>char.charCodeAt(0)));
+}
+
+async function enableCustomerOrderPush(orderId){
+ const button=$("#enableCustomerOrderPush");
+ const feedback=$("#customerPushFeedback");
+ if(!button||!feedback)return;
+ if(!("serviceWorker" in navigator)||!("PushManager" in window)){
+  feedback.textContent="Browser ini belum mendukung notifikasi push. Coba Chrome di Android.";
+  return;
+ }
+ if(!trackedOrderCredentials||trackedOrderCredentials.id!==orderId){
+  feedback.textContent="Silakan cek pesanan kembali sebelum mengaktifkan notifikasi.";
+  return;
+ }
+ button.disabled=true;
+ button.textContent="Mengaktifkan...";
+ try{
+  const permission=await Notification.requestPermission();
+  if(permission!=="granted")throw new Error("Izin notifikasi belum diizinkan. Aktifkan izin notifikasi CAMXD Store di pengaturan browser.");
+  const registration=await navigator.serviceWorker.ready;
+  const vapidPublicKey="BD5nIoOP11mvsDoTJjTsNIRQkLevxbjlb4zgDdH9Ls_5-ikCWWCKm7Ca_Dp8Sti7Jdli-gJsSWFoCy2ZxLPTAzM";
+  let subscription=await registration.pushManager.getSubscription();
+  if(!subscription){
+   subscription=await registration.pushManager.subscribe({
+    userVisibleOnly:true,
+    applicationServerKey:customerUrlBase64ToUint8Array(vapidPublicKey)
+   });
+  }
+  const response=await fetch(SUPABASE_URL+"/functions/v1/customer-push-subscribe",{
+   method:"POST",
+   headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY},
+   body:JSON.stringify({
+    order_id:orderId,
+    customer_wa:trackedOrderCredentials.wa,
+    subscription:subscription.toJSON(),
+    user_agent:navigator.userAgent
+   })
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error||"Notifikasi belum berhasil didaftarkan.");
+  feedback.textContent="✓ Notifikasi HP aktif untuk pesanan "+orderId+". Jangan hapus izin notifikasi browser.";
+  button.textContent="✓ Notifikasi HP Aktif";
+ }catch(error){
+  feedback.textContent=error?.message||"Notifikasi belum dapat diaktifkan. Coba lagi.";
+  button.textContent="🔔 Coba Aktifkan Lagi";
+  button.disabled=false;
+ }
 }
 
 async function pollOrderCheckStatus(){
