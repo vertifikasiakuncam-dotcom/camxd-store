@@ -140,11 +140,19 @@ jobs:
           import android.webkit.*;
           import android.content.*;
           import android.net.Uri;
+          import android.os.Build;
+          import android.Manifest;
+          import android.content.pm.PackageManager;
+          import com.google.firebase.messaging.FirebaseMessaging;
           public class MainActivity extends Activity {
             WebView webView;
           ValueCallback<Uri[]> fileCallback;
           static final int FILE_REQUEST=1001;
-            @Override public void onCreate(Bundle b){super.onCreate(b); webView=new WebView(this); setContentView(webView);
+            @Override public void onCreate(Bundle b){
+              super.onCreate(b);
+              if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},5001);
+              webView=new WebView(this); setContentView(webView);
               WebSettings s=webView.getSettings(); s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setDatabaseEnabled(true);
               s.setSupportZoom(false); webView.setWebChromeClient(new WebChromeClient(){
                 @Override public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> callback, FileChooserParams params){
@@ -175,6 +183,9 @@ jobs:
                 }
               });
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?v=20261006-11");
+              FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token->{
+                webView.post(()->webView.evaluateJavascript("window.onCamxdAdminFcmToken && window.onCamxdAdminFcmToken("+org.json.JSONObject.quote(token)+")",null));
+              });
             }
             @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
               if(requestCode==FILE_REQUEST && fileCallback!=null){
