@@ -488,6 +488,59 @@ jobs:
                 }
               },"CAMXDMusic");
 
+              webView.addJavascriptInterface(new Object(){
+                @JavascriptInterface public void registerForOrder(String orderId, String customerWa){
+                  final String safeOrderId = orderId == null ? "" : orderId.trim();
+                  final String safeWa = customerWa == null ? "" : customerWa.trim();
+                  FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                    if(!task.isSuccessful() || task.getResult() == null){
+                      notifyWebFcmResult(false, "Token notifikasi Android belum tersedia.");
+                      return;
+                    }
+                    final String token = task.getResult();
+                    new Thread(() -> {
+                      HttpURLConnection connection = null;
+                      boolean ok = false;
+                      String message = "Pendaftaran notifikasi gagal.";
+                      try {
+                        URL url = new URL("https://tbgpisneezbrkygbxwyg.supabase.co/functions/v1/customer-fcm-register");
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setRequestMethod("POST");
+                        connection.setConnectTimeout(10000);
+                        connection.setReadTimeout(10000);
+                        connection.setDoOutput(true);
+                        connection.setRequestProperty("Content-Type", "application/json");
+                        connection.setRequestProperty("apikey", "sb_publishable_gGe_VnO98UdAyMZfCr696Q_9qiPsYaM");
+                        org.json.JSONObject payload = new org.json.JSONObject();
+                        payload.put("order_id", safeOrderId);
+                        payload.put("customer_wa", safeWa);
+                        payload.put("token", token);
+                        payload.put("user_agent", "CAMXD Store Android APK");
+                        byte[] bytes = payload.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                        try(java.io.OutputStream output = connection.getOutputStream()){ output.write(bytes); }
+                        int status = connection.getResponseCode();
+                        java.io.InputStream stream = status >= 200 && status < 300 ? connection.getInputStream() : connection.getErrorStream();
+                        StringBuilder responseText = new StringBuilder();
+                        if(stream != null){
+                          try(java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8))){
+                            String line; while((line=reader.readLine())!=null) responseText.append(line);
+                          }
+                        }
+                        org.json.JSONObject response = new org.json.JSONObject(responseText.toString());
+                        ok = status >= 200 && status < 300 && response.optBoolean("ok", false);
+                        message = response.optString("message", response.optString("error", message));
+                      } catch(Exception e){
+                        Log.w("CAMXDFCM", "FCM registration request failed", e);
+                        message = "Tidak dapat mendaftarkan notifikasi. Periksa koneksi internet.";
+                      } finally {
+                        if(connection != null) connection.disconnect();
+                      }
+                      notifyWebFcmResult(ok, message);
+                    }).start();
+                  });
+                }
+              },"CAMXDFCM");
+
               webView.setWebChromeClient(new WebChromeClient(){
                 @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params){
                   pendingFileCallback=callback;
@@ -513,6 +566,20 @@ jobs:
                 }
               });
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final2");
+            }
+
+            private void notifyWebFcmResult(boolean ok, String message){
+              runOnUiThread(() -> {
+                if(webView == null) return;
+                try{
+                  org.json.JSONObject result = new org.json.JSONObject();
+                  result.put("ok", ok);
+                  result.put("message", message == null ? "" : message);
+                  webView.evaluateJavascript("window.onCamxdFcmResult && window.onCamxdFcmResult(" + result.toString() + ");", null);
+                }catch(Exception e){
+                  Log.w("CAMXDFCM", "Unable to return FCM result to checkout", e);
+                }
+              });
             }
 
             private void startMainMusic(){
