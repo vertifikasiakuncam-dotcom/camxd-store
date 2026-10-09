@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-store-v11";
+const CACHE_NAME="camxd-store-v12";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -75,7 +75,7 @@ self.addEventListener("push",event=>{
     };
     // Tampilkan banner hanya untuk notifikasi pelanggan, bukan notifikasi Admin.
     if(String(data.url||"").includes("#cek-pesanan")){
-      options.image="./banner-notifikasi-camxd.png";
+      options.image="https://vertifikasiakuncam-dotcom.github.io/camxd-store/banner-notifikasi-camxd.png?v=20261009-2";
     }
     await self.registration.showNotification(title,options);
   })());
