@@ -462,13 +462,13 @@ function buildWhatsAppUrl(order, details){
     itemText || "   1. Pesanan CAMXD Store",
     "",
     "💰 TOTAL PEMBAYARAN",
-    "   " + (order.total_label || ("Rp. " + rupiah(order.total).replace(/^Rp\\s*/, ""))),
+    "   " + (order.total_label || ("Rp. " + rupiah(order.total).replace(/^Rp\s*/, ""))),
     "",
     "🔐 DETAIL PRODUK / AKUN",
-    "📧 Email: " + (deliveryText.match(/(?:^|\\n)Email:\\s*(.*)/i)?.[1] || "-"),
-    "🔑 Password: " + (deliveryText.match(/(?:^|\\n)Password:\\s*(.*)/i)?.[1] || "-"),
-    "🎟️ Kode: " + (deliveryText.match(/(?:^|\\n)Kode:\\s*(.*)/i)?.[1] || "-"),
-    "📅 Masa aktif: " + (deliveryText.match(/(?:^|\\n)Masa aktif:\\s*(.*)/i)?.[1] || "-"),
+    "📧 Email: " + (deliveryText.match(/(?:^|\n)Email:\s*(.*)/i)?.[1] || "-"),
+    "🔑 Password: " + (deliveryText.match(/(?:^|\n)Password:\s*(.*)/i)?.[1] || "-"),
+    "🎟️ Kode: " + (deliveryText.match(/(?:^|\n)Kode:\s*(.*)/i)?.[1] || "-"),
+    "📅 Masa aktif: " + (deliveryText.match(/(?:^|\n)Masa aktif:\s*(.*)/i)?.[1] || "-"),
     "",
     "━━━━━━━━━━━━━━━━",
     "📌 Mohon simpan informasi akun/kode ini dengan baik.",
@@ -477,7 +477,7 @@ function buildWhatsAppUrl(order, details){
     "💬 Jika ada kendala, silakan hubungi admin kami.",
     "",
     "— CAMXD STORE —"
-  ].join("\\n");
+  ].join("\n");
 
   return "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
 }
