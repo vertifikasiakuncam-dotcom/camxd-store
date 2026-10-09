@@ -61,6 +61,8 @@ function normalizeRefreshButton(){
   btn.dataset.working="0";
 }
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Share the exact dashboard auth client with notification modules so they observe the same login session.
+window.camxdAdminSupabase = sb;
 const $ = (s) => document.querySelector(s);
 
 function showAdminToast(title, message){
