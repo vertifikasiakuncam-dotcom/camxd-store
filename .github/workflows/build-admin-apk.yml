@@ -39,6 +39,10 @@ jobs:
           set -e
           rm -rf admin-android
           mkdir -p admin-android/app/src/main/java/com/camxd/admin admin-android/app/src/main/res/values admin-android/app/src/main/res/values-v31 admin-android/app/src/main/res/drawable admin-android/app/src/main/res/drawable-nodpi
+          cat > admin-android/gradle.properties <<'EOF'
+          android.useAndroidX=true
+          android.enableJetifier=true
+          EOF
           cat > admin-android/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
