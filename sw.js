@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-store-v10";
+const CACHE_NAME="camxd-store-v11";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -81,9 +81,14 @@ self.addEventListener("notificationclick",event=>{
     self.location.origin
   ).href;
   event.waitUntil(
-    clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
-      for(const client of list){
-        if("focus" in client) return client.focus();
+    clients.matchAll({type:"window",includeUncontrolled:true}).then(async list=>{
+      const targetUrl=new URL(target);
+      const matching=list.find(client=>{
+        try{return new URL(client.url).pathname===targetUrl.pathname;}catch{return false;}
+      });
+      if(matching){
+        if("navigate" in matching) await matching.navigate(target);
+        if("focus" in matching) return matching.focus();
       }
       return clients.openWindow(target);
     })
