@@ -1432,3 +1432,8 @@ body:before{
 .order-status-notice p{margin:5px 0 4px;color:#f2f2f2;font-size:13px;line-height:1.5}
 .order-status-notice small{color:#aaa;font-size:10px}
 @media(max-width:760px){.order-status-notice{padding:11px}.order-status-notice p{font-size:12px}}
+
+.customer-push-actions{margin:12px 0 4px}
+.customer-push-actions .btn{width:100%;min-height:44px;border-color:rgba(255,208,0,.35);color:var(--yellow)}
+.customer-push-actions p{margin:6px 2px 0;color:#aaa;font-size:11px;line-height:1.45}
+.customer-push-actions .btn:disabled{opacity:.7}
