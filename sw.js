@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-store-v10";
+const CACHE_NAME="camxd-store-v11";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -62,6 +62,8 @@ self.addEventListener("push",event=>{
     const title=isDiagnostic ? "CAMXD STORE • PUSH DIAGNOSTIC" : (data.title||"CAMXD STORE");
     const options={
       body:isDiagnostic ? "Service Worker Android menerima push dari FCM." : (data.body||"Pesanan baru masuk."),
+      icon:"./camxd-logo.png",
+      badge:"./camxd-logo.png",
       tag:data.tag||("camxd-push-"+Date.now()),
       renotify:true,
       requireInteraction:true,
