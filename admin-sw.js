@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-admin-v21";
+const CACHE_NAME="camxd-admin-v22";
 const PUSH_DIAGNOSTIC_KEY="./__camxd_push_received.json";
 const APP_SHELL=[
   "./admin.html",
@@ -97,16 +97,26 @@ self.addEventListener("notificationclick",event=>{
   const target=new URL(
     event.notification.data?.url || "./admin.html?app=camxd-admin",
     self.location.origin
-  ).href;
-
-  event.waitUntil(
-    clients.matchAll({type:"window",includeUncontrolled:true}).then(list=>{
-      for(const client of list){
-        if("focus" in client) return client.focus();
-      }
-      return clients.openWindow(target);
-    })
   );
+  event.waitUntil((async()=>{
+    const list=await clients.matchAll({type:"window",includeUncontrolled:true});
+    const isAdminTarget=target.pathname.endsWith("/admin.html");
+    const sameApp=list.find(client=>{
+      try{
+        const current=new URL(client.url);
+        if(current.origin!==target.origin) return false;
+        return isAdminTarget
+          ? current.pathname.endsWith("/admin.html")
+          : !current.pathname.endsWith("/admin.html");
+      }catch{return false;}
+    });
+    if(sameApp && "navigate" in sameApp){
+      const navigated=await sameApp.navigate(target.href);
+      if(navigated && "focus" in navigated) return navigated.focus();
+      if("focus" in sameApp) return sameApp.focus();
+    }
+    return clients.openWindow(target.href);
+  })());
 });
 
 self.addEventListener("fetch",event=>{
