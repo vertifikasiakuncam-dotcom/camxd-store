@@ -194,7 +194,25 @@ jobs:
                   if(url==null || !url.contains("camxd-store/admin.html")) return;
                   FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token->{
                     String js="localStorage.setItem('camxd_admin_fcm_token',"+org.json.JSONObject.quote(token)+"); if(window.onCamxdAdminFcmToken){window.onCamxdAdminFcmToken("+org.json.JSONObject.quote(token)+");}";
-                    view.post(()->view.evaluateJavascript(js,null));
+                    view.post(()->{
+                      view.evaluateJavascript(js,null);
+                      // APK-only UI: native FCM is used here, not browser PushManager.
+                      // This deliberately leaves the public Web Admin untouched.
+                      String apkPushUi = "(function(){"
+                        + "function markNativePush(){"
+                        + "var b=document.getElementById('enableNotificationsBtn');if(!b)return;"
+                        + "b.textContent='🔔 Notifikasi APK';"
+                        + "b.title='Notifikasi pesanan melalui Firebase pada aplikasi Android.';"
+                        + "if(!b.dataset.camxdNativePushBound){b.dataset.camxdNativePushBound='1';"
+                        + "b.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();"
+                        + "var ready=localStorage.getItem('camxd_admin_fcm_registered')==='1';"
+                        + "var msg=ready?'Notifikasi APK tersinkron. Pesanan baru akan dikirim ke aplikasi ini.':'Token notifikasi sedang disinkronkan. Pastikan Anda sudah login sebagai admin.';"
+                        + "if(window.showAdminToast)window.showAdminToast('Notifikasi APK',msg);else alert(msg);"
+                        + "},true);}"
+                        + "}"
+                        + "markNativePush();new MutationObserver(markNativePush).observe(document.documentElement,{childList:true,subtree:true});})();";
+                      view.evaluateJavascript(apkPushUi,null);
+                    });
                   }).addOnFailureListener(error->android.util.Log.e("CAMXD_ADMIN_FCM","Unable to get FCM token",error));
                 }
               });
