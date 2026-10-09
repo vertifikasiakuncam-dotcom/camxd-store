@@ -46,10 +46,11 @@ jobs:
           include(":app")
           EOF
           cat > admin-android/build.gradle <<'EOF'
-          plugins { id 'com.android.application' version '8.7.3' apply false }
+          plugins { id 'com.android.application' version '8.7.3' apply false; id 'com.google.gms.google-services' version '4.4.2' apply false }
           EOF
           cat > admin-android/app/build.gradle <<'EOF'
-          plugins { id 'com.android.application' }
+          plugins { id 'com.android.application'; id 'com.google.gms.google-services' }
+          dependencies { implementation platform('com.google.firebase:firebase-bom:34.3.0'); implementation 'com.google.firebase:firebase-messaging' }
           android { namespace 'com.camxd.admin'; compileSdk 35
             defaultConfig { applicationId 'com.camxd.admin'; minSdk 23; targetSdk 35; versionCode 5; versionName '1.0.4' }
           }
