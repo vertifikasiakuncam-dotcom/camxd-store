@@ -1,18 +1,10 @@
-import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const VAPID_PUBLIC_KEY = Deno.env.get("CAMXD_VAPID_PUBLIC_KEY")!;
-const VAPID_PRIVATE_KEY = Deno.env.get("CAMXD_VAPID_PRIVATE_KEY")!;
 const WEBHOOK_SECRET = Deno.env.get("CAMXD_ORDER_WEBHOOK_SECRET")!;
 const FIREBASE_PROJECT_ID = "camxd-store";
 
-webpush.setVapidDetails(
-  "https://vertifikasiakuncam-dotcom.github.io/camxd-store/",
-  VAPID_PUBLIC_KEY,
-  VAPID_PRIVATE_KEY
-);
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
 let cachedFcmAccessToken = "";
@@ -126,28 +118,13 @@ Deno.serve(async (req) => {
       url: "https://vertifikasiakuncam-dotcom.github.io/camxd-store/admin.html?app=camxd-admin&order_id=" + encodeURIComponent(String(order.order_id || ""))
     };
 
-    // Keep existing website Web Push behavior unchanged.
-    const { data: subs, error: subError } = await supabase.from("admin_push_subscriptions").select("id,subscription");
-    if (subError) return Response.json({ error: "Web Push subscription lookup failed" }, { status: 500 });
-    let webSent = 0, webFailed = 0, webRemoved = 0;
-    for (const row of subs || []) {
-      try {
-        await webpush.sendNotification(row.subscription, JSON.stringify(message), { TTL: 86400, urgency: "high" });
-        webSent++;
-      } catch (err: any) {
-        webFailed++;
-        if (err?.statusCode === 404 || err?.statusCode === 410) {
-          await supabase.from("admin_push_subscriptions").delete().eq("id", row.id);
-          webRemoved++;
-        } else {
-          console.error("Admin Web Push failed", row.id, err?.statusCode, String(err?.message || err).slice(0, 200));
-        }
-      }
-    }
+    // Admin notifications are intentionally APK-only. Keep in-page web dashboard alerts
+    // handled by admin.js, but do not send OS Web Push when the admin tab is closed.
+    const webpushResult = { disabled: true, reason: "APK-only notifications requested" };
 
     // Add native Firebase notifications for CAMXD Admin APK.
     const { data: tokens, error: tokenError } = await supabase.from("admin_fcm_tokens").select("id,token");
-    if (tokenError) return Response.json({ ok: true, webpush: { subscriptions: (subs || []).length, sent: webSent, failed: webFailed, removed: webRemoved }, fcmError: "token lookup failed" });
+    if (tokenError) return Response.json({ ok: false, webpush: webpushResult, fcmError: "token lookup failed" }, { status: 500 });
     let fcmSent = 0, fcmFailed = 0, fcmRemoved = 0;
     for (const row of tokens || []) {
       try {
@@ -166,7 +143,7 @@ Deno.serve(async (req) => {
     }
     return Response.json({
       ok: true,
-      webpush: { subscriptions: (subs || []).length, sent: webSent, failed: webFailed, removed: webRemoved },
+      webpush: webpushResult,
       fcm: { tokens: (tokens || []).length, sent: fcmSent, failed: fcmFailed, removed: fcmRemoved }
     });
   } catch (error) {
