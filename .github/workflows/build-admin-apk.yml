@@ -186,7 +186,7 @@ jobs:
                       String apkPushUi = "(function(){"
                         + "function markNativePush(){"
                         + "var b=document.getElementById('enableNotificationsBtn');if(!b)return;"
-                        + "b.textContent='🔔 Notifikasi APK';"
+                        + "if(b.textContent!=='🔔 Notifikasi APK')b.textContent='🔔 Notifikasi APK';"
                         + "b.title='Notifikasi pesanan melalui Firebase pada aplikasi Android.';"
                         + "if(!b.dataset.camxdNativePushBound){b.dataset.camxdNativePushBound='1';"
                         + "b.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();"
