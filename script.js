@@ -787,86 +787,22 @@ function renderOrderTimeline(status){
  return '<div class="order-timeline">'+steps.map((step,i)=>'<div class="timeline-step '+(i<=idx?"active":"")+'"><i>'+(i<idx?"✓":(i===idx?"•":"○"))+'</i><span>'+step+'</span></div>').join("")+'</div>';
 }
 
-let orderCheckWatchTimer=null;
-let orderCheckWatchBusy=false;
-let trackedOrderCredentials=null;
-let trackedOrderStatus=null;
-let orderStatusUpdateNotice="";
-
-function stopOrderCheckWatch(){
- if(orderCheckWatchTimer){clearInterval(orderCheckWatchTimer);orderCheckWatchTimer=null;}
- orderCheckWatchBusy=false;
- trackedOrderCredentials=null;
- trackedOrderStatus=null;
-}
-
-function orderStatusMessage(status){
- const s=String(status||"").toLowerCase();
- if(s.includes("dibatalkan")||s.includes("batal")) return "Pesanan dibatalkan. Hubungi admin CAMXD Store jika membutuhkan bantuan.";
- if(s.includes("selesai")) return "Pesanan selesai! Detail pesanan/pengiriman dapat dilihat di bawah.";
- if(s.includes("sedang diproses")||s.includes("diproses")) return "Pembayaran sudah diterima dan pesanan sedang diproses admin.";
- if(s.includes("sudah dibayar")||s.includes("lunas")) return "Pembayaran berhasil diverifikasi. Pesanan siap diproses.";
- if(s.includes("verifikasi")) return "Bukti pembayaran telah dilaporkan dan sedang menunggu verifikasi admin.";
- return "Pesanan berhasil dibuat. Silakan ikuti petunjuk pembayaran yang tersedia.";
-}
-
 function renderOrderCheck(order){
  const result=$("#orderCheckResult");
- const status=String(order.status||"Menunggu Pembayaran");
  const items=Array.isArray(order.items)?order.items:[];
  const itemHtml=items.length?items.map(x=>`<div class="order-result-item"><span>${escapeHtml(x.name||"Produk")} — ${escapeHtml(x.plan||"")} ×${Number(x.qty||1)}</span><strong>${Number(x.price||0)?rupiah(Number(x.price||0)*Number(x.qty||1)):"Konfirmasi admin"}</strong></div>`).join(""):"<div class='order-result-item'><span>Detail produk</span><strong>-</strong></div>";
  result.innerHTML=`
   <div class="order-result-head">
    <div><span class="eyebrow">PESANAN DITEMUKAN</span><h3>${escapeHtml(order.order_id)}</h3></div>
-   <span class="order-status ${statusClass(status)}">${escapeHtml(status)}</span>
+   <span class="order-status ${statusClass(order.status)}">${escapeHtml(order.status||"Menunggu Pembayaran")}</span>
   </div>
-  <div class="order-status-notice">
-   <strong>🔔 Status Pesanan</strong>
-   <p>${escapeHtml(orderStatusUpdateNotice||orderStatusMessage(status))}</p>
-   <small>Pemeriksaan status otomatis aktif selama halaman ini terbuka.</small>
-  </div>
-  ${renderOrderTimeline(status)}
   <div class="order-result-meta"><span>Nama</span><strong>${escapeHtml(order.customer_name||"-")}</strong></div>
   <div class="order-result-meta"><span>Dibuat</span><strong>${new Date(order.created_at).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}</strong></div>
   <div class="order-result-items">${itemHtml}</div>
   <div class="order-result-total"><span>Total</span><strong>${order.total_label||rupiah(order.total||0)}</strong></div>
-  ${order.delivery_details?`<div class="delivery-box"><b>📦 Detail Pesanan</b><p>${String(order.delivery_details).replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\r?\n/g,"<br>")}</p></div>:"<p class='order-result-note'>Detail pengiriman akan muncul setelah pesanan selesai diproses admin.</p>"}
+  ${order.delivery_details?`<div class="delivery-box"><b>📦 Detail Pesanan</b><p>${String(order.delivery_details).replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\r?\n/g,"<br>")}</p></div>`:"<p class='order-result-note'>Detail pengiriman akan muncul setelah pesanan selesai diproses admin.</p>"}
  `;
  result.hidden=false;
-}
-
-async function pollOrderCheckStatus(){
- if(!trackedOrderCredentials||orderCheckWatchBusy||document.visibilityState==="hidden"||!sb)return;
- orderCheckWatchBusy=true;
- try{
-  const {data,error}=await sb.rpc("check_order",{
-   p_order_id:trackedOrderCredentials.id,
-   p_customer_wa:trackedOrderCredentials.wa
-  });
-  if(error||!data)return;
-  const nextStatus=String(data.status||"Menunggu Pembayaran");
-  if(nextStatus!==trackedOrderStatus){
-   trackedOrderStatus=nextStatus;
-   orderStatusUpdateNotice="Status pesanan diperbarui: "+nextStatus;
-   renderOrderCheck(data);
-   if(nextStatus.toLowerCase().includes("selesai")||nextStatus.toLowerCase().includes("dibatalkan")){
-    clearInterval(orderCheckWatchTimer);
-    orderCheckWatchTimer=null;
-   }
-  }
- }catch(error){
-  console.warn("Pemantauan status pesanan:",error);
- }finally{
-  orderCheckWatchBusy=false;
- }
-}
-
-function startOrderCheckWatch(id,wa,status){
- stopOrderCheckWatch();
- trackedOrderCredentials={id,wa};
- trackedOrderStatus=String(status||"Menunggu Pembayaran");
- orderStatusUpdateNotice="";
- orderCheckWatchTimer=setInterval(pollOrderCheckStatus,10000);
 }
 
 async function checkOrder(event){
@@ -874,8 +810,6 @@ async function checkOrder(event){
 
   const id=$("#checkOrderId").value.trim().toUpperCase();
   const wa=$("#checkOrderWa").value.trim();
-  stopOrderCheckWatch();
-  orderStatusUpdateNotice="";
 
   const result=$("#orderCheckResult");
   const btn=$("#checkOrderBtn");
@@ -897,7 +831,6 @@ async function checkOrder(event){
     if(error) throw error;
 
     if(!data){
-      stopOrderCheckWatch();
       result.innerHTML=
         "<div class='order-not-found'>" +
         "<strong>Pesanan tidak ditemukan.</strong>" +
@@ -907,7 +840,6 @@ async function checkOrder(event){
     }
 
     renderOrderCheck(data);
-    startOrderCheckWatch(id,wa,data.status);
 
   }catch(error){
 
