@@ -77,11 +77,21 @@ jobs:
           EOF
 
           cat > store-android/build.gradle <<'EOF'
-          plugins { id 'com.android.application' version '8.7.3' apply false }
+          plugins {
+            id 'com.android.application' version '8.7.3' apply false
+            id 'com.google.gms.google-services' version '4.4.2' apply false
+          }
           EOF
 
           cat > store-android/app/build.gradle <<'EOF'
-          plugins { id 'com.android.application' }
+          plugins {
+            id 'com.android.application'
+            id 'com.google.gms.google-services'
+          }
+          dependencies {
+            implementation platform('com.google.firebase:firebase-bom:34.3.0')
+            implementation 'com.google.firebase:firebase-messaging'
+          }
           android {
             namespace 'com.camxd.store'
             compileSdk 35
@@ -126,12 +136,23 @@ jobs:
           cat > store-android/app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET"/>
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
             <application
               android:theme="@style/AppTheme"
               android:label="CAMXD STORE"
               android:icon="@drawable/camxd_logo"
               android:allowBackup="false"
               android:usesCleartextTraffic="false">
+              <meta-data
+                android:name="com.google.firebase.messaging.default_notification_channel_id"
+                android:value="camxd_order_updates"/>
+              <service
+                android:name=".CamxdFirebaseMessagingService"
+                android:exported="false">
+                <intent-filter>
+                  <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                </intent-filter>
+              </service>
               <activity
                 android:name=".MainActivity"
                 android:exported="true"
@@ -145,11 +166,126 @@ jobs:
           </manifest>
           EOF
 
+          cat > store-android/app/src/main/java/com/camxd/store/CamxdFirebaseMessagingService.java <<'EOF'
+          package com.camxd.store;
+
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.app.PendingIntent;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.graphics.Bitmap;
+          import android.graphics.BitmapFactory;
+          import android.os.Build;
+          import android.text.TextUtils;
+          import android.util.Log;
+
+          import com.google.firebase.messaging.FirebaseMessagingService;
+          import com.google.firebase.messaging.RemoteMessage;
+
+          import java.io.InputStream;
+          import java.net.HttpURLConnection;
+          import java.net.URL;
+          import java.util.Map;
+
+          public class CamxdFirebaseMessagingService extends FirebaseMessagingService {
+            private static final String TAG = "CAMXDFCM";
+            private static final String CHANNEL_ID = "camxd_order_updates";
+
+            @Override public void onNewToken(String token) {
+              super.onNewToken(token);
+              // Token registration with the CAMXD backend is wired in the next integration step.
+              Log.i(TAG, "FCM token refreshed; length=" + (token == null ? 0 : token.length()));
+            }
+
+            @Override public void onMessageReceived(RemoteMessage message) {
+              super.onMessageReceived(message);
+              Map<String, String> data = message.getData();
+              String title = data.get("title");
+              String body = data.get("body");
+              String imageUrl = data.get("image");
+              if (message.getNotification() != null) {
+                if (TextUtils.isEmpty(title)) title = message.getNotification().getTitle();
+                if (TextUtils.isEmpty(body)) body = message.getNotification().getBody();
+                if (TextUtils.isEmpty(imageUrl)) imageUrl = message.getNotification().getImageUrl() == null
+                    ? null : message.getNotification().getImageUrl().toString();
+              }
+              if (TextUtils.isEmpty(title)) title = "CAMXD STORE";
+              if (TextUtils.isEmpty(body)) body = "Ada pembaruan pesanan Anda.";
+              showNotification(title, body, imageUrl);
+            }
+
+            private void showNotification(String title, String body, String imageUrl) {
+              NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+              if (manager == null) return;
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID, "Notifikasi Pesanan CAMXD", NotificationManager.IMPORTANCE_HIGH);
+                channel.setDescription("Pembaruan pembayaran dan status pesanan CAMXD Store");
+                manager.createNotificationChannel(channel);
+              }
+
+              Intent intent = new Intent(this, MainActivity.class);
+              intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+              PendingIntent pendingIntent = PendingIntent.getActivity(
+                  this, (int) System.currentTimeMillis(), intent,
+                  PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0));
+
+              Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                  ? new Notification.Builder(this, CHANNEL_ID)
+                  : new Notification.Builder(this);
+              builder.setSmallIcon(R.drawable.camxd_logo)
+                  .setContentTitle(title)
+                  .setContentText(body)
+                  .setStyle(new Notification.BigTextStyle().bigText(body))
+                  .setAutoCancel(true)
+                  .setContentIntent(pendingIntent)
+                  .setCategory(Notification.CATEGORY_STATUS)
+                  .setPriority(Notification.PRIORITY_HIGH);
+
+              Bitmap image = downloadImage(imageUrl);
+              if (image != null) {
+                builder.setLargeIcon(image);
+                builder.setStyle(new Notification.BigPictureStyle().bigPicture(image).bigLargeIcon((Bitmap) null));
+              }
+
+              manager.notify((int) (System.currentTimeMillis() & 0x7fffffff), builder.build());
+            }
+
+            private Bitmap downloadImage(String imageUrl) {
+              if (TextUtils.isEmpty(imageUrl) || !imageUrl.startsWith("https://")) return null;
+              HttpURLConnection connection = null;
+              try {
+                connection = (HttpURLConnection) new URL(imageUrl).openConnection();
+                connection.setConnectTimeout(3500);
+                connection.setReadTimeout(3500);
+                connection.setInstanceFollowRedirects(true);
+                connection.connect();
+                if (connection.getResponseCode() != 200) return null;
+                try (InputStream input = connection.getInputStream()) {
+                  return BitmapFactory.decodeStream(input);
+                }
+              } catch (Exception e) {
+                Log.w(TAG, "Unable to load notification image", e);
+                return null;
+              } finally {
+                if (connection != null) connection.disconnect();
+              }
+            }
+          }
+          EOF
+
           cat > store-android/app/src/main/java/com/camxd/store/MainActivity.java <<'EOF'
           package com.camxd.store;
 
           import android.app.Activity;
           import android.os.Bundle;
+          import android.os.Build;
+          import android.Manifest;
+          import android.content.pm.PackageManager;
+          import android.util.Log;
+          import com.google.firebase.messaging.FirebaseMessaging;
           import android.net.Uri;
           import android.content.Intent;
           import android.graphics.Bitmap;
@@ -191,6 +327,22 @@ jobs:
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
               );
               showIntro();
+              requestNotificationPermission();
+              FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                  String token = task.getResult();
+                  Log.i("CAMXDFCM", "FCM token ready; length=" + (token == null ? 0 : token.length()));
+                } else {
+                  Log.w("CAMXDFCM", "Unable to obtain FCM token", task.getException());
+                }
+              });
+            }
+
+            private void requestNotificationPermission(){
+              if (Build.VERSION.SDK_INT >= 33 &&
+                  checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 2002);
+              }
             }
 
             private void showIntro(){
@@ -451,6 +603,29 @@ jobs:
             }
           }
           EOF
+
+      - name: Configure Firebase Android app
+        shell: bash
+        env:
+          FIREBASE_GOOGLE_SERVICES_JSON: ${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON }}
+        run: |
+          set -e
+          test -n "$FIREBASE_GOOGLE_SERVICES_JSON" || { echo "Missing FIREBASE_GOOGLE_SERVICES_JSON repository secret"; exit 1; }
+          python3 - <<'PY'
+          import json, os
+          raw = os.environ["FIREBASE_GOOGLE_SERVICES_JSON"]
+          config = json.loads(raw)
+          clients = config.get("client", [])
+          matches = [
+              c for c in clients
+              if c.get("client_info", {}).get("android_client_info", {}).get("package_name") == "com.camxd.store"
+          ]
+          if not matches:
+              raise SystemExit("google-services.json does not contain Android package com.camxd.store")
+          with open("store-android/app/google-services.json", "w", encoding="utf-8") as f:
+              json.dump(config, f, ensure_ascii=False)
+          print("Firebase config validated for com.camxd.store")
+          PY
 
       - name: Build and sign
         working-directory: store-android
