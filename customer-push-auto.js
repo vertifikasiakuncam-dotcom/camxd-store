@@ -35,7 +35,7 @@ function addOptIn(){
   try{
    if(!orderId||orderId==="-"||!customerWa)throw new Error("ID pesanan atau nomor WhatsApp belum tersedia. Pastikan checkout berhasil.");
    if(!("serviceWorker"in navigator)||!("PushManager"in window)||!("Notification"in window))throw new Error("Browser ini belum mendukung push notification. Coba Chrome Android.");
-   if(!window.SUPABASE_URL||!window.SUPABASE_PUBLISHABLE_KEY)throw new Error("Konfigurasi server belum termuat.");
+   if(typeof SUPABASE_URL==="undefined"||typeof SUPABASE_PUBLISHABLE_KEY==="undefined")throw new Error("Konfigurasi server belum termuat.");
    const permission=await Notification.requestPermission();
    if(permission!=="granted")throw new Error("Izin notifikasi belum diberikan. Anda tetap bisa melanjutkan pembayaran.");
    const registration=await navigator.serviceWorker.register("./sw.js");
