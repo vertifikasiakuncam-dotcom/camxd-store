@@ -19,7 +19,7 @@ function addOptIn(){
  title.textContent="🔔 Notifikasi status pesanan";
  title.style.cssText="display:block;margin-bottom:5px";
  const desc=document.createElement("p");
- desc.textContent="Aktifkan agar HP ini menerima kabar otomatis saat status pesanan berubah. Izin browser diperlukan; checkout tetap berjalan jika dilewati.";
+ desc.textContent="Jangan sampai ketinggalan kabar pesananmu! Aktifkan notifikasi agar kamu langsung tahu saat pembayaran diverifikasi, pesanan mulai diproses, hingga selesai. Cukup aktifkan sekali di perangkat ini.";
  desc.style.cssText="font-size:13px;line-height:1.5;color:#c9c9c9;margin:0 0 10px";
  const button=document.createElement("button");
  button.type="button";button.id="customerPushOptInButton";
