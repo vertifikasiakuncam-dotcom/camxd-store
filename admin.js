@@ -306,6 +306,36 @@ async function loadOrders(){
   updateStats();
   renderOrders();
   updateNewOrderAlert();
+  routeToNotificationOrder();
+}
+
+let lastRoutedNotificationOrder = "";
+function routeToNotificationOrder(){
+  const params = new URLSearchParams(window.location.search);
+  const code = (params.get("order_id") || "").trim();
+  if(!code || code === lastRoutedNotificationOrder) return;
+  lastRoutedNotificationOrder = code;
+
+  const productsPanel = $("#productsPanel");
+  const ordersPanel = $(".orders-panel");
+  if(productsPanel) productsPanel.hidden = true;
+  if(ordersPanel) ordersPanel.hidden = false;
+  const productsBtn = $("#productsBtn");
+  if(productsBtn) productsBtn.textContent = "🛍️ Kelola Produk";
+  const statusFilter = $("#statusFilter");
+  if(statusFilter) statusFilter.value = "all";
+  const search = $("#orderSearch");
+  if(search) search.value = code;
+  const clear = $("#clearOrderSearch");
+  if(clear) clear.hidden = false;
+
+  renderOrders();
+  const el = document.querySelector('[data-order-id="' + CSS.escape(code) + '"]');
+  if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+  else showAdminToast("Pesanan dari notifikasi", "Sedang mencari pesanan " + code + ".");
+  params.delete("order_id");
+  const cleanUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "") + window.location.hash;
+  window.history.replaceState({}, "", cleanUrl);
 }
 
 function updateStats(){
