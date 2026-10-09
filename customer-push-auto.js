@@ -34,6 +34,21 @@ function addOptIn(){
   const customerWa=(waEl.value||"").trim();
   try{
    if(!orderId||orderId==="-"||!customerWa)throw new Error("ID pesanan atau nomor WhatsApp belum tersedia. Pastikan checkout berhasil.");
+   if(window.CAMXDFCM && typeof window.CAMXDFCM.registerForOrder==="function"){
+    status.textContent="Mengaktifkan notifikasi Android...";
+    status.style.color="#ffdf66";
+    window.onCamxdFcmResult=function(result){
+     if(result&&result.ok){
+      status.textContent="✓ Notifikasi Android aktif untuk pesanan "+orderId+".";
+      status.style.color="#8ee6a6";button.textContent="✓ Notifikasi Aktif";
+     }else{
+      status.textContent="Belum aktif: "+(result&&result.message?result.message:"Pendaftaran notifikasi gagal.");
+      status.style.color="#ffcf70";button.disabled=false;button.textContent="Coba Aktifkan Lagi";
+     }
+    };
+    window.CAMXDFCM.registerForOrder(orderId,customerWa);
+    return;
+   }
    if(!("serviceWorker"in navigator)||!("PushManager"in window)||!("Notification"in window))throw new Error("Browser ini belum mendukung push notification. Coba Chrome Android.");
    if(typeof SUPABASE_URL==="undefined"||typeof SUPABASE_PUBLISHABLE_KEY==="undefined")throw new Error("Konfigurasi server belum termuat.");
    const permission=await Notification.requestPermission();
