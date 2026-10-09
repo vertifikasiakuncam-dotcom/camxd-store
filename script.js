@@ -917,6 +917,25 @@ $("#paymentProofFile")?.addEventListener("change",e=>{
  }
 });
 $("#orderCheckForm").addEventListener("submit",checkOrder);
+function handleCustomerNotificationRoute(){
+  try{
+    const params=new URLSearchParams(window.location.search);
+    const orderId=String(params.get("order_id")||"").trim();
+    const customerWa=String(params.get("customer_wa")||"").trim();
+    if(!orderId || !customerWa || !window.location.hash.includes("cek-pesanan")) return;
+    const idInput=$("#checkOrderId");
+    const waInput=$("#checkOrderWa");
+    const form=$("#orderCheckForm");
+    if(!idInput||!waInput||!form) return;
+    idInput.value=orderId.toUpperCase();
+    waInput.value=customerWa;
+    $("#cek-pesanan")?.scrollIntoView({behavior:"auto",block:"start"});
+    setTimeout(()=>{
+      if(idInput.value.trim() && waInput.value.trim()) form.requestSubmit();
+    },250);
+  }catch(error){console.error("CAMXD notification route failed",error);}
+}
+
 $("#paymentModal").addEventListener("click",e=>{if(e.target.id==="paymentModal"&&!pendingOrder)closePayment();});
 $("#menuBtn").onclick=()=>$("#navMenu").classList.toggle("open");
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>$("#navMenu").classList.remove("open"));
@@ -931,5 +950,4 @@ openSharedProduct();
 renderSavedProducts();
 renderRecentProducts();
 loadProducts();
-
-
+handleCustomerNotificationRoute();
