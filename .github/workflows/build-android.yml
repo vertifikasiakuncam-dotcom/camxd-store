@@ -593,6 +593,7 @@ jobs:
               if (orderId == null || orderId.trim().isEmpty()) return;
               final String safeOrderId = orderId.trim().toUpperCase(java.util.Locale.ROOT);
               final String safeWa = customerWa == null ? "" : customerWa.trim();
+              if (webView == null) return; // Splash screen is still visible; setupWebView will handle the saved intent.
               webView.postDelayed(() -> {
                 if (webView == null) return;
                 try {
