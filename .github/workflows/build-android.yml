@@ -218,10 +218,12 @@ jobs:
               }
               if (TextUtils.isEmpty(title)) title = "CAMXD STORE";
               if (TextUtils.isEmpty(body)) body = "Ada pembaruan pesanan Anda.";
-              showNotification(title, body, imageUrl);
+              String orderId = data.get("order_id");
+              String customerWa = data.get("customer_wa");
+              showNotification(title, body, imageUrl, orderId, customerWa);
             }
 
-            private void showNotification(String title, String body, String imageUrl) {
+            private void showNotification(String title, String body, String imageUrl, String orderId, String customerWa) {
               NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
               if (manager == null) return;
               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -233,6 +235,8 @@ jobs:
 
               Intent intent = new Intent(this, MainActivity.class);
               intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+              if (!TextUtils.isEmpty(orderId)) intent.putExtra("camxd_order_id", orderId);
+              if (!TextUtils.isEmpty(customerWa)) intent.putExtra("camxd_customer_wa", customerWa);
               PendingIntent pendingIntent = PendingIntent.getActivity(
                   this, (int) System.currentTimeMillis(), intent,
                   PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0));
@@ -573,6 +577,49 @@ jobs:
                 }
               });
               webView.loadUrl("https://vertifikasiakuncam-dotcom.github.io/camxd-store/?v=20261007-store-final2");
+              handleOrderNotificationIntent(getIntent());
+            }
+
+            @Override protected void onNewIntent(Intent intent) {
+              super.onNewIntent(intent);
+              setIntent(intent);
+              handleOrderNotificationIntent(intent);
+            }
+
+            private void handleOrderNotificationIntent(Intent intent) {
+              if (intent == null) return;
+              String orderId = intent.getStringExtra("camxd_order_id");
+              String customerWa = intent.getStringExtra("camxd_customer_wa");
+              if (orderId == null || orderId.trim().isEmpty()) return;
+              final String safeOrderId = orderId.trim().toUpperCase(java.util.Locale.ROOT);
+              final String safeWa = customerWa == null ? "" : customerWa.trim();
+              webView.postDelayed(() -> {
+                if (webView == null) return;
+                try {
+                  org.json.JSONObject payload = new org.json.JSONObject();
+                  payload.put("orderId", safeOrderId);
+                  payload.put("customerWa", safeWa);
+                  String js = "(function(p){" +
+                    "var go=function(){" +
+                    "var id=document.getElementById('checkOrderId');" +
+                    "var wa=document.getElementById('checkOrderWa');" +
+                    "var form=document.getElementById('orderCheckForm');" +
+                    "if(!id||!wa||!form)return false;" +
+                    "id.value=p.orderId;" +
+                    "wa.value=p.customerWa;" +
+                    "location.hash='cek-pesanan';" +
+                    "if(p.customerWa){form.requestSubmit?form.requestSubmit():form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));}" +
+                    "return true;" +
+                    "};" +
+                    "var n=0;var timer=setInterval(function(){if(go()||++n>30)clearInterval(timer);},250);" +
+                    "})(" + payload.toString() + ");";
+                  webView.evaluateJavascript(js, null);
+                } catch (Exception e) {
+                  Log.w("CAMXDFCM", "Unable to open order from notification", e);
+                }
+              }, 800);
+              intent.removeExtra("camxd_order_id");
+              intent.removeExtra("camxd_customer_wa");
             }
 
             private void notifyWebFcmResult(boolean ok, String message){
