@@ -143,6 +143,14 @@ jobs:
             @Override protected void onDestroy(){webView.destroy(); super.onDestroy();}
           }
           EOF
+      - name: Configure Firebase Admin
+        env:
+          FIREBASE_ADMIN_GOOGLE_SERVICES_JSON: ${{ secrets.FIREBASE_ADMIN_GOOGLE_SERVICES_JSON }}
+        run: |
+          set -e
+          test -n "$FIREBASE_ADMIN_GOOGLE_SERVICES_JSON" || (echo "Secret FIREBASE_ADMIN_GOOGLE_SERVICES_JSON belum tersedia"; exit 1)
+          printf '%s' "$FIREBASE_ADMIN_GOOGLE_SERVICES_JSON" > admin-android/app/google-services.json
+          python3 -m json.tool admin-android/app/google-services.json >/dev/null
       - name: Build and sign
         working-directory: admin-android
         shell: bash
