@@ -1,4 +1,4 @@
-const CACHE_NAME="camxd-admin-v22";
+const CACHE_NAME="camxd-admin-v23";
 const PUSH_DIAGNOSTIC_KEY="./__camxd_push_received.json";
 const APP_SHELL=[
   "./admin.html",
@@ -96,7 +96,7 @@ self.addEventListener("notificationclick",event=>{
   event.notification.close();
   const target=new URL(
     event.notification.data?.url || "./admin.html?app=camxd-admin",
-    self.location.origin
+    self.registration.scope
   );
   event.waitUntil((async()=>{
     const list=await clients.matchAll({type:"window",includeUncontrolled:true});
