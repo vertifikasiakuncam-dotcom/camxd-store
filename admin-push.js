@@ -115,6 +115,44 @@
     }
   }
 
+  let nativeFcmToken=localStorage.getItem("camxd_admin_fcm_token")||"";
+  let nativeRegistrationClient=null;
+  async function registerNativeFcmToken(token){
+    if(!token) return false;
+    nativeFcmToken=token;
+    localStorage.setItem("camxd_admin_fcm_token",token);
+    try{
+      if(!window.supabase || typeof window.supabase.createClient!=="function") return false;
+      if(!nativeRegistrationClient){
+        nativeRegistrationClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+          auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+        });
+        nativeRegistrationClient.auth.onAuthStateChange((_event,session)=>{
+          if(session?.access_token && nativeFcmToken) sendNativeFcmRegistration(nativeFcmToken,session.access_token);
+        });
+      }
+      const {data:{session}}=await nativeRegistrationClient.auth.getSession();
+      if(!session?.access_token) return false;
+      return await sendNativeFcmRegistration(token,session.access_token);
+    }catch(error){
+      console.error("CAMXD native FCM registration:",error);
+      return false;
+    }
+  }
+  async function sendNativeFcmRegistration(token,accessToken){
+    const response=await fetch(SUPABASE_URL+"/functions/v1/admin-fcm-register",{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+accessToken,"apikey":SUPABASE_PUBLISHABLE_KEY,"Content-Type":"application/json"},
+      body:JSON.stringify({token,user_agent:"CAMXD Admin Android"})
+    });
+    if(!response.ok){console.error("CAMXD native FCM registration failed:",response.status,await response.text());return false;}
+    localStorage.setItem("camxd_admin_fcm_registered","1");
+    console.log("CAMXD native FCM token registered");
+    return true;
+  }
+  window.onCamxdAdminFcmToken=registerNativeFcmToken;
+  if(nativeFcmToken) registerNativeFcmToken(nativeFcmToken);
+
   window.subscribeAdminPush=subscribeAdminPush;
 
   document.addEventListener("DOMContentLoaded",async()=>{
