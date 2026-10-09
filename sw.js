@@ -7,6 +7,7 @@ const APP_SHELL=[
   "./pwa.js",
   "./supabase-config.js",
   "./camxd-logo.png",
+  "./banner-notifikasi-camxd.png",
   "./camxd-background.png",
   "./qris-gopay.jpg",
   "./manifest.webmanifest"
@@ -72,6 +73,10 @@ self.addEventListener("push",event=>{
       timestamp:Date.now(),
       data:{url:data.url||"./admin.html?app=camxd-admin"}
     };
+    // Tampilkan banner hanya untuk notifikasi pelanggan, bukan notifikasi Admin.
+    if(String(data.url||"").includes("#cek-pesanan")){
+      options.image="./banner-notifikasi-camxd.png";
+    }
     await self.registration.showNotification(title,options);
   })());
 });
