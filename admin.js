@@ -479,7 +479,7 @@ function buildWhatsAppUrl(order, details){
     "— CAMXD STORE —"
   ].join("\n");
 
-  return "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
+  return "https://api.whatsapp.com/send/?phone=" + number + "&text=" + encodeURIComponent(message);
 }
 
 function updateBulkDeleteUi(){
